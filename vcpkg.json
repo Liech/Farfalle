@@ -1,0 +1,26 @@
+{
+  "name": "assimpsupcom",
+  "version-string": "0.0.1",
+  "dependencies": [
+    "assimp",
+	  "lodepng",
+	  "gli",
+    "nlohmann-json",
+    "glm",
+	"glfw3",
+	"portaudio",
+	"openvr",
+	"freetype",	
+	"bullet3",
+	"lua",
+	"enet",
+	"snappy",
+	"concurrentqueue",
+	"mio",
+	{
+	  "name" : "imgui",
+	  "features" : ["glfw-binding", "opengl3-binding"]
+	},
+    "pybind11"
+  ]
+}
