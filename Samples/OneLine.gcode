@@ -9,10 +9,10 @@ G90 ; use absolute coordinates
 M83 ; use relative distances for extrusion
 M107
 G92 E0
-
 G1 Z.2 F18000
 G1 E-2 F3000
 G1 Z.6 F18000
+
 G1 X60 Y61.3
 G1 Z.2
 G1 E2 F1800

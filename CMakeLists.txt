@@ -12,18 +12,31 @@ find_package(glm REQUIRED)
 ############################################################################
 ############################################################################
 
-set(Header_Files
-)
-source_group("Header Files" FILES ${Header_Files})
-
 set(Source_Files
     "Source/main.cpp"
 )
-source_group("Source Files" FILES ${Source_Files})
+source_group("Source" FILES ${Source_Files})
+
+set(Tools_Files
+    "Source/Tools/String2File.h"
+    "Source/Tools/String2File.cpp"
+)
+source_group("Source/Tools" FILES ${Tools_Files})
+
+set(GCode_Files
+    "Source/GCode/Startup.h"
+    "Source/GCode/Startup.cpp"
+    "Source/GCode/Shutdown.h"
+    "Source/GCode/Shutdown.cpp"
+    "Source/GCode/LinearSpline.h"
+    "Source/GCode/LinearSpline.cpp"
+)
+source_group("Source/GCode" FILES ${GCode_Files})
 
 set(ALL_FILES
-    ${Header_Files}
     ${Source_Files}
+    ${Tools_Files}
+    ${GCode_Files}
 )
 
 ############################################################################
