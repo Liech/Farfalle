@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8...3.20)
 project(Farfalle)
 
+############################################################################
+############################################################################
+############################################################################
+
+
 find_package(glm REQUIRED)
 
 ############################################################################
@@ -12,7 +17,7 @@ set(Header_Files
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
-    "main.cpp"
+    "Source/main.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
@@ -38,11 +43,6 @@ glm::glm
 
 #add_dependencies(AssimpSupCom 
 #)
-				
-add_custom_command(TARGET AssimpSupCom POST_BUILD 
-               COMMAND ${CMAKE_COMMAND} -E copy_if_different
-               "${AhwassaGraphicsLib_SOURCE_DIR}/Data/Fonts/arial.ttf"              
-                $<TARGET_FILE_DIR:AssimpSupCom>/Data/Fonts/arial.ttf)
-
+	
 
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Farfalle)
