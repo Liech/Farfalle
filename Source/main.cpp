@@ -21,7 +21,7 @@ int main() {
   GCode::LinearSpline line(printer);
 
   line.controlPoints = { glm::dvec3(80,58.7,0.2)};
-  line.feedrate = 0.0267225;
+  line.feedrate = 0.14;
 
   travel.controlPoints = { glm::dvec3(60,61.3,printer.currentPosition[2]), glm::dvec3(60,61.3,0.2)};
   travel.feedrate = 0;
@@ -39,7 +39,8 @@ int main() {
   temp   .cooldown(data);
   printer.shutdown(data);
 
-  Tools::String2File("E:\\Farfalle\\firstTest.gcode",data);
+  //Tools::String2File("E:\\Farfalle\\firstTest.gcode",data);
+  Tools::String2File("firstTest.gcode", data);
 
   return 0;
 }

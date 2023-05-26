@@ -8,6 +8,7 @@ namespace GCode
 
   void LinearSpline::toString(std::string& result) const
   {
+    result += "\n; Linear Spline: \n";
     for (auto& point : controlPoints)
     {
       double distance = glm::distance(point, printer.currentPosition);
