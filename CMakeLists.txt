@@ -23,11 +23,15 @@ set(Tools_Files
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 
+set(Config_Files
+    "Source/Config/Printer.h"
+    "Source/Config/Printer.cpp"
+    "Source/Config/Temperature.h"
+    "Source/Config/Temperature.cpp"
+)
+source_group("Source/Config" FILES ${Config_Files})
+
 set(GCode_Files
-    "Source/GCode/Startup.h"
-    "Source/GCode/Startup.cpp"
-    "Source/GCode/Shutdown.h"
-    "Source/GCode/Shutdown.cpp"
     "Source/GCode/LinearSpline.h"
     "Source/GCode/LinearSpline.cpp"
 )
@@ -36,6 +40,7 @@ source_group("Source/GCode" FILES ${GCode_Files})
 set(ALL_FILES
     ${Source_Files}
     ${Tools_Files}
+    ${Config_Files}
     ${GCode_Files}
 )
 
@@ -51,8 +56,9 @@ target_link_libraries(Farfalle
 glm::glm
 )
 
-#target_include_directories(AssimpSupCom PRIVATE 
-#)
+target_include_directories(Farfalle PRIVATE 
+./Source/
+)
 
 #add_dependencies(AssimpSupCom 
 #)
