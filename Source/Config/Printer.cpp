@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-void Printer::startup(std::string& result) const
+void Printer::startup(std::string& result)
 {
   result += "M201 X" + std::to_string(accelerationLimits[0]) + " Y"+ std::to_string(accelerationLimits[1]) + " Z" + std::to_string(accelerationLimits[2]) + " E" + std::to_string(extruderAccelerationLimits) + " ; sets maximum accelerations\n";
   result += "M203 X" + std::to_string(maxFeedrate[0]) + " Y" + std::to_string(maxFeedrate[1]) + " Z" + std::to_string(maxFeedrate[2]) + " E" + std::to_string(maxExtruderFeedrate) + " ; sets maximum feedrates\n";
@@ -21,16 +21,21 @@ void Printer::startup(std::string& result) const
 
 void Printer::shutdown(std::string& result)
 {
+  double z = std::clamp(currentPosition[2] + 5, 0.0, dimensions[2]);
+  moveTo(result,glm::dvec3(restPosition[0], restPosition[1], z),0);
   result += "M84 ; disable motor\n";
-  double z = std::clamp(currentPosition[2] - 5, 0.0, dimensions[2]);
-  result += "G1 X" + std::to_string(restPosition[0]) + " Y" + std::to_string(restPosition[1]) + " Z" + std::to_string(z) + " ; go to home position\n";
-  currentPosition = glm::dvec3(restPosition[0], restPosition[1], z);
 }
 
-void Printer::home(std::string& result) const
+void Printer::home(std::string& result)
 {
   result += "G28 ; Home\n";
   if (hasMeshBedLeveling)
     result += "G29 ; Mesh bed Level\n";
-  result += "G1 X" + std::to_string(currentPosition[0]) + " Y" + std::to_string(currentPosition[1]) + " Z" + std::to_string(currentPosition[2]) + " ; go to home position\n";
+  moveTo(result, currentPosition, 0);
+}
+
+void Printer::moveTo(std::string& result, const glm::dvec3& pos, double feedrate)
+{
+  result += "G1 X" + std::to_string(pos[0]) + " Y" + std::to_string(pos[1]) + " Z" + std::to_string(pos[2]) + " E" + std::to_string(feedrate) + " ; go to home position\n";
+  currentPosition = pos;
 }
