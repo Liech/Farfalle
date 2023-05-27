@@ -6,8 +6,10 @@
 #include "Tools/String2File.h"
 
 #include "GCode/LinearSpline.h"
-#include "Config/Printer.h"
-#include "Config/Temperature.h"
+#include "GCode/Printer.h"
+#include "GCode/Temperature.h"
+#include "GCode/Extruder.h"
+#include "GCode/Movement.h"
 
 int main() {
   glm::dvec3 x;
@@ -15,7 +17,6 @@ int main() {
   j["x"] = "x";
 
   Printer printer;
-  Temperature temp;
 
   GCode::LinearSpline travel(printer);
   GCode::LinearSpline line(printer);
@@ -23,23 +24,28 @@ int main() {
   line.controlPoints = { glm::dvec3(10,10,0.2)};
   line.feedrate = 0.16;
 
-  travel.controlPoints = { glm::dvec3(190, 190,printer.currentPosition[2]), glm::dvec3(190,190,0.2)};
+  travel.controlPoints = { glm::dvec3(190, 190,printer.movement->currentPosition[2]), glm::dvec3(190,190,0.2)};
   travel.feedrate = 0;
 
   std::string data = "";
-  temp   .fanOff        (data);
-  temp   .startHeating  (data);
-  printer.startup       (data);
-  printer.home          (data);
-  temp   .waitForHeating(data);
+  data += "; Farfalle GCODE Generator\n";
 
+  printer .startup       (data);
+
+  data += "\n; ;;;;;;;;;;;;;;;;;;";
+  data += "\n; Printing:  ";
+  data += "\n; ;;;;;;;;;;;;;;;;;;\n";
+  printer.extruder->retract(data);
+  printer.movement->travelMode(data);
   travel.toString(data);
-  line.toString(data);
+  printer.extruder->unretract(data);
+  printer.movement->printMode(data);
+  line  .toString(data);
+  printer.extruder->retract(data);
 
-  temp   .cooldown(data);
   printer.shutdown(data);
 
-  Tools::String2File("E:\\Farfalle\\firstTest.gcode",data);
+  Tools::String2File("D:\\Farfalle\\firstTest.gcode",data);
   //Tools::String2File("firstTest.gcode", data);
 
   return 0;

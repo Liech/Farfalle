@@ -5,7 +5,8 @@
 
 #include <glm/glm.hpp>
 
-#include "Config/Printer.h"
+#include "GCode/Printer.h"
+#include "Tools/MovementType.h"
 
 namespace GCode
 {

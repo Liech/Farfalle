@@ -10,6 +10,6 @@ public:
 
   void startHeating  (std::string& result) const;
   void waitForHeating(std::string& result) const;
-  void cooldown      (std::string& result) const;
+  void shutdown      (std::string& result) const;
   void fanOff        (std::string& result) const;
 };

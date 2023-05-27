@@ -20,27 +20,27 @@ source_group("Source" FILES ${Source_Files})
 set(Tools_Files
     "Source/Tools/String2File.h"
     "Source/Tools/String2File.cpp"
+    "Source/Tools/MovementType.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
-
-set(Config_Files
-    "Source/Config/Printer.h"
-    "Source/Config/Printer.cpp"
-    "Source/Config/Temperature.h"
-    "Source/Config/Temperature.cpp"
-)
-source_group("Source/Config" FILES ${Config_Files})
 
 set(GCode_Files
     "Source/GCode/LinearSpline.h"
     "Source/GCode/LinearSpline.cpp"
+    "Source/GCode/Printer.h"
+    "Source/GCode/Printer.cpp"
+    "Source/GCode/Temperature.h"
+    "Source/GCode/Temperature.cpp"
+    "Source/GCode/Movement.h"
+    "Source/GCode/Movement.cpp"
+    "Source/GCode/Extruder.h"
+    "Source/GCode/Extruder.cpp"
 )
 source_group("Source/GCode" FILES ${GCode_Files})
 
 set(ALL_FILES
     ${Source_Files}
     ${Tools_Files}
-    ${Config_Files}
     ${GCode_Files}
 )
 

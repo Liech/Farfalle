@@ -15,9 +15,9 @@ void Temperature::waitForHeating(std::string& result) const
   result += "M190 S" + std::to_string(bed) + " ; wait for bed temp\n";
 }
 
-void Temperature::cooldown(std::string& result)       const
+void Temperature::shutdown(std::string& result) const
 {
-  result += "\n; Cooldown: \n";
+  result += "\n; Temperature Shutdown: \n";
   result += "M104 S0 ; extruder temp off\n";
   result += "M140 S0 ; bed temp off\n";
 }
