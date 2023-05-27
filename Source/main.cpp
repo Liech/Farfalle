@@ -5,7 +5,8 @@
 
 #include "Tools/String2File.h"
 
-#include "GCode/LinearSpline.h"
+#include "GCode/Travel.h"
+#include "GCode/LinearPrint.h"
 #include "GCode/Printer.h"
 #include "GCode/Temperature.h"
 #include "GCode/Extruder.h"
@@ -18,14 +19,13 @@ int main() {
 
   Printer printer;
 
-  GCode::LinearSpline travel(printer);
-  GCode::LinearSpline line(printer);
+  GCode::Travel      travel(printer);
+  GCode::LinearPrint line  (printer);
 
   line.controlPoints = { glm::dvec3(10,10,0.2)};
   line.feedrate = 0.16;
 
-  travel.controlPoints = { glm::dvec3(190, 190,printer.movement->currentPosition[2]), glm::dvec3(190,190,0.2)};
-  travel.feedrate = 0;
+  travel.controlPoints = { printer.movement->currentPosition+glm::dvec3(0,0,1) ,glm::dvec3(190, 190,printer.movement->currentPosition[2]+1), glm::dvec3(190,190,0.2)};
 
   std::string data = "";
   data += "; Farfalle GCODE Generator\n";

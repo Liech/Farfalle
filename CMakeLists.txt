@@ -25,8 +25,10 @@ set(Tools_Files
 source_group("Source/Tools" FILES ${Tools_Files})
 
 set(GCode_Files
-    "Source/GCode/LinearSpline.h"
-    "Source/GCode/LinearSpline.cpp"
+    "Source/GCode/LinearPrint.h"
+    "Source/GCode/LinearPrint.cpp"
+    "Source/GCode/Travel.h"
+    "Source/GCode/Travel.cpp"
     "Source/GCode/Printer.h"
     "Source/GCode/Printer.cpp"
     "Source/GCode/Temperature.h"

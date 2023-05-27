@@ -39,7 +39,8 @@ void Movement::moveTo(std::string& result, const glm::dvec3& pos)
 void Movement::shutdown(std::string& result) {
   result += "\n; Movement Shutdown: \n";
   double z = std::clamp(currentPosition[2] + 5, 0.0, printer.dimensions[2]);
-  moveTo(result, glm::dvec3(restPosition[0], restPosition[1], z));
+  moveTo(result, glm::dvec3(currentPosition[0], currentPosition[1], z));
+  moveTo(result, glm::dvec3(restPosition   [0], restPosition   [1], z));
   result += "M84 ; disable motor\n";
 }
 
@@ -62,5 +63,4 @@ void Movement::retractMode(std::string& result) {
     return;
   travelType = MovementType::Retract;
   result += "G1 F" + std::to_string(retractSpeed) + " ; retract Mode\n";
-
 }

@@ -1,6 +1,7 @@
 #include "Extruder.h"
 
-#include "LinearSpline.h"
+#include "LinearPrint.h"
+#include "Travel.h"
 #include "Movement.h"
 
 Extruder::Extruder(Printer& p ) : printer(p){
@@ -23,13 +24,12 @@ void Extruder::startup(std::string& result) {
 }
 
 void Extruder::prime(std::string& result) {
-  GCode::LinearSpline travel   (printer);
-  GCode::LinearSpline primeLine(printer);  
+  GCode::Travel      travel   (printer);
+  GCode::LinearPrint primeLine(printer);  
 
   result += "\n; Prime Nozzle: \n";
 
   travel.controlPoints = { glm::dvec3(printer.dimensions[0]/2,0,printer.movement->currentPosition[2]), glm::dvec3(printer.dimensions[0]/2,0,startPrintHeight)};
-  travel.feedrate = 0.0;
 
   glm::dvec3 primeEnd = glm::dvec3(0, 0, startPrintHeight);
   primeLine.controlPoints = { glm::dvec3(printer.dimensions[0]/2,0,startPrintHeight), primeEnd };

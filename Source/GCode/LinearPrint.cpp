@@ -1,17 +1,18 @@
-#include "LinearSpline.h"
+#include "LinearPrint.h"
 
 #include "Extruder.h"
 #include "Movement.h"
 
 namespace GCode
 {
-  LinearSpline::LinearSpline(Printer& _printer) : printer(_printer){
+  LinearPrint::LinearPrint(Printer& _printer) : printer(_printer){
 
   }
 
-  void LinearSpline::toString(std::string& result) const
+  void LinearPrint::toString(std::string& result) const
   {
-    //result += "; Linear Spline: \n";
+    printer.movement->printMode(result);
+
     for (auto& point : controlPoints)
     {
       double distance = glm::distance(point, printer.movement->currentPosition);
@@ -36,10 +37,7 @@ namespace GCode
         result += " E" + std::to_string(printer.extruder->position);
       }
 
-
-      result += " ; Linear Movement ";
-      if (feedrate != 0)
-        result += "with Extrusion";
+      result += " ; Print ";
       result+= "\n";
     }
   }

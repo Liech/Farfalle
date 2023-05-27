@@ -10,10 +10,10 @@
 
 namespace GCode
 {
-  class LinearSpline
+  class LinearPrint
   {
   public:
-    LinearSpline(Printer&);
+    LinearPrint(Printer&);
 
     std::vector<glm::dvec3> controlPoints;    
     double feedrate = 0.0267225;
