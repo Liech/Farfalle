@@ -11,7 +11,16 @@ namespace GCode
 
   void LinearPrint::toString(std::string& result) const
   {
-    printer.movement->printMode(result);
+    double f = feedrate;
+    if (f >= printer.extruder->maximumFeedrate) {
+      double max = printer.extruder->maximumFeedrate;
+      double factor = f / max;
+      //f = max;
+      printer.movement->customMode(result, printer.movement->printSpeed / factor);
+    }
+    else
+      printer.movement->printMode(result);
+
 
     for (auto& point : controlPoints)
     {
@@ -32,8 +41,8 @@ namespace GCode
         result += " Z" + std::to_string(point[2]);
         printer.movement->currentPosition[2] = point[2];
       }
-      if (feedrate != 0) {
-        printer.extruder->position += feedrate * distance;
+      if (f != 0) {
+        printer.extruder->position += f * distance;
         result += " E" + std::to_string(printer.extruder->position);
       }
 

@@ -19,7 +19,7 @@ public:
   double       printSpeed            = 900;
   double       retractSpeed          = 4200;
   double       travelSpeed           = 9000;
-  MovementType travelType            = MovementType::None;
+  MovementType travelType            = MovementType::Custom;
   double       minimumTravelFeedRate = 0;
   bool         hasMeshBedLeveling    = true;
 
@@ -33,6 +33,7 @@ public:
   void travelMode (std::string&);
   void printMode  (std::string&);
   void retractMode(std::string&);
+  void customMode (std::string&, double speed);
 
 
   void moveTo(std::string&, const glm::dvec3&);

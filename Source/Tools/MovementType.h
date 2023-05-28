@@ -1,5 +1,5 @@
 #pragma once
 
 enum class MovementType {
-  Travel, Print, Retract, None
+  Travel, Print, Retract, Custom
 };

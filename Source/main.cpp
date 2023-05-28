@@ -13,19 +13,7 @@
 #include "GCode/Movement.h"
 
 int main() {
-  glm::dvec3 x;
-  nlohmann::json j;
-  j["x"] = "x";
-
   Printer printer;
-
-  GCode::Travel      travel(printer);
-  GCode::LinearPrint line  (printer);
-
-  line.controlPoints = { glm::dvec3(10,10,0.2)};
-  line.feedrate = 0.16;
-
-  travel.controlPoints = { printer.movement->currentPosition+glm::dvec3(0,0,1) ,glm::dvec3(190, 190,printer.movement->currentPosition[2]+1), glm::dvec3(190,190,0.2)};
 
   std::string data = "";
   data += "; Farfalle GCODE Generator\n";
@@ -35,13 +23,28 @@ int main() {
   data += "\n; ;;;;;;;;;;;;;;;;;;";
   data += "\n; Printing:  ";
   data += "\n; ;;;;;;;;;;;;;;;;;;\n";
-  printer.extruder->retract(data);
-  printer.movement->travelMode(data);
-  travel.toString(data);
-  printer.extruder->unretract(data);
-  printer.movement->printMode(data);
-  line  .toString(data);
-  printer.extruder->retract(data);
+  
+  for (int i = 0; i < 20; i++) {
+    data += "; " + std::to_string(i) + "\n";
+    GCode::Travel      travel(printer);
+    GCode::LinearPrint line(printer);
+
+    glm::dvec2 startPos = glm::dvec2(i * 5, 190);
+    glm::dvec2 endPos   = glm::dvec2(i * 5, 90 );
+    travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(startPos[0], startPos[1],printer.movement->currentPosition[2] + 1), glm::dvec3(startPos[0], startPos[1],0.2)};
+    line  .controlPoints = { glm::dvec3(endPos[0],endPos[1],0.2)};
+    line  .feedrate = 0.1 + 0.1*i;
+
+
+    printer.extruder->retract(data);
+    printer.movement->travelMode(data);
+    travel.toString(data);
+    printer.extruder->unretract(data);
+    printer.movement->printMode(data);
+    line.toString(data);
+    printer.extruder->retract(data);
+  }
+
 
   printer.shutdown(data);
 

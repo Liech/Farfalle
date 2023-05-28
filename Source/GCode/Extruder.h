@@ -14,6 +14,7 @@ public:
   double linearAdvance            = 0.2;
   double startPrintHeight         = 0.2;
   double minimumExtrudingFeedRate = 0;
+  double maximumFeedrate          = 0.5;
 
   Extruder(Printer&);
   void startup(std::string& result);
