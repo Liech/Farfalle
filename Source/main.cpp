@@ -12,7 +12,14 @@
 #include "GCode/Extruder.h"
 #include "GCode/Movement.h"
 
+#include <CGAL/Simple_cartesian.h>
+
+typedef CGAL::Simple_cartesian<double> Kernel; 
+typedef Kernel::Point_2 Point_2;
+
 int main() {
+  Point_2 p(1, 1), q(10, 10);
+
   Printer printer;
 
   std::string data = "";

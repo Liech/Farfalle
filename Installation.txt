@@ -1,0 +1,6 @@
+https://doc.cgal.org/latest/Manual/windows.html
+ 
+* set VCPKG_DEFAULT_TRIPLET via Environement Variables to x64-windows
+* ./vcpkg.exe install yasm-tool:x86-windows
+* ./vcpkg.exe install cgal
+* CMAKE

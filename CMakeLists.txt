@@ -7,6 +7,7 @@ project(Farfalle)
 
 
 find_package(glm REQUIRED)
+find_package(cgal REQUIRED)
 
 ############################################################################
 ############################################################################
@@ -56,6 +57,7 @@ set_property(TARGET Farfalle PROPERTY CXX_STANDARD 20)
 
 target_link_libraries(Farfalle 
 glm::glm
+CGAL::CGAL
 )
 
 target_include_directories(Farfalle PRIVATE 
