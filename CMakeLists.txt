@@ -41,10 +41,17 @@ set(GCode_Files
 )
 source_group("Source/GCode" FILES ${GCode_Files})
 
+set(Geometry_Files
+    "Source/Geometry/Model.h"
+    "Source/Geometry/Model.cpp"
+)
+source_group("Source/Geometry" FILES ${Geometry_Files})
+
 set(ALL_FILES
     ${Source_Files}
     ${Tools_Files}
     ${GCode_Files}
+    ${Geometry_Files}
 )
 
 ############################################################################
