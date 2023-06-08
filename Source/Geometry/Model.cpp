@@ -1,13 +1,18 @@
 #include "Model.h"
 
+#include <iostream>
+
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <CGAL/boost/graph/helpers.h>
 #include <CGAL/Polygon_mesh_slicer.h>
+#include <CGAL/minkowski_sum_3.h>
+#include <CGAL/Nef_polyhedron_3.h>
+#include "CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h"
 
-#include <iostream>
+#include "Primitives.h"
 
 namespace PMP = CGAL::Polygon_mesh_processing;
 
@@ -19,13 +24,17 @@ typedef std::list<Polyline_type>                                  Polylines;
 typedef CGAL::AABB_halfedge_graph_segment_primitive<Surface_mesh> HGSP;
 typedef CGAL::AABB_traits<Kernel, HGSP>                           AABB_traits;
 typedef CGAL::AABB_tree<AABB_traits>                              AABB_tree;
-
+typedef CGAL::Nef_polyhedron_3<Kernel>                            Nef_polyhedron;
 
 class ModelPimpl {
 public:
   Surface_mesh mesh;
   AABB_tree    tree;
 };
+
+Model::Model() {
+
+}
 
 Model::Model(const std::string& filename) {
   std::cout << "Loading Mesh: " << filename << std::endl;
@@ -40,8 +49,8 @@ Model::Model(const std::string& filename) {
   }
   p->mesh = mesh;
   std::cout << "Loaded: " << mesh.num_vertices() << " - " << mesh.num_faces() << std::endl;
-  glm::dvec3 min = glm::dvec3(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-  glm::dvec3 max = glm::dvec3(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min());
+  min = glm::dvec3(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+  max = glm::dvec3(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min());
   for (auto x : p->mesh.points()) {
     if (x.x() < min[0]) min[0] = x.x();
     if (x.y() < min[1]) min[1] = x.y();
@@ -72,4 +81,25 @@ std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, doub
     result.push_back(sub);
   }
   return result;
+}
+
+
+std::shared_ptr<Model> Model::erode(double radius) const {
+  //https://doc.cgal.org/latest/Minkowski_sum_3/index.html
+  //https://github.com/CGAL/cgal/issues/6423
+  std::shared_ptr<Model> result = std::make_shared<Model>();
+  //Nef_polyhedron nefPoly  (p->mesh);
+  //Nef_polyhedron nefSphere(*Primitives::sphere(glm::dvec3(0,0,0),radius));
+  //
+  //Nef_polyhedron eroded = CGAL::minkowski_sum_3(nefPoly, nefSphere);
+  //CGAL::convert_nef_polyhedron_to_polygon_mesh(eroded, result->p->mesh, true);
+  return result;
+}
+
+glm::dvec3 Model::getMin() const {
+  return min;
+}
+
+glm::dvec3 Model::getMax() const {
+  return max;
 }

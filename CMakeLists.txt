@@ -44,6 +44,10 @@ source_group("Source/GCode" FILES ${GCode_Files})
 set(Geometry_Files
     "Source/Geometry/Model.h"
     "Source/Geometry/Model.cpp"
+    "Source/Geometry/Geometry.h"
+    "Source/Geometry/Geometry.cpp"
+    "Source/Geometry/Primitives.h"
+    "Source/Geometry/Primitives.cpp"
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
 
