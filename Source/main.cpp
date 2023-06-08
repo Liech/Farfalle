@@ -16,7 +16,7 @@
 
 
 int main() {
-  Model m;
+  Model m("C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchy.stl");
 
   Printer printer;
 
@@ -29,32 +29,30 @@ int main() {
   data += "\n; Printing:  ";
   data += "\n; ;;;;;;;;;;;;;;;;;;\n";
   
-  for (int i = 0; i < 20; i++) {
-    data += "; " + std::to_string(i) + "\n";
-    GCode::Travel      travel(printer);
-    GCode::LinearPrint line(printer);
+  for (int i = 0; i < 10; i++) {
+    std::cout << "Slice: " << i << std::endl;
+    double h = (i + 1) * 0.2;
+    auto lineStreaks = m.slice(glm::dvec3(0, 0, 1), h);
 
-    glm::dvec2 startPos = glm::dvec2(i * 5, 190);
-    glm::dvec2 endPos   = glm::dvec2(i * 5, 90 );
-    travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(startPos[0], startPos[1],printer.movement->currentPosition[2] + 1), glm::dvec3(startPos[0], startPos[1],0.2)};
-    line  .controlPoints = { glm::dvec3(endPos[0],endPos[1],0.2)};
-    line  .feedrate = 0.1 + 0.1*i;
-
-
-    printer.extruder->retract(data);
-    printer.movement->travelMode(data);
-    travel.toString(data);
-    printer.extruder->unretract(data);
-    printer.movement->printMode(data);
-    line.toString(data);
-    printer.extruder->retract(data);
+    for (auto streak : lineStreaks) {      
+      GCode::LinearPrint line(printer);
+      line.controlPoints = streak;
+      line.feedrate = 0.3;
+      GCode::Travel travel(printer);
+      travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],printer.movement->currentPosition[2] + 1), glm::dvec3(streak[0][0], streak[1][1],h) };
+      
+      printer.extruder->retract(data);
+      printer.movement->travelMode(data);
+      travel.toString(data);
+      printer.extruder->unretract(data);
+      printer.movement->printMode(data);
+      line.toString(data);
+      printer.extruder->retract(data);
+    }
   }
-
 
   printer.shutdown(data);
 
-  Tools::String2File("D:\\Farfalle\\firstTest.gcode",data);
-  //Tools::String2File("firstTest.gcode", data);
-
+  Tools::String2File("firstTest.gcode",data);
   return 0;
 }
