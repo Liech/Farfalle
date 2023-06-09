@@ -13,7 +13,6 @@ public:
   Model();
 
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);
-  std::shared_ptr<Model> erode(double radius) const;
   void repair();
 
   glm::dvec3 getMin() const;

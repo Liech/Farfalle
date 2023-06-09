@@ -22,7 +22,6 @@ int main() {
   Model loaded(filename);
   loaded.repair();
 
-  //std::shared_ptr<Model> model = loaded.erode(2);
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
   //model->repair();
 

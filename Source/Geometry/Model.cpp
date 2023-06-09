@@ -52,37 +52,6 @@ std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, doub
   return result;
 }
 
-
-std::shared_ptr<Model> Model::erode(double radius) const {
-  //https://doc.cgal.org/latest/Minkowski_sum_3/index.html
-  //https://github.com/CGAL/cgal/issues/6423
-  std::cout << "Erosion..." << std::endl;
-  std::shared_ptr<Model> result = std::make_shared<Model>();
-
-  std::cout << "does_self_intersect: "<< CGAL::Polygon_mesh_processing::does_self_intersect(p->mesh) << std::endl;
-
-
-  Nef_polyhedron nefSphere(*Primitives::sphere(glm::dvec3(0, 0, 0), radius));
-  //Nef_polyhedron nefSphere(*Primitives::sphere(glm::dvec3(10, 10, 10), 10));
-  Nef_polyhedron nefPoly  (p->mesh);
-  std::cout << "Edges: " << nefPoly.number_of_edges() << std::endl;
-  Nef_polyhedron eroded = CGAL::minkowski_sum_3(nefSphere, nefSphere);
-
-  std::vector<Point>                     points;
-  std::vector<std::vector<std::size_t> > polygons;
-
-  //CGAL::convert_nef_polyhedron_to_polygon_soup(nefPoly, points, polygons, true);
-  //CGAL::Polygon_mesh_processing::orient_polygon_soup(points,polygons);
-  //Surface_mesh mesh;
-  //CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons, result->p->mesh);
-
-  CGAL::convert_nef_polyhedron_to_polygon_mesh(eroded, result->p->mesh, true);
-  //CGAL::convert_nef_polyhedron_to_polygon_mesh(nefSphere, result->p->mesh, true);
-
-  result->init();
-  return result;
-}
-
 glm::dvec3 Model::getMin() const {
   return min;
 }
