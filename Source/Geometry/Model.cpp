@@ -44,6 +44,7 @@ FT implicitFunctionModelMeshGen(const Point& p)
 Model::Model(std::function<double(const glm::dvec3&)>& func, const glm::dvec3& boundingSphereCenter, double boundingSphereRadius, double detail) {
   //https://doc.cgal.org/latest/Surface_mesher/index.html
   //https://doc.cgal.org/latest/Surface_mesh_parameterization/index.html
+  assert(func(glm::dvec3(0, 0, 0)) <= 0);
   p = std::make_shared<ModelPimpl>();
   implicitModelMakerFunction = func;
   Tr tr;            
@@ -116,9 +117,9 @@ glm::dvec3 Model::getMax() const {
   return max;
 }
 
-void Model::getBoundingSphere(glm::dvec3& center, double& radius) {
+void Model::getBoundingSphere(glm::dvec3& center, double& radius) const {
   center = (min + max) / 2.0;
-  radius = glm::distance(min, max) / 2;
+  radius = glm::distance(min, max); // this is wrong for non cube models (currently i am lazy and will regret it)
 }
 
 void Model::repair() {

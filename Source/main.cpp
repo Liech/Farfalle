@@ -17,20 +17,29 @@
 #include "Geometry/Model.h"
 
 
+std::shared_ptr<Model> genSliceTool(const Model& input, double z) {
+  glm::dvec3 center;
+  double radius;
+  double precision = 8;
+  input.getBoundingSphere(center, radius);
+  center.z = z;
+  radius *= 15;
+  std::cout << "Radius: " << radius << std::endl;
+  std::cout << "Center: " << center[0] << "/" << center[1] << "/" << center[2] << std::endl;
+  std::cout << "Precision: " << precision << std::endl;
+
+  std::cout << "Gen Slice Tool... voxelRes=" << (radius/precision) << std::endl;  
+  std::function<double(const glm::dvec3& point) > sphereFun = [center, radius, z, precision](const glm::dvec3& point) {
+    return point.z - z;
+  };
+  std::shared_ptr<Model> result = std::make_shared<Model>(sphereFun, center, radius + 1, precision);
+  result->save("debug.stl");
+  return result;
+}
+
 int main() {
   
   std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-
-  
-  std::cout << "start" << std::endl;
-  glm::dvec3 center = glm::dvec3(10, 10, 10);
-  double radius = 1;
-  std::function<double(const glm::dvec3& point) > sphereFun = [center,radius](const glm::dvec3& point) {
-    return center.z - point.z;
-    //return glm::distance(point,center)-radius; 
-  };
-  Model implicit = Model(sphereFun, center, radius + 2,0.2);
-  implicit.save("debug.stl");
 
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
   model->repair();
@@ -52,8 +61,13 @@ int main() {
   for (int i = 0; i < layerAmount; i++) {
     std::cout << "Slice: " << i << std::endl;
     double h = (i + 1) * geometry.layerHeight + model->getMin()[2];
-    auto lineStreaks = model->slice(glm::dvec3(0, 0, 1), h);
 
+    //auto lineStreaks = model->slice(glm::dvec3(0, 0, 1), h); //Planar slicing
+    auto tool = genSliceTool(*model, h);
+    std::cout << "Slice..." << std::endl;
+    auto lineStreaks = model->slice(*tool); //Implicit Surface slicing 
+
+    std::cout << "Gather Streaks..." << std::endl;
     for (auto streak : lineStreaks) {      
       GCode::LinearPrint line(printer);
       line.controlPoints = streak;
