@@ -35,19 +35,22 @@ Model::Model(const std::string& filename) {
   init();
 }
 
-FT sphere_function(Point p) {
-  const FT x2 = p.x() * p.x(), y2 = p.y() * p.y(), z2 = p.z() * p.z();
-  return x2 + y2 + z2 - 1;
-}
-
-Model::Model(double isovalue) {
+std::function<double(const glm::dvec3&)> implicitModelMakerFunction = [](const glm::dvec3& p) {return p.z; };
+FT implicitFunctionModelMeshGen(const Point& p)
+{
+  return implicitModelMakerFunction(glm::dvec3(p.x(), p.y(), p.z()));
+} 
+ 
+Model::Model(std::function<double(const glm::dvec3&)>& func, const glm::dvec3& boundingSphereCenter, double boundingSphereRadius, double detail) {
   //https://doc.cgal.org/latest/Surface_mesher/index.html
   //https://doc.cgal.org/latest/Surface_mesh_parameterization/index.html
+  p = std::make_shared<ModelPimpl>();
+  implicitModelMakerFunction = func;
   Tr tr;            
   C2t3 c2t3(tr);
-  Surface_3 surface(sphere_function, Sphere(CGAL::ORIGIN, 2.));
+  Surface_3 surface(implicitFunctionModelMeshGen, Sphere(Point(boundingSphereCenter[0], boundingSphereCenter[1], boundingSphereCenter[2]), boundingSphereRadius));
 
-  CGAL::Surface_mesh_default_criteria_3<Tr> criteria(30., 0.1, 0.1); 
+  CGAL::Surface_mesh_default_criteria_3<Tr> criteria(30., detail, detail);
   CGAL::make_surface_mesh(c2t3, surface, criteria, CGAL::Non_manifold_tag());
   CGAL::facets_in_complex_2_to_triangle_mesh(c2t3, p->mesh);
   
@@ -113,6 +116,11 @@ glm::dvec3 Model::getMax() const {
   return max;
 }
 
+void Model::getBoundingSphere(glm::dvec3& center, double& radius) {
+  center = (min + max) / 2.0;
+  radius = glm::distance(min, max) / 2;
+}
+
 void Model::repair() {
 
   std::cout << "Repairing..." << std::endl;
@@ -144,4 +152,9 @@ void Model::init() {
 
   std::cout << "Build Tree..." << std::endl;
   p->tree = AABB_tree(edges(p->mesh).first, edges(p->mesh).second, p->mesh);
+}
+
+void Model::save(const std::string& filename) {
+  CGAL::IO::write_STL(filename, p->mesh);
+
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 
 #include <nlohmann/json.hpp>
 #include <glm/glm.hpp>
@@ -20,12 +21,21 @@ int main() {
   
   std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
 
+  
+  std::cout << "start" << std::endl;
+  glm::dvec3 center = glm::dvec3(10, 10, 10);
+  double radius = 1;
+  std::function<double(const glm::dvec3& point) > sphereFun = [center,radius](const glm::dvec3& point) {
+    return center.z - point.z;
+    //return glm::distance(point,center)-radius; 
+  };
+  Model implicit = Model(sphereFun, center, radius + 2,0.2);
+  implicit.save("debug.stl");
+
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
   model->repair();
-
   Printer  printer;
   Geometry geometry;
-  
 
   std::string data = "";
   data += "; Farfalle GCODE Generator\n";
