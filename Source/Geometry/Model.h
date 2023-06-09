@@ -14,11 +14,14 @@ public:
 
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);
   std::shared_ptr<Model> erode(double radius) const;
+  void repair();
 
   glm::dvec3 getMin() const;
   glm::dvec3 getMax() const;
 
 private:
+  void init();
+
   std::shared_ptr<ModelPimpl> p;
 
   glm::dvec3 min;

@@ -2,29 +2,9 @@
 
 #include <iostream>
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
-#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
-#include <CGAL/boost/graph/helpers.h>
-#include <CGAL/Polygon_mesh_slicer.h>
-#include <CGAL/minkowski_sum_3.h>
-#include <CGAL/Nef_polyhedron_3.h>
-#include "CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h"
-
 #include "Primitives.h"
+#include "CGALDefs.h"
 
-namespace PMP = CGAL::Polygon_mesh_processing;
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
-typedef Kernel::Point_3                                           Point;
-typedef CGAL::Surface_mesh<Point>                                 Surface_mesh;
-typedef std::vector<Kernel::Point_3>                              Polyline_type;
-typedef std::list<Polyline_type>                                  Polylines;
-typedef CGAL::AABB_halfedge_graph_segment_primitive<Surface_mesh> HGSP;
-typedef CGAL::AABB_traits<Kernel, HGSP>                           AABB_traits;
-typedef CGAL::AABB_tree<AABB_traits>                              AABB_tree;
-typedef CGAL::Nef_polyhedron_3<Kernel>                            Nef_polyhedron;
 
 class ModelPimpl {
 public:
@@ -33,10 +13,11 @@ public:
 };
 
 Model::Model() {
-
+  p = std::make_shared<ModelPimpl>();
 }
 
 Model::Model(const std::string& filename) {
+
   std::cout << "Loading Mesh: " << filename << std::endl;
   p = std::make_shared<ModelPimpl>();
 
@@ -49,21 +30,9 @@ Model::Model(const std::string& filename) {
   }
   p->mesh = mesh;
   std::cout << "Loaded: " << mesh.num_vertices() << " - " << mesh.num_faces() << std::endl;
-  min = glm::dvec3(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-  max = glm::dvec3(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min());
-  for (auto x : p->mesh.points()) {
-    if (x.x() < min[0]) min[0] = x.x();
-    if (x.y() < min[1]) min[1] = x.y();
-    if (x.z() < min[2]) min[2] = x.z();
-    if (x.x() > max[0]) max[0] = x.x();
-    if (x.y() > max[1]) max[1] = x.y();
-    if (x.z() > max[2]) max[2] = x.z();
-  }
-  std::cout << "MIN: " << min[0] << "/" << min[1] << "/" << min[2] << std::endl;
-  std::cout << "MAX: " << max[0] << "/" << max[1] << "/" << max[2] << std::endl;
 
-  std::cout << "Build Tree..." << std::endl;
-  p->tree = AABB_tree(edges(p->mesh).first, edges(p->mesh).second, p->mesh);
+
+  init();
 }
 
 std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, double z) {
@@ -87,12 +56,30 @@ std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, doub
 std::shared_ptr<Model> Model::erode(double radius) const {
   //https://doc.cgal.org/latest/Minkowski_sum_3/index.html
   //https://github.com/CGAL/cgal/issues/6423
+  std::cout << "Erosion..." << std::endl;
   std::shared_ptr<Model> result = std::make_shared<Model>();
-  //Nef_polyhedron nefPoly  (p->mesh);
-  //Nef_polyhedron nefSphere(*Primitives::sphere(glm::dvec3(0,0,0),radius));
-  //
-  //Nef_polyhedron eroded = CGAL::minkowski_sum_3(nefPoly, nefSphere);
-  //CGAL::convert_nef_polyhedron_to_polygon_mesh(eroded, result->p->mesh, true);
+
+  std::cout << "does_self_intersect: "<< CGAL::Polygon_mesh_processing::does_self_intersect(p->mesh) << std::endl;
+
+
+  Nef_polyhedron nefSphere(*Primitives::sphere(glm::dvec3(0, 0, 0), radius));
+  //Nef_polyhedron nefSphere(*Primitives::sphere(glm::dvec3(10, 10, 10), 10));
+  Nef_polyhedron nefPoly  (p->mesh);
+  std::cout << "Edges: " << nefPoly.number_of_edges() << std::endl;
+  Nef_polyhedron eroded = CGAL::minkowski_sum_3(nefSphere, nefSphere);
+
+  std::vector<Point>                     points;
+  std::vector<std::vector<std::size_t> > polygons;
+
+  //CGAL::convert_nef_polyhedron_to_polygon_soup(nefPoly, points, polygons, true);
+  //CGAL::Polygon_mesh_processing::orient_polygon_soup(points,polygons);
+  //Surface_mesh mesh;
+  //CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons, result->p->mesh);
+
+  CGAL::convert_nef_polyhedron_to_polygon_mesh(eroded, result->p->mesh, true);
+  //CGAL::convert_nef_polyhedron_to_polygon_mesh(nefSphere, result->p->mesh, true);
+
+  result->init();
   return result;
 }
 
@@ -102,4 +89,37 @@ glm::dvec3 Model::getMin() const {
 
 glm::dvec3 Model::getMax() const {
   return max;
+}
+
+void Model::repair() {
+
+  std::cout << "Repairing..." << std::endl;
+  assert(CGAL::is_valid_polygon_mesh(p->mesh));
+  CGAL::Polygon_mesh_processing::remove_isolated_vertices(p->mesh);
+  CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(p->mesh);
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(p->mesh)) {
+    std::cout << " * Remove Self Intersection..." << std::endl;
+    if (!CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(p->mesh, CGAL::parameters::preserve_genus(false))) {
+      std::cout << "Self intersection repair failed!" << std::endl;
+    } 
+  }
+  init();
+}
+
+void Model::init() {
+  min = glm::dvec3(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+  max = glm::dvec3(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min());
+  for (auto x : p->mesh.points()) {
+    if (x.x() < min[0]) min[0] = x.x();
+    if (x.y() < min[1]) min[1] = x.y();
+    if (x.z() < min[2]) min[2] = x.z();
+    if (x.x() > max[0]) max[0] = x.x();
+    if (x.y() > max[1]) max[1] = x.y();
+    if (x.z() > max[2]) max[2] = x.z();
+  }
+  std::cout << "MIN: " << min[0] << "/" << min[1] << "/" << min[2] << std::endl;
+  std::cout << "MAX: " << max[0] << "/" << max[1] << "/" << max[2] << std::endl;
+
+  std::cout << "Build Tree..." << std::endl;
+  p->tree = AABB_tree(edges(p->mesh).first, edges(p->mesh).second, p->mesh);
 }

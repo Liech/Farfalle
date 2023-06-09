@@ -27,7 +27,7 @@ void Printer::startup(std::string& result)
   extruder   ->startup(result);
   movement   ->home(result);
   temperature->waitForHeating(result);
-  extruder   ->prime(result);
+  //extruder   ->prime(result);
 }
 
 void Printer::shutdown(std::string& result)

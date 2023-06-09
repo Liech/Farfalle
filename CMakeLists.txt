@@ -42,6 +42,7 @@ set(GCode_Files
 source_group("Source/GCode" FILES ${GCode_Files})
 
 set(Geometry_Files
+    "Source/Geometry/CGALDefs.h"
     "Source/Geometry/Model.h"
     "Source/Geometry/Model.cpp"
     "Source/Geometry/Geometry.h"

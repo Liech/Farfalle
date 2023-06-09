@@ -17,7 +17,14 @@
 
 
 int main() {
-  Model m("C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchy.stl");
+  
+  std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  Model loaded(filename);
+  loaded.repair();
+
+  //std::shared_ptr<Model> model = loaded.erode(2);
+  std::shared_ptr<Model> model = std::make_shared<Model>(filename);
+  //model->repair();
 
   Printer  printer;
   Geometry geometry;
@@ -32,13 +39,13 @@ int main() {
   data += "\n; Printing:  ";
   data += "\n; ;;;;;;;;;;;;;;;;;;\n";
   
-  int layerAmount = ((m.getMax()[2] - m.getMin()[2]) / geometry.layerHeight) + 1;
+  int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
   std::cout << "Layer Amount: " << layerAmount << std::endl;
 
   for (int i = 0; i < layerAmount; i++) {
     std::cout << "Slice: " << i << std::endl;
-    double h = (i + 1) * geometry.layerHeight;
-    auto lineStreaks = m.slice(glm::dvec3(0, 0, 1), h);
+    double h = (i + 1) * geometry.layerHeight + model->getMin()[2];
+    auto lineStreaks = model->slice(glm::dvec3(0, 0, 1), h);
 
     for (auto streak : lineStreaks) {      
       GCode::LinearPrint line(printer);
