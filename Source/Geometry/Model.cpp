@@ -49,7 +49,7 @@ Model::Model(std::function<double(const glm::dvec3&)>& func, const glm::dvec3& b
   implicitModelMakerFunction = func;
   Tr tr;            
   C2t3 c2t3(tr);
-  Surface_3 surface(implicitFunctionModelMeshGen, Sphere(Point(boundingSphereCenter[0], boundingSphereCenter[1], boundingSphereCenter[2]), boundingSphereRadius));
+  Surface_3 surface(implicitFunctionModelMeshGen, Sphere(Point(boundingSphereCenter[0], boundingSphereCenter[1], boundingSphereCenter[2]), boundingSphereRadius* boundingSphereRadius));
 
   CGAL::Surface_mesh_default_criteria_3<Tr> criteria(30., detail, detail);
   CGAL::make_surface_mesh(c2t3, surface, criteria, CGAL::Non_manifold_tag());
@@ -60,7 +60,6 @@ Model::Model(std::function<double(const glm::dvec3&)>& func, const glm::dvec3& b
 
 
 std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, double z) {
-  std::cout << "Slice Mesh..."<< std::endl;
   Polylines polylines;
 
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer_aabb(p->mesh, p->tree);
@@ -77,7 +76,6 @@ std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, doub
 }
 
 std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) {
-  std::cout << "Slice Mesh..." << std::endl;
   Polylines polylines;
 
   Surface_mesh meshCopy = p->mesh;
@@ -120,6 +118,27 @@ glm::dvec3 Model::getMax() const {
 void Model::getBoundingSphere(glm::dvec3& center, double& radius) const {
   center = (min + max) / 2.0;
   radius = glm::distance(min, max); // this is wrong for non cube models (currently i am lazy and will regret it)
+
+  auto points = std::vector<glm::dvec3>{
+    min + glm::dvec3(max[0] * 0,max[1] * 0,max[2] * 0),
+    min + glm::dvec3(max[0] * 1,max[1] * 0,max[2] * 0),
+    min + glm::dvec3(max[0] * 0,max[1] * 1,max[2] * 0),
+    min + glm::dvec3(max[0] * 1,max[1] * 1,max[2] * 0),
+    min + glm::dvec3(max[0] * 0,max[1] * 0,max[2] * 1),
+    min + glm::dvec3(max[0] * 1,max[1] * 0,max[2] * 1),
+    min + glm::dvec3(max[0] * 0,max[1] * 1,max[2] * 1),
+    min + glm::dvec3(max[0] * 1,max[1] * 1,max[2] * 1)
+  };
+
+  for (int a = 0; a < 8; a++) {
+    for (int b = a + 1; b < 8; b++) {
+      double currentDist = glm::distance(points[a], points[b]);
+      if (currentDist > radius)
+        radius = currentDist;
+    }
+  }
+
+  radius /= 2;
 }
 
 void Model::repair() {
@@ -148,10 +167,10 @@ void Model::init() {
     if (x.y() > max[1]) max[1] = x.y();
     if (x.z() > max[2]) max[2] = x.z();
   }
-  std::cout << "MIN: " << min[0] << "/" << min[1] << "/" << min[2] << std::endl;
-  std::cout << "MAX: " << max[0] << "/" << max[1] << "/" << max[2] << std::endl;
+  //std::cout << "MIN: " << min[0] << "/" << min[1] << "/" << min[2] << std::endl;
+  //std::cout << "MAX: " << max[0] << "/" << max[1] << "/" << max[2] << std::endl;
 
-  std::cout << "Build Tree..." << std::endl;
+  //std::cout << "Build Tree..." << std::endl;
   p->tree = AABB_tree(edges(p->mesh).first, edges(p->mesh).second, p->mesh);
 }
 
