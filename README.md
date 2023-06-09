@@ -15,6 +15,7 @@ An basic Slicer that is capable of non-planar-slicing with zero steps.
 * Generate Density field, that "follows" the horizontal walls
 * Slice along the density field with implicit surface slicing
 * obtain horizontal walls by planar parameterization and triangulated shortest paths on surface
+* Some kind of Infill capability that im not sure of yet
 
 # Dependencies
 
