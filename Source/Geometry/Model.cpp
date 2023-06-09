@@ -5,7 +5,6 @@
 #include "Primitives.h"
 #include "CGALDefs.h"
 
-
 class ModelPimpl {
 public:
   Surface_mesh mesh;
@@ -15,6 +14,7 @@ public:
 Model::Model() {
   p = std::make_shared<ModelPimpl>();
 }
+
 
 Model::Model(const std::string& filename) {
 
@@ -35,6 +35,26 @@ Model::Model(const std::string& filename) {
   init();
 }
 
+FT sphere_function(Point p) {
+  const FT x2 = p.x() * p.x(), y2 = p.y() * p.y(), z2 = p.z() * p.z();
+  return x2 + y2 + z2 - 1;
+}
+
+Model::Model(double isovalue) {
+  //https://doc.cgal.org/latest/Surface_mesher/index.html
+  //https://doc.cgal.org/latest/Surface_mesh_parameterization/index.html
+  Tr tr;            
+  C2t3 c2t3(tr);
+  Surface_3 surface(sphere_function, Sphere(CGAL::ORIGIN, 2.));
+
+  CGAL::Surface_mesh_default_criteria_3<Tr> criteria(30., 0.1, 0.1); 
+  CGAL::make_surface_mesh(c2t3, surface, criteria, CGAL::Non_manifold_tag());
+  CGAL::facets_in_complex_2_to_triangle_mesh(c2t3, p->mesh);
+  
+  init();
+}
+
+
 std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, double z) {
   std::cout << "Slice Mesh..."<< std::endl;
   Polylines polylines;
@@ -49,6 +69,39 @@ std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, doub
       sub.push_back(glm::dvec3(x.x(), x.y(), x.z()));
     result.push_back(sub);
   }
+  return result;
+}
+
+std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) {
+  std::cout << "Slice Mesh..." << std::endl;
+  Polylines polylines;
+
+  Surface_mesh meshCopy = p->mesh;
+  //split
+  CGAL::Polygon_mesh_processing::split(meshCopy, sliceTool.p->mesh);
+  //visit all holes https://doc.cgal.org/latest/Polygon_mesh_processing/Polygon_mesh_processing_2hole_filling_visitor_example_8cpp-example.html
+  std::vector<halfedge_descriptor> border_cycles;
+  // collect one halfedge per boundary cycle
+  PMP::extract_boundary_cycles(meshCopy, std::back_inserter(border_cycles));
+
+  std::vector<std::vector<glm::dvec3>> result;
+  for (halfedge_descriptor h : border_cycles)
+  {
+    std::vector<glm::dvec3> sub;
+    halfedge_descriptor current = meshCopy.next(h);
+    auto startIndex = meshCopy.source(h);
+    auto startPoint = meshCopy.point(startIndex);
+    sub.push_back(glm::dvec3(startPoint.x(), startPoint.y(), startPoint.z()));
+
+    while (current != h) {
+      auto Index = meshCopy.source(current);
+      auto Point = meshCopy.point(Index);
+      sub.push_back(glm::dvec3(Point.x(), Point.y(), Point.z()));
+      current = meshCopy.next(current);
+    }
+    result.push_back(sub);
+  }
+
   return result;
 }
 

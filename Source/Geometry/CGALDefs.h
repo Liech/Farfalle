@@ -18,6 +18,15 @@
 #include <CGAL/IO/Nef_polyhedron_iostream_3.h>
 #include <CGAL/minkowski_sum_3.h>
 
+#include <CGAL/Polygon_mesh_processing/clip.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
+#include <CGAL/Polygon_mesh_processing/border.h>
+#include <CGAL/Surface_mesh_default_triangulation_3.h>
+#include <CGAL/Complex_2_in_triangulation_3.h>
+#include <CGAL/make_surface_mesh.h>
+#include <CGAL/Implicit_surface_3.h>
+#include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
+
 namespace PMP = CGAL::Polygon_mesh_processing;
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
@@ -30,3 +39,11 @@ typedef CGAL::AABB_traits<Kernel, HGSP>                           AABB_traits;
 typedef CGAL::AABB_tree<AABB_traits>                              AABB_tree;
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items>   Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel>                                Polyhedron;
+typedef boost::graph_traits<Surface_mesh>::halfedge_descriptor    halfedge_descriptor;
+typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
+typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
+typedef Tr::Geom_traits GT;
+typedef GT::FT FT;
+typedef FT(*Function)(Point);
+typedef CGAL::Implicit_surface_3<GT, Function> Surface_3;
+typedef GT::Sphere_3 Sphere;

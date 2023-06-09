@@ -19,11 +19,9 @@
 int main() {
   
   std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  Model loaded(filename);
-  loaded.repair();
 
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  //model->repair();
+  model->repair();
 
   Printer  printer;
   Geometry geometry;

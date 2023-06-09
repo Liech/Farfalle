@@ -10,9 +10,11 @@ class ModelPimpl;
 class Model {
 public:
   Model(const std::string& filename);
+  Model(double isovalue);
   Model();
 
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);
+  std::vector<std::vector<glm::dvec3>> slice(Model&);
   void repair();
 
   glm::dvec3 getMin() const;
