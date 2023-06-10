@@ -17,8 +17,6 @@ Model::Model() {
 
 
 Model::Model(const std::string& filename) {
-
-  std::cout << "Loading Mesh: " << filename << std::endl;
   p = std::make_shared<ModelPimpl>();
 
   Surface_mesh mesh;
@@ -29,9 +27,6 @@ Model::Model(const std::string& filename) {
     return;
   }
   p->mesh = mesh;
-  std::cout << "Loaded: " << mesh.num_vertices() << " - " << mesh.num_faces() << std::endl;
-
-
   init();
 }
 
@@ -148,7 +143,7 @@ void Model::repair() {
   CGAL::Polygon_mesh_processing::remove_isolated_vertices(p->mesh);
   CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(p->mesh);
   if (CGAL::Polygon_mesh_processing::does_self_intersect(p->mesh)) {
-    std::cout << " * Remove Self Intersection..." << std::endl;
+    std::cout << "Remove Self Intersection..." << std::endl;
     if (!CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(p->mesh, CGAL::parameters::preserve_genus(false))) {
       std::cout << "Self intersection repair failed!" << std::endl;
     } 

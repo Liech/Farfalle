@@ -49,6 +49,10 @@ set(Geometry_Files
     "Source/Geometry/Geometry.cpp"
     "Source/Geometry/Primitives.h"
     "Source/Geometry/Primitives.cpp"
+    "Source/Geometry/SliceMesh.h"
+    "Source/Geometry/SliceMesh.cpp"
+    "Source/Geometry/SliceConfig.h"
+    "Source/Geometry/SliceConfig.cpp"
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
 
