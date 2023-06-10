@@ -5,6 +5,7 @@ project(Farfalle)
 ############################################################################
 ############################################################################
 
+find_package(OpenMP)
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(glm REQUIRED)
 find_package(cgal REQUIRED)
@@ -75,6 +76,7 @@ target_link_libraries(Farfalle
 glm::glm
 Eigen3::Eigen
 CGAL::CGAL
+OpenMP::OpenMP_CXX
 )
 
 target_include_directories(Farfalle PRIVATE 

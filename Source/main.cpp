@@ -42,6 +42,8 @@ std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const Slic
   return std::make_shared<SliceMesh>(input, planeFun, config);
 }
 
+
+
 int main() {
   Printer  printer;
   Geometry geometry;
@@ -69,11 +71,17 @@ int main() {
   }
 
   std::vector<std::vector<std::vector<glm::dvec3>>> streaks;
+  streaks.resize(layerAmount);
+  int progress = 0;
+  #pragma omp parallel for
   for (int i = 0; i < layerAmount; i++) {
-    std::cout << "Slice: " << i << "/" << layerAmount << std::endl;
+    #pragma omp atomic
+    progress++;
+
+    std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
     //double h = (i + 1) * geometry.layerHeight;
     //streaks.push_back(model->slice(glm::dvec3(0, 0, 1), h); //Planar slicing
-    streaks.push_back(model->slice(*tools[i]->getModel()));
+    streaks[i] = model->slice(*tools[i]->getModel());
   }
 
   std::string data = "";
