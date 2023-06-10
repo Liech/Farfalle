@@ -176,5 +176,13 @@ void Model::init() {
 
 void Model::save(const std::string& filename) {
   CGAL::IO::write_STL(filename, p->mesh);
+}
 
+void Model::generateUVMap(const std::string& name) {
+  //https://doc.cgal.org/latest/Surface_mesh_parameterization/index.html
+  assert(!hasUVMap);
+  hasUVMap = true;
+  halfedge_descriptor bhd = CGAL::Polygon_mesh_processing::longest_border(p->mesh).first;
+  UV_pmap uv_map = p->mesh.add_property_map<vertex_descriptor, Point_2>(name).first;
+  SMP::parameterize(p->mesh, bhd, uv_map);
 }

@@ -5,7 +5,7 @@ project(Farfalle)
 ############################################################################
 ############################################################################
 
-
+find_package(Eigen3 CONFIG REQUIRED)
 find_package(glm REQUIRED)
 find_package(cgal REQUIRED)
 
@@ -69,6 +69,7 @@ set_property(TARGET Farfalle PROPERTY CXX_STANDARD 20)
 
 target_link_libraries(Farfalle 
 glm::glm
+Eigen3::Eigen
 CGAL::CGAL
 )
 

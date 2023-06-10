@@ -4,6 +4,7 @@
   "dependencies": [
     "nlohmann-json",
     "glm",
+	"eigen3",
 	"cgal"
   ]
 }

@@ -28,6 +28,7 @@ std::shared_ptr<Model> genSliceTool(const Model& input, double z) {
     return point.z - z;
   };
   std::shared_ptr<Model> result = std::make_shared<Model>(sphereFun, center, radius*2, precision);
+  result->generateUVMap("h:UV");
   //result->save("debug.stl");
   return result;
 }
@@ -66,7 +67,7 @@ int main() {
     for (auto streak : lineStreaks) {      
       GCode::LinearPrint line(printer);
       line.controlPoints = streak;
-      line.feedrate = 0.3;
+      line.feedrate = 0.03;
       GCode::Travel travel(printer);
       travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],printer.movement->currentPosition[2] + 1), glm::dvec3(streak[0][0], streak[1][1],h) };
       

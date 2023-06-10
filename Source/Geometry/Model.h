@@ -17,6 +17,7 @@ public:
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);
   std::vector<std::vector<glm::dvec3>> slice(Model&);
   void repair();
+  void generateUVMap(const std::string& name);
 
   glm::dvec3 getMin() const;
   glm::dvec3 getMax() const;
@@ -29,6 +30,7 @@ private:
 
   std::shared_ptr<ModelPimpl> p;
 
+  bool hasUVMap = false;
   glm::dvec3 min;
   glm::dvec3 max;
 };
