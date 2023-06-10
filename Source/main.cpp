@@ -18,18 +18,37 @@
 
 
 std::shared_ptr<Model> genSliceTool(const Model& input, double z) {
+
   glm::dvec3 center;
   double radius;
-  double precision = 8;
+  double precision = 4;
   input.getBoundingSphere(center, radius);
   center.z = input.getMin()[2];
   std::cout << "  Gen Slice Tool..." << std::endl;  
-  std::function<double(const glm::dvec3& point) > sphereFun = [center, radius, z, precision](const glm::dvec3& point) {
-    return point.z - z;
+
+  std::function<double(const glm::dvec3& point)> sphereFun = [center, z,radius, precision](const glm::dvec3& point) {
+    if (point.z < center.z) {
+      if (point.z > center.z - radius/2.0) {
+        if ((glm::distance(glm::dvec3(point.x, point.y, 0), glm::dvec3(center.x, center.y, 0)) - z) < 0)
+          return -1.0;
+        else
+          return 1.0;
+      }
+      else
+        return -1.0;
+    }
+
+    return glm::distance(point, center) - z;
   };
+
+  double offset = input.getMin()[2];
+  std::function<double(const glm::dvec3& point) > planeFun = [center, z, offset, precision](const glm::dvec3& point) {
+    return point.z - (z+ offset);
+  };
+
   std::shared_ptr<Model> result = std::make_shared<Model>(sphereFun, center, radius*2, precision);
   result->generateUVMap("h:UV");
-  //result->save("debug.stl");
+  result->save("debug.stl");
   return result;
 }
 
@@ -56,7 +75,7 @@ int main() {
 
   for (int i = 0; i < layerAmount; i++) {
     std::cout << "Slice: " << i << "/" << layerAmount << std::endl;
-    double h = (i + 1) * geometry.layerHeight + model->getMin()[2];
+    double h = (i + 1) * geometry.layerHeight;
 
     //auto lineStreaks = model->slice(glm::dvec3(0, 0, 1), h); //Planar slicing
     auto tool = genSliceTool(*model, h);
@@ -69,7 +88,7 @@ int main() {
       line.controlPoints = streak;
       line.feedrate = 0.03;
       GCode::Travel travel(printer);
-      travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],printer.movement->currentPosition[2] + 1), glm::dvec3(streak[0][0], streak[1][1],h) };
+      travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],printer.movement->currentPosition[2] + 1), streak[0] };
       
       printer.extruder->retract(data);
       printer.movement->travelMode(data);
