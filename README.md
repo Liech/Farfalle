@@ -19,8 +19,9 @@ An basic Slicer that is capable of non-planar-slicing with zero steps.
 
 # Dependencies
 
-* CMAKE
-* VCPKG
-* CGAL
-* glm
-* nlohmann::json
+* CMAKE - Build Tool
+* VCPKG - Package Manager
+* CGAL - Main Workhorse
+* eigen3 - CGAL wants this
+* glm - Vector Library
+* nlohmann::json - Config Load/Save
