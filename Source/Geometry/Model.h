@@ -15,9 +15,11 @@ public:
   Model();
 
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);
-  std::vector<std::vector<glm::dvec3>> slice(Model&);
+  std::vector<std::vector<glm::dvec3>> slice(Model&) const;
   void repair();
+
   void generateUVMap(const std::string& name);
+  double getUVLayerWidth();
 
   glm::dvec3 getMin() const;
   glm::dvec3 getMax() const;

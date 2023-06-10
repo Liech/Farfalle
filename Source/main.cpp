@@ -16,7 +16,7 @@
 #include "Geometry/Geometry.h"
 #include "Geometry/Model.h"
 #include "Geometry/SliceMesh.h"
-
+#include "Geometry/Mesh2D.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -42,9 +42,8 @@ std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const Slic
   return std::make_shared<SliceMesh>(input, planeFun, config);
 }
 
-
-
 int main() {
+  Mesh2D m({});
   Printer  printer;
   Geometry geometry;
   
@@ -59,8 +58,9 @@ int main() {
 
   SliceConfig config;
   model->getBoundingSphere(config.CenterPoint, config.BoundingSphereRadius);
-  config.BoundingSphereRadius *= 2;
-  config.Precision = 10;
+  config.BoundingSphereRadius *= 1.3;
+  config.Precision = 20;
+  config.layerWidth = geometry.layerWidth;
 
   std::vector<std::shared_ptr<SliceMesh>> tools;
 
@@ -81,7 +81,7 @@ int main() {
     std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
     //double h = (i + 1) * geometry.layerHeight;
     //streaks.push_back(model->slice(glm::dvec3(0, 0, 1), h); //Planar slicing
-    streaks[i] = model->slice(*tools[i]->getModel());
+    tools[i]->cut();
   }
 
   std::string data = "";
@@ -97,7 +97,7 @@ int main() {
   for (int i = 0; i < layerAmount; i++) {
     std::cout << "GCode: " << i << "/" << layerAmount << std::endl;
 
-    for (auto streak : streaks[i]) {
+    for (auto streak : tools[i]->getStreaks()) {
       GCode::LinearPrint line(printer);
       line.controlPoints = streak;
       line.feedrate = 0.03;

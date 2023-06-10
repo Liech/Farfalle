@@ -46,6 +46,8 @@ set(Geometry_Files
     "Source/Geometry/CGALDefs.h"
     "Source/Geometry/Model.h"
     "Source/Geometry/Model.cpp"
+    "Source/Geometry/Mesh2D.h"
+    "Source/Geometry/Mesh2D.cpp"
     "Source/Geometry/Geometry.h"
     "Source/Geometry/Geometry.cpp"
     "Source/Geometry/Primitives.h"

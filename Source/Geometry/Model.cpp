@@ -70,7 +70,7 @@ std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, doub
   return result;
 }
 
-std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) {
+std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
   Polylines polylines;
 
   Surface_mesh meshCopy = p->mesh;
@@ -180,4 +180,10 @@ void Model::generateUVMap(const std::string& name) {
   halfedge_descriptor bhd = CGAL::Polygon_mesh_processing::longest_border(p->mesh).first;
   UV_pmap uv_map = p->mesh.add_property_map<vertex_descriptor, Point_2>(name).first;
   SMP::parameterize(p->mesh, bhd, uv_map);
+}
+
+double Model::getUVLayerWidth() {
+  assert(hasUVMap);
+
+  return 0.4;
 }
