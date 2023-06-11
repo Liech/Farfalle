@@ -1,5 +1,6 @@
 #include "SliceMesh.h"
 
+#include "Mesh2D.h"
 
 SliceMesh::SliceMesh(const Model& target, std::function<double(const glm::dvec3& point)> fun, const SliceConfig& conf) :
   targetModel(target) {
@@ -21,6 +22,8 @@ std::vector<std::vector<glm::dvec3>> SliceMesh::getStreaks() {
 
 void SliceMesh::cut() {
   streaks = targetModel.slice(*sliceMesh);
+
+  uvMesh = std::make_shared<Mesh2D>(streaks);
 }
 
 std::vector<std::vector<glm::dvec3>> SliceMesh::getFill(std::vector<glm::dvec3> input) {

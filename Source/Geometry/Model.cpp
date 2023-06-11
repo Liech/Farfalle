@@ -75,15 +75,16 @@ std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
 
   Surface_mesh meshCopy = p->mesh;
   //split
-  CGAL::Polygon_mesh_processing::split(meshCopy, sliceTool.p->mesh);
+  CGAL::Polygon_mesh_processing::clip(meshCopy, sliceTool.p->mesh);
   //visit all holes https://doc.cgal.org/latest/Polygon_mesh_processing/Polygon_mesh_processing_2hole_filling_visitor_example_8cpp-example.html
   std::vector<halfedge_descriptor> border_cycles;
   // collect one halfedge per boundary cycle
   PMP::extract_boundary_cycles(meshCopy, std::back_inserter(border_cycles));
-
+  
   std::vector<std::vector<glm::dvec3>> result;
   for (halfedge_descriptor h : border_cycles)
   {
+    
     std::vector<glm::dvec3> sub;
     halfedge_descriptor current = meshCopy.next(h);
     auto startIndex = meshCopy.source(h);
@@ -98,7 +99,6 @@ std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
     }
     result.push_back(sub);
   }
-
   return result;
 }
 
