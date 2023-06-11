@@ -61,7 +61,6 @@ void Mesh2D::save(const std::string& filename) {
   size_t counter = 0;
   for (CDT::Finite_faces_iterator it = p->cdt.finite_faces_begin();
     it != p->cdt.finite_faces_end(); ++it)
-  //for (auto it = p->cdt.faces_begin(); it != p->cdt.faces_end(); ++it) 
   {
     
     if (it->is_in_domain())
@@ -95,10 +94,10 @@ void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
       p->cdt.insert_constraint(previous, current);
       if (i == 1) {
         glm::dvec2 dir = glm::normalize(vCurrent - vPrevious);
-        glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 0.05;
+        glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 1e-5;
         glm::dvec2 seedPos = (vCurrent + vPrevious) / 2.0 + outerDir;
         list_of_seeds.push_back(Point(seedPos.x, seedPos.y));
-        //p->cdt.insert(Point(seedPos.x, seedPos.y));
+        p->cdt.insert(Point(seedPos.x, seedPos.y));
       }
       previous = current;
       vPrevious = vCurrent;
@@ -106,7 +105,6 @@ void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
     p->cdt.insert_constraint(previous, first);
   }
 
-  CGAL::refine_Delaunay_mesh_2(p->cdt, list_of_seeds.begin(), list_of_seeds.end(),
-    Criteria());
+  CGAL::refine_Delaunay_mesh_2(p->cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
   save("slice.stl");
 }
