@@ -184,9 +184,8 @@ void Model::generateUVMap() {
   halfedge_descriptor bhd = CGAL::Polygon_mesh_processing::longest_border(p->mesh).first;
   p->uvmap = p->mesh.add_property_map<vertex_descriptor, Point_2>("h:UV").first;
 
-  SMP::ARAP_parameterizer_3<Surface_mesh> parameterizer(0.5);
 
-  SMP::parameterize(p->mesh, parameterizer, bhd, p->uvmap);
+  SMP::parameterize(p->mesh, bhd, p->uvmap);
 }
 
 double Model::getUVLayerWidth() {

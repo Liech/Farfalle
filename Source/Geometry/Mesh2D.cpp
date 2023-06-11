@@ -94,7 +94,7 @@ void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
       p->cdt.insert_constraint(previous, current);
       if (i == 1) {
         glm::dvec2 dir = glm::normalize(vCurrent - vPrevious);
-        glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 1e-5;
+        glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 1e-8;
         glm::dvec2 seedPos = (vCurrent + vPrevious) / 2.0 + outerDir;
         list_of_seeds.push_back(Point(seedPos.x, seedPos.y));
         p->cdt.insert(Point(seedPos.x, seedPos.y));

@@ -8,8 +8,8 @@ SliceMesh::SliceMesh(const Model& target, std::function<double(const glm::dvec3&
   config          = conf;
 
   sliceMesh = std::make_shared<Model>(fun, conf.CenterPoint, conf.BoundingSphereRadius, conf.Precision);
-  sliceMesh->generateUVMap();
   sliceMesh->save("debug.stl");
+  sliceMesh->generateUVMap();
 }
 
 std::shared_ptr<Model> SliceMesh::getModel() {
@@ -22,6 +22,7 @@ std::vector<std::vector<glm::dvec3>> SliceMesh::getStreaks() {
 
 void SliceMesh::cut() {
   streaks = targetModel.slice(*sliceMesh);
+  sliceMesh->save("slice1.stl");
   uvMesh = std::make_shared<Mesh2D>(*sliceMesh,streaks);
   uvMesh->save("slice.stl");
 }
