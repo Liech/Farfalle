@@ -43,7 +43,6 @@ std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const Slic
 }
 
 int main() {
-  Mesh2D m({});
   Printer  printer;
   Geometry geometry;
   
@@ -52,10 +51,10 @@ int main() {
 
   std::cout << "Loading Mesh: " << filename << std::endl;
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  model->repair();
+  //model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-
+  layerAmount = 1;
   SliceConfig config;
   model->getBoundingSphere(config.CenterPoint, config.BoundingSphereRadius);
   config.BoundingSphereRadius *= 1.3;

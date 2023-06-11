@@ -4,6 +4,7 @@
 
 #include "Primitives.h"
 #include "CGALDefs.h"
+#include "Mesh2D.h"
 
 class ModelPimpl {
 public:
@@ -173,12 +174,13 @@ void Model::save(const std::string& filename) {
   CGAL::IO::write_STL(filename, p->mesh);
 }
 
-void Model::generateUVMap(const std::string& name) {
+void Model::generateUVMap() {
   //https://doc.cgal.org/latest/Surface_mesh_parameterization/index.html
-  assert(!hasUVMap);
+  if (hasUVMap)
+    return;
   hasUVMap = true;
   halfedge_descriptor bhd = CGAL::Polygon_mesh_processing::longest_border(p->mesh).first;
-  UV_pmap uv_map = p->mesh.add_property_map<vertex_descriptor, Point_2>(name).first;
+  UV_pmap uv_map = p->mesh.add_property_map<vertex_descriptor, Point_2>("h:UV").first;
   SMP::parameterize(p->mesh, bhd, uv_map);
 }
 
@@ -186,4 +188,20 @@ double Model::getUVLayerWidth() {
   assert(hasUVMap);
 
   return 0.4;
+}
+
+glm::dvec2 Model::getUV(const glm::dvec3& pos) {
+  assert(hasUVMap);
+  auto onSurface = CGAL::Polygon_mesh_processing::locate(Point(pos.x, pos.y, pos.z), p->mesh);
+  UV_pmap map = p->mesh.property_map< vertex_descriptor, Point_2>("h:UV").first;
+  auto h1 = p->mesh.halfedge(onSurface.first);
+  auto h2 = p->mesh.next(h1);
+  auto h3 = p->mesh.next(h2);
+  Point_2 uv1 = map[p->mesh.source(h1)]; //here it fails
+  Point_2 uv2 = map[p->mesh.source(h2)]; //here it fails
+  Point_2 uv3 = map[p->mesh.source(h3)]; //here it fails
+  glm::dvec2 guv1 = glm::dvec2(uv1.x(), uv1.y());
+  glm::dvec2 guv2 = glm::dvec2(uv2.x(), uv2.y());
+  glm::dvec2 guv3 = glm::dvec2(uv3.x(), uv3.y());
+  return guv1 * onSurface.second[0] + guv2 * onSurface.second[1] + guv3 * onSurface.second[2];
 }

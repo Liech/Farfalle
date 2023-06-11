@@ -6,12 +6,16 @@
 #include <glm/glm.hpp>
 
 class Mesh2DPIMPL;
+class Model;
 
 class Mesh2D {
 public:
   Mesh2D(const std::vector<std::vector<glm::dvec3>>&);
+  Mesh2D(Model&, const std::vector<std::vector<glm::dvec3>>& loops);
 
   void save(const std::string& filename);
 private:
+  void init(const std::vector<std::vector<glm::dvec2>>&);
+
   std::shared_ptr<Mesh2DPIMPL> p;
 };

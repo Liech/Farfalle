@@ -28,6 +28,8 @@
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
 #include <CGAL/Surface_mesh_parameterization/parameterize.h>
 #include <CGAL/Polygon_mesh_processing/measure.h>
+#include <CGAL/Polygon_mesh_processing/locate.h>
+
 
 namespace PMP = CGAL::Polygon_mesh_processing;
 
