@@ -10,6 +10,7 @@ class ModelPimpl {
 public:
   Surface_mesh mesh;
   AABB_tree    tree;
+  UV_pmap      uvmap;
 };
 
 Model::Model() {
@@ -75,8 +76,9 @@ std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
   Polylines polylines;
 
   Surface_mesh meshCopy = p->mesh;
+  Surface_mesh sliceToolMeshCopy = sliceTool.p->mesh;
   //split
-  CGAL::Polygon_mesh_processing::clip(meshCopy, sliceTool.p->mesh);
+  CGAL::Polygon_mesh_processing::clip(meshCopy, sliceToolMeshCopy);
   //visit all holes https://doc.cgal.org/latest/Polygon_mesh_processing/Polygon_mesh_processing_2hole_filling_visitor_example_8cpp-example.html
   std::vector<halfedge_descriptor> border_cycles;
   // collect one halfedge per boundary cycle
@@ -180,8 +182,11 @@ void Model::generateUVMap() {
     return;
   hasUVMap = true;
   halfedge_descriptor bhd = CGAL::Polygon_mesh_processing::longest_border(p->mesh).first;
-  UV_pmap uv_map = p->mesh.add_property_map<vertex_descriptor, Point_2>("h:UV").first;
-  SMP::parameterize(p->mesh, bhd, uv_map);
+  p->uvmap = p->mesh.add_property_map<vertex_descriptor, Point_2>("h:UV").first;
+
+  SMP::ARAP_parameterizer_3<Surface_mesh> parameterizer(0.5);
+
+  SMP::parameterize(p->mesh, parameterizer, bhd, p->uvmap);
 }
 
 double Model::getUVLayerWidth() {
@@ -192,14 +197,18 @@ double Model::getUVLayerWidth() {
 
 glm::dvec2 Model::getUV(const glm::dvec3& pos) {
   assert(hasUVMap);
+
   auto onSurface = CGAL::Polygon_mesh_processing::locate(Point(pos.x, pos.y, pos.z), p->mesh);
-  UV_pmap map = p->mesh.property_map< vertex_descriptor, Point_2>("h:UV").first;
   auto h1 = p->mesh.halfedge(onSurface.first);
   auto h2 = p->mesh.next(h1);
   auto h3 = p->mesh.next(h2);
-  Point_2 uv1 = map[p->mesh.source(h1)]; //here it fails
-  Point_2 uv2 = map[p->mesh.source(h2)]; //here it fails
-  Point_2 uv3 = map[p->mesh.source(h3)]; //here it fails
+  
+  vertex_descriptor v1 = p->mesh.source(h1);
+  vertex_descriptor v2 = p->mesh.source(h2);
+  vertex_descriptor v3 = p->mesh.source(h3); 
+  Point_2 uv1 = p->uvmap[v1];
+  Point_2 uv2 = p->uvmap[v2];
+  Point_2 uv3 = p->uvmap[v3];
   glm::dvec2 guv1 = glm::dvec2(uv1.x(), uv1.y());
   glm::dvec2 guv2 = glm::dvec2(uv2.x(), uv2.y());
   glm::dvec2 guv3 = glm::dvec2(uv3.x(), uv3.y());

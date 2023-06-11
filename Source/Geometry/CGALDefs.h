@@ -13,6 +13,7 @@
 #include <CGAL/Polygon_mesh_processing/intersection.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+#include <CGAL/Surface_mesh_parameterization/ARAP_parameterizer_3.h>
 
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/IO/Nef_polyhedron_iostream_3.h>
@@ -29,7 +30,7 @@
 #include <CGAL/Surface_mesh_parameterization/parameterize.h>
 #include <CGAL/Polygon_mesh_processing/measure.h>
 #include <CGAL/Polygon_mesh_processing/locate.h>
-
+#include <CGAL/Polyhedron_3.h>
 
 namespace PMP = CGAL::Polygon_mesh_processing;
 

@@ -22,8 +22,8 @@ std::vector<std::vector<glm::dvec3>> SliceMesh::getStreaks() {
 
 void SliceMesh::cut() {
   streaks = targetModel.slice(*sliceMesh);
-
   uvMesh = std::make_shared<Mesh2D>(*sliceMesh,streaks);
+  uvMesh->save("slice.stl");
 }
 
 std::vector<std::vector<glm::dvec3>> SliceMesh::getFill(std::vector<glm::dvec3> input) {
