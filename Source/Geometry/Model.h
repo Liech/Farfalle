@@ -16,6 +16,7 @@ public:
 
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);
   std::vector<std::vector<glm::dvec3>> slice(Model&) const;
+  std::vector<glm::dvec3> projectLine(const glm::dvec3& start, const glm::dvec3& end);
   void repair();
 
   void generateUVMap();

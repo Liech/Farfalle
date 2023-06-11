@@ -32,6 +32,7 @@
 #include <CGAL/Polygon_mesh_processing/measure.h>
 #include <CGAL/Polygon_mesh_processing/locate.h>
 #include <CGAL/Polyhedron_3.h>
+#include <CGAL/Surface_mesh_shortest_path.h>
 
 namespace PMP = CGAL::Polygon_mesh_processing;
 
@@ -40,13 +41,14 @@ typedef Kernel::Point_3                                           Point;
 typedef CGAL::Surface_mesh<Point>                                 Surface_mesh;
 typedef std::vector<Kernel::Point_3>                              Polyline_type;
 typedef std::list<Polyline_type>                                  Polylines;
-typedef CGAL::AABB_halfedge_graph_segment_primitive<Surface_mesh> HGSP;
+typedef CGAL::AABB_halfedge_graph_segment_primitive<Surface_mesh> HGSP; //AABB_halfedge_graph_segment_primitive , AABB_face_graph_triangle_primitive
 typedef CGAL::AABB_traits<Kernel, HGSP>                           AABB_traits;
 typedef CGAL::AABB_tree<AABB_traits>                              AABB_tree;
 typedef CGAL::Nef_polyhedron_3<Kernel, CGAL::SNC_indexed_items>   Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel>                                Polyhedron;
 typedef boost::graph_traits<Surface_mesh>::halfedge_descriptor    halfedge_descriptor;
 typedef boost::graph_traits<Surface_mesh>::vertex_descriptor      vertex_descriptor;
+typedef boost::graph_traits<Surface_mesh>::face_descriptor        face_descriptor;
 typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
 typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
 typedef Tr::Geom_traits GT;
@@ -58,3 +60,6 @@ namespace SMP = CGAL::Surface_mesh_parameterization;
 
 typedef Kernel::Point_2 Point_2;
 typedef Surface_mesh::Property_map<vertex_descriptor, Point_2>  UV_pmap;
+
+typedef CGAL::Surface_mesh_shortest_path_traits<Kernel, Surface_mesh> Traits;
+typedef CGAL::Surface_mesh_shortest_path<Traits> Surface_mesh_shortest_path;

@@ -58,7 +58,7 @@ Model::Model(std::function<double(const glm::dvec3&)>& func, const glm::dvec3& b
 
 std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, double z) {
   Polylines polylines;
-
+  
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer_aabb(p->mesh, p->tree);
   slicer_aabb(Kernel::Plane_3(normal[0], normal[1], normal[2], -z), std::back_inserter(polylines));
   
@@ -212,4 +212,25 @@ glm::dvec2 Model::getUV(const glm::dvec3& pos) {
   glm::dvec2 guv2 = glm::dvec2(uv2.x(), uv2.y());
   glm::dvec2 guv3 = glm::dvec2(uv3.x(), uv3.y());
   return guv1 * onSurface.second[0] + guv2 * onSurface.second[1] + guv3 * onSurface.second[2];
+}
+
+std::vector<glm::dvec3> Model::projectLine(const glm::dvec3& start, const glm::dvec3& end) {
+  //https://doc.cgal.org/latest/Surface_mesh_shortest_path/index.html
+  Surface_mesh_shortest_path shortest_paths(p->mesh);
+
+  const Point source_pt(start[0],start[1],start[2]);
+  const Point target_pt(end[0], end[1], end[2]);
+  auto source_loc = shortest_paths.locate<CGAL::AABB_traits<Kernel, CGAL::AABB_face_graph_triangle_primitive<Surface_mesh>>>(source_pt); // this builds an AABB tree of the mesh
+  auto target_loc = shortest_paths.locate<CGAL::AABB_traits<Kernel, CGAL::AABB_face_graph_triangle_primitive<Surface_mesh>>>(target_pt); // this builds an AABB tree of the mesh
+  // Add the source point
+  shortest_paths.add_source_point(source_loc.first, source_loc.second);
+
+  std::vector<Point> points;
+  shortest_paths.shortest_path_points_to_source_points(target_loc.first, target_loc.second,
+    std::back_inserter(points));
+
+  std::vector<glm::dvec3> result;
+  for (auto x : points)
+    result.push_back(glm::dvec3(x.x(), x.y(), x.z()));
+  return result;
 }
