@@ -67,20 +67,29 @@ int main() {
     std::cout << "Generate Tools: " << i << "/" << layerAmount << std::endl;
     double h = (i + 1) * geometry.layerHeight;
     tools.push_back(genSliceTool(*model, h, config));
+    tools.back()->sliceNumber = i;
   }
 
   std::vector<std::vector<std::vector<glm::dvec3>>> streaks;
   streaks.resize(layerAmount);
   int progress = 0;
-  //#pragma omp parallel for
+#pragma omp parallel for
   for (int i = 0; i < layerAmount; i++) {
-    //#pragma omp atomic
+    #pragma omp atomic
     progress++;
 
     std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
     //double h = (i + 1) * geometry.layerHeight;
     //streaks.push_back(model->slice(glm::dvec3(0, 0, 1), h); //Planar slicing
-    tools[i]->cut();
+    tools[i]->cut();    
+  }
+
+  progress = 0;
+  for (int i = 0; i < layerAmount-1; i++) {
+    #pragma omp atomic
+    progress++;
+    std::cout << "Projection: " << progress << "/" << layerAmount << std::endl;
+    tools[i]->identifyAreas(tools[i + 1]->getStreaks());
   }
 
   std::string data = "";
