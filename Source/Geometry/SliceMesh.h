@@ -23,6 +23,9 @@ public:
   std::vector<std::vector<glm::dvec3>> getFill();
   int sliceNumber = 0;
 private:
+  void projectNextToUV(const std::vector<std::vector<glm::dvec3>>& next);
+  void cutUVs();
+
   std::vector<std::vector<glm::dvec3>> getFill(std::vector<glm::dvec3>);
 
   SliceConfig             config;

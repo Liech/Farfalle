@@ -220,8 +220,8 @@ std::vector<glm::dvec3> Model::projectLine(const glm::dvec3& start, const glm::d
 
   const Point source_pt(start[0],start[1],start[2]);
   const Point target_pt(end[0], end[1], end[2]);
-  auto source_loc = shortest_paths.locate<CGAL::AABB_traits<Kernel, CGAL::AABB_face_graph_triangle_primitive<Surface_mesh>>>(source_pt); // this builds an AABB tree of the mesh
-  auto target_loc = shortest_paths.locate<CGAL::AABB_traits<Kernel, CGAL::AABB_face_graph_triangle_primitive<Surface_mesh>>>(target_pt); // this builds an AABB tree of the mesh
+  auto target_loc = shortest_paths.locate<CGAL::AABB_traits<Kernel, CGAL::AABB_face_graph_triangle_primitive<Surface_mesh>>>(source_pt); // this builds an AABB tree of the mesh
+  auto source_loc = shortest_paths.locate<CGAL::AABB_traits<Kernel, CGAL::AABB_face_graph_triangle_primitive<Surface_mesh>>>(target_pt); // this builds an AABB tree of the mesh
   // Add the source point
   shortest_paths.add_source_point(source_loc.first, source_loc.second);
 

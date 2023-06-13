@@ -44,6 +44,11 @@ std::vector<std::vector<glm::dvec3>> SliceMesh::getFill() {
 }
 
 void SliceMesh::identifyAreas(const std::vector<std::vector<glm::dvec3>>& next) {
+  projectNextToUV(next);
+  cutUVs();
+}
+
+void SliceMesh::projectNextToUV(const std::vector<std::vector<glm::dvec3>>& next){
   std::vector<std::vector<glm::dvec3>> projected;
   for (size_t i = 0; i < next.size(); i++) {
     std::vector<glm::dvec3> sub;
@@ -51,11 +56,20 @@ void SliceMesh::identifyAreas(const std::vector<std::vector<glm::dvec3>>& next) 
       auto& a = next[i][j - 1];
       auto& b = next[i][j];
       auto streak = sliceMesh->projectLine(a, b);
-      sub.insert(sub.end(), streak.begin(), streak.end());
+      sub.insert(sub.end(), streak.begin(), streak.end()-1);
     }
+
+    //wrap around the loop
+    auto streak = sliceMesh->projectLine(next[i].back(), next[i].back());
+    sub.insert(sub.end(), streak.begin(), streak.end() - 1);
+
     projected.push_back(sub);
   }
 
   projectedUVMesh = std::make_shared<Mesh2D>(*sliceMesh, projected);
   projectedUVMesh->save("dbg/projected" + std::to_string(sliceNumber) + ".stl");
+}
+
+void SliceMesh::cutUVs() {
+
 }

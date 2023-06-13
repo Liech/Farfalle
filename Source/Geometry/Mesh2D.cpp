@@ -8,6 +8,8 @@
 #include <CGAL/Delaunay_mesh_face_base_2.h>
 #include <CGAL/Delaunay_mesh_size_criteria_2.h>
 #include <CGAL/IO/STL.h>
+#include <CGAL/Boolean_set_operations_2.h>
+#include <CGAL/Polygon_with_holes_2.h>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Triangulation_vertex_base_2<K> Vb;
@@ -19,9 +21,14 @@ typedef CDT::Vertex_handle Vertex_handle;
 typedef CDT::Point Point;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
 typedef Kernel::Point_3                                           Point3;
+typedef Kernel::Point_2                                   Point_2;
+typedef CGAL::Polygon_with_holes_2<Kernel>                Polygon_with_holes_2;
+typedef std::list<Polygon_with_holes_2>                   Pwh_list_2;
+typedef CGAL::Polygon_2<K>                                Polygon_2;
 
 class Mesh2DPIMPL {
 public:
+  std::shared_ptr<Polygon_with_holes_2> getPoly();
 
   CDT cdt;
 };
@@ -107,4 +114,16 @@ void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
 
   CGAL::refine_Delaunay_mesh_2(p->cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
   save("slice.stl");
+}
+
+std::shared_ptr<Polygon_with_holes_2> Mesh2DPIMPL::getPoly() {
+  std::shared_ptr<Polygon_with_holes_2> result = std::make_shared<Polygon_with_holes_2>();
+
+  std::vector<Polygon_2> holes;
+
+  return result;
+}
+
+std::shared_ptr<Mesh2D> Mesh2D::difference(const Mesh2D& other) {
+  return nullptr;
 }
