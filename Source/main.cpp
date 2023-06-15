@@ -52,10 +52,10 @@ int main() {
 
   std::cout << "Loading Mesh: " << filename << std::endl;
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  //model->repair();
+  model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  layerAmount = 5;
+  //layerAmount = 15;
 
   SliceConfig config;
   model->getBoundingSphere(config.CenterPoint, config.BoundingSphereRadius);
@@ -87,7 +87,7 @@ int main() {
   }
 
   progress = 0;
-//#pragma omp parallel for
+#pragma omp parallel for
   for (int i = 0; i < layerAmount-1; i++) {
     tools[i]->identifyAreas(tools[i + 1]->getStreaks());
 
