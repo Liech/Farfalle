@@ -96,8 +96,17 @@ void Mesh2D::saveCDT(const std::string& filename) {
 
 void Mesh2D::savePoly(const std::string& filename) {
   std::vector<std::vector<glm::dvec2>> streaks;
+  streaks.reserve(p->poly.size());
 
+  for (auto& x : p->poly) {    
+    std::vector<glm::dvec2> streak;
 
+    for (auto y : x->outer_boundary())
+      streak.push_back(glm::dvec2(y.x(), y.y()));
+    streak.push_back(glm::dvec2(x->outer_boundary()[0].x(), x->outer_boundary()[1].y()));
+
+    streaks.push_back(streak);
+  }
 
   Tools::glm2svg().save(filename, streaks);
 }
