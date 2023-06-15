@@ -1,6 +1,7 @@
 #include "Mesh2D.h"
 
 #include "Model.h"
+#include "Tools/glm2svg.h"
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
@@ -66,7 +67,7 @@ Mesh2D::Mesh2D(Model& modl, const std::vector<std::vector<glm::dvec3>>& loops) {
   init(loops2d);
 }
 
-void Mesh2D::save(const std::string& filename) {
+void Mesh2D::saveCDT(const std::string& filename) {
   std::vector<Point3> points;
   std::vector<std::vector<std::size_t> > polygons;
   points.reserve(p->cdt.number_of_faces() * 3);
@@ -90,6 +91,15 @@ void Mesh2D::save(const std::string& filename) {
   }
 
   CGAL::IO::write_STL(filename, points, polygons);
+}
+
+
+void Mesh2D::savePoly(const std::string& filename) {
+  std::vector<std::vector<glm::dvec2>> streaks;
+
+
+
+  Tools::glm2svg().save(filename, streaks);
 }
 
 void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
@@ -127,7 +137,7 @@ void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
   }
 
   CGAL::refine_Delaunay_mesh_2(p->cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
-  save("slice.stl");
+  saveCDT("slice.stl");
 }
 
 std::shared_ptr<Mesh2D> Mesh2D::difference(const Mesh2D& other) {

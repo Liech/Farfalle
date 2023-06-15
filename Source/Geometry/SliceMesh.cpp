@@ -23,7 +23,7 @@ std::vector<std::vector<glm::dvec3>> SliceMesh::getStreaks() {
 void SliceMesh::cut() {
   streaks = targetModel.slice(*sliceMesh);
   uvMesh = std::make_shared<Mesh2D>(*sliceMesh,streaks);
-  uvMesh->save("dbg/slice" +std::to_string(sliceNumber) + ".stl");
+  uvMesh->saveCDT("dbg/slice" +std::to_string(sliceNumber) + ".stl");
 }
 
 std::vector<std::vector<glm::dvec3>> SliceMesh::getFill(std::vector<glm::dvec3> input) {
@@ -67,7 +67,7 @@ void SliceMesh::projectNextToUV(const std::vector<std::vector<glm::dvec3>>& next
   }
 
   projectedUVMesh = std::make_shared<Mesh2D>(*sliceMesh, projected);
-  projectedUVMesh->save("dbg/projected" + std::to_string(sliceNumber) + ".stl");
+  projectedUVMesh->saveCDT("dbg/projected" + std::to_string(sliceNumber) + ".stl");
 }
 
 void SliceMesh::cutUVs() {
