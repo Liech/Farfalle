@@ -46,13 +46,13 @@ int main() {
   Printer  printer;
   Geometry geometry;
   
-  std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  //std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\OneDrive\\3dDruck\\Modelle\\Gifts\\Flexi-Rex-improved.stl";
 
   std::cout << "Loading Mesh: " << filename << std::endl;
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  model->repair();
+  //model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
   layerAmount = 5;
