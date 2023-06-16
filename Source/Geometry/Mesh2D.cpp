@@ -4,26 +4,17 @@
 #include "Tools/glm2svg.h"
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Delaunay_mesher_2.h>
-#include <CGAL/Delaunay_mesh_face_base_2.h>
-#include <CGAL/Delaunay_mesh_size_criteria_2.h>
 #include <CGAL/IO/STL.h>
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/Boolean_set_operations_2.h>
+#include <CGAL/Polygon_2.h>
+
 
 
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Triangulation_vertex_base_2<K> Vb;
-typedef CGAL::Delaunay_mesh_face_base_2<K> Fb;
-typedef CGAL::Triangulation_data_structure_2<Vb, Fb> Tds;
-typedef CGAL::Constrained_Delaunay_triangulation_2<K, Tds> CDT;
-typedef CGAL::Delaunay_mesh_size_criteria_2<CDT> Criteria;
-typedef CDT::Vertex_handle Vertex_handle;
-typedef CDT::Point Point;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
 typedef Kernel::Point_3                                           Point3;
 typedef Kernel::Point_2                                   Point_2;
@@ -33,9 +24,9 @@ typedef CGAL::Polygon_2<K>                                Polygon_2;
 
 class Mesh2DPIMPL {
 public:
-  std::vector<std::shared_ptr<Polygon_with_holes_2>> loopSoup2Polys(const std::vector<std::vector<Point_2>>&);
+  std::vector<Polygon_with_holes_2> loopSoup2Polys(const std::vector<std::vector<Point_2>>&);
 
- std::vector<std::shared_ptr<Polygon_with_holes_2>> poly;
+ std::vector<Polygon_with_holes_2> poly;
 };
 
 Mesh2D::Mesh2D(const std::vector<std::vector<glm::dvec3>>& loops) {
@@ -65,6 +56,9 @@ Mesh2D::Mesh2D(Model& modl, const std::vector<std::vector<glm::dvec3>>& loops) {
   init(loops2d);
 }
 
+Mesh2D::Mesh2D() {
+  init({});
+}
 
 void Mesh2D::savePoly(const std::string& filename) {
   std::vector<std::vector<glm::dvec2>> streaks;
@@ -75,17 +69,17 @@ void Mesh2D::savePoly(const std::string& filename) {
     std::vector<glm::dvec2> streak;
 
     colors.push_back("black");
-    for (auto y : x->outer_boundary())
+    for (auto y : x.outer_boundary())
       streak.push_back(glm::dvec2(y.x(), y.y()));
-    streak.push_back(glm::dvec2(x->outer_boundary()[0].x(), x->outer_boundary()[1].y()));
+    streak.push_back(glm::dvec2(x.outer_boundary()[0].x(), x.outer_boundary()[0].y()));
     streaks.push_back(streak);
 
-    for (auto& x : x->holes()) {
+    for (auto& x : x.holes()) {
       colors.push_back("red");
       std::vector<glm::dvec2> streak;
       for (auto y : x)
         streak.push_back(glm::dvec2(y.x(), y.y()));
-      streak.push_back(glm::dvec2(x[0].x(), x[1].y()));
+      streak.push_back(glm::dvec2(x[0].x(), x[0].y()));
       streaks.push_back(streak);
     }
 
@@ -97,7 +91,7 @@ void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
   p = std::make_shared<Mesh2DPIMPL>();
   //https://doc.cgal.org/latest/Mesh_2/index.html
 
-  std::vector<std::vector<Point>> converted;
+  std::vector<std::vector<Point_2>> converted;
   converted.resize(loops.size());
   for (size_t i = 0; i < loops.size(); i++)
     for (size_t j = 0; j < loops[i].size(); j++)
@@ -106,10 +100,41 @@ void Mesh2D::init(const std::vector<std::vector<glm::dvec2>>& loops) {
 }
 
 std::shared_ptr<Mesh2D> Mesh2D::difference(const Mesh2D& other) {
-  return nullptr;
+  std::shared_ptr<Mesh2D> result = std::make_shared<Mesh2D>();
+  
+  for (size_t a = 0; a < p->poly.size(); a++) {
+    //https://doc.cgal.org/latest/Boolean_set_operations_2/index.html
+/*
+[ ] Closed Boundary - both the outer boundary and the holes must be closed polygons as defined above.
+[ ] Simplicity - the outer boundary must be a relatively simple polygon (as defined above). Every hole must be a simple polygon.
+[x] Orientation - The polygon with holes must have an outer boundary with counter clockwise orientation. Every hole's outer boundary should have clockwise orientation.
+[ ] The holes and the outer boundary must be pairwise disjoint,except maybe on vertices.
+[ ] All holes are contained in the outer boundary - holes must be contained inside the outer boundary and must be disjoint from it (except on vertices).
+[ ] Pairwise disjoint holes (on interior) - the polygon's holes must be pairwise disjoint, except for intersection on a joint vertex/vertices.
+*/
+    bool isOK = true;
+    isOK &= p->poly[a].outer_boundary().is_counterclockwise_oriented();
+    for (auto& x : p->poly[a].holes()) 
+      isOK &= x.is_clockwise_oriented();
+
+    for (size_t b = 0; b < other.p->poly.size(); b++) {
+
+      isOK &= other.p->poly[b].outer_boundary().is_counterclockwise_oriented();
+      for (auto& x : other.p->poly[b].holes())
+        isOK &= x.is_clockwise_oriented();
+
+      if (!isOK) {
+        std::cout << "Not ok :(" << std::endl;
+        throw std::runtime_error(":(");
+      }
+      CGAL::difference(p->poly[a], other.p->poly[b], std::back_inserter(result->p->poly));
+    }
+  }
+
+  return result;
 }
 
-std::vector<std::shared_ptr<Polygon_with_holes_2>> Mesh2DPIMPL::loopSoup2Polys(const std::vector<std::vector<Point_2>>& loops) {
+std::vector<Polygon_with_holes_2> Mesh2DPIMPL::loopSoup2Polys(const std::vector<std::vector<Point_2>>& loops) {
   
   //identify loops by loop orientation
   std::vector<int> holeIndex;
@@ -161,10 +186,9 @@ std::vector<std::shared_ptr<Polygon_with_holes_2>> Mesh2DPIMPL::loopSoup2Polys(c
   }
 
   //build result
-  std::vector<std::shared_ptr<Polygon_with_holes_2>> result;
+  std::vector<Polygon_with_holes_2> result;
   for (size_t i = 0; i < outer.size(); i++) {
-    std::shared_ptr<Polygon_with_holes_2> sub = std::make_shared<Polygon_with_holes_2>(outer[i],assignedHoles[i].begin(),assignedHoles[i].end());
-    result.push_back(sub);
+    result.push_back(Polygon_with_holes_2(outer[i], assignedHoles[i].begin(), assignedHoles[i].end()));
   }
 
   return result;

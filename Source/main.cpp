@@ -55,7 +55,8 @@ int main() {
   model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  //layerAmount = 15;
+  //layerAmount = 20;
+  int startLayer = 0;
 
   SliceConfig config;
   model->getBoundingSphere(config.CenterPoint, config.BoundingSphereRadius);
@@ -67,7 +68,7 @@ int main() {
 
   for (int i = 0; i < layerAmount; i++) {
     std::cout << "Generate Tools: " << i << "/" << layerAmount << std::endl;
-    double h = (i + 1) * geometry.layerHeight;
+    double h = (i + startLayer + 1) * geometry.layerHeight;
     tools.push_back(genSliceTool(*model, h, config));
     tools.back()->sliceNumber = i;
   }
@@ -87,7 +88,7 @@ int main() {
   }
 
   progress = 0;
-#pragma omp parallel for
+//#pragma omp parallel for
   for (int i = 0; i < layerAmount-1; i++) {
     tools[i]->identifyAreas(tools[i + 1]->getStreaks());
 
@@ -106,7 +107,7 @@ int main() {
   data += "\n; ;;;;;;;;;;;;;;;;;;\n";
   
 
-  for (int i = 0; i < layerAmount; i++) {
+  for (int i = startLayer; i < layerAmount; i++) {
     std::cout << "GCode: " << i << "/" << layerAmount << std::endl;
 
     for (auto streak : tools[i]->getStreaks()) {

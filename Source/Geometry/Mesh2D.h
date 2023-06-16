@@ -12,6 +12,7 @@ class Mesh2D {
 public:
   Mesh2D(const std::vector<std::vector<glm::dvec3>>&);
   Mesh2D(Model&, const std::vector<std::vector<glm::dvec3>>& loops);
+  Mesh2D();
 
   std::shared_ptr<Mesh2D> difference(const Mesh2D& other);
   void savePoly(const std::string& filename);

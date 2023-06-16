@@ -46,6 +46,9 @@ std::vector<std::vector<glm::dvec3>> SliceMesh::getFill() {
 void SliceMesh::identifyAreas(const std::vector<std::vector<glm::dvec3>>& next) {
   projectNextToUV(next);
   cutUVs();
+
+  auto top = projectedUVMesh->difference(*uvMesh);
+  top->savePoly("dbg/Ceiling" + std::to_string(sliceNumber) + ".svg");
 }
 
 void SliceMesh::projectNextToUV(const std::vector<std::vector<glm::dvec3>>& next){

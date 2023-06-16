@@ -17,7 +17,7 @@ namespace Tools {
         glm::dvec2 start = streak[i]*100.0;
 
         glm::dvec2 end = streak[i - 1] * 100.0;
-        data += "<line x1 = \"" + std::to_string(start.x) + "\" y1 = \"" + std::to_string(start.y) + "\" x2 = \"" + std::to_string(end.x) + "\" y2 = \"" + std::to_string(end.y) + "\" stroke = \"" + color + "\" stroke-width=\"0.1\"  />\n";//
+        data += "<line x1 = \"" + std::to_string(start.x) + "\" y1 = \"" + std::to_string(start.y) + "\" x2 = \"" + std::to_string(end.x) + "\" y2 = \"" + std::to_string(end.y) + "\" stroke = \"" + color + "\" stroke-width=\"0.01\"  />\n";//
       }
     }
 
