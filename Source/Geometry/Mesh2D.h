@@ -15,7 +15,7 @@ public:
   Mesh2D();
 
   std::shared_ptr<Mesh2D> difference(const Mesh2D& other);
-  void savePoly(const std::string& filename);
+  void savePoly(const std::string& filename) const;
 private:
   void init(const std::vector<std::vector<glm::dvec2>>&);
 

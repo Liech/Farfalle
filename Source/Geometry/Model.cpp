@@ -78,6 +78,8 @@ std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
   Surface_mesh meshCopy = p->mesh;
   Surface_mesh sliceToolMeshCopy = sliceTool.p->mesh;
   //split
+  //sliceTool.save("dbg/sliceTool.stl");
+  //save("dbg/sliceMe.stl");
   CGAL::Polygon_mesh_processing::clip(meshCopy, sliceToolMeshCopy);
   //visit all holes https://doc.cgal.org/latest/Polygon_mesh_processing/Polygon_mesh_processing_2hole_filling_visitor_example_8cpp-example.html
   std::vector<halfedge_descriptor> border_cycles;
@@ -172,7 +174,7 @@ void Model::init() {
   p->tree = AABB_tree(edges(p->mesh).first, edges(p->mesh).second, p->mesh);
 }
 
-void Model::save(const std::string& filename) {
+void Model::save(const std::string& filename) const {
   CGAL::IO::write_STL(filename, p->mesh);
 }
 
@@ -228,6 +230,8 @@ std::vector<glm::dvec3> Model::projectLine(const glm::dvec3& start, const glm::d
   std::vector<Point> points;
   shortest_paths.shortest_path_points_to_source_points(target_loc.first, target_loc.second,
     std::back_inserter(points));
+  if (points.size() > 200)
+    throw std::runtime_error(":O");
 
   std::vector<glm::dvec3> result;
   for (auto x : points)

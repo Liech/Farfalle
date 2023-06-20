@@ -27,7 +27,7 @@ public:
   glm::dvec3 getMax() const;
   void getBoundingSphere(glm::dvec3& center, double& radius) const;
 
-  void save(const std::string& filename);
+  void save(const std::string& filename) const;
 
 private:
   void init();

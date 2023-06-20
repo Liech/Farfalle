@@ -55,7 +55,7 @@ int main() {
   model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  //layerAmount = 20;
+  //layerAmount = 50;
   int startLayer = 0;
 
   SliceConfig config;
@@ -88,7 +88,7 @@ int main() {
   }
 
   progress = 0;
-//#pragma omp parallel for
+#pragma omp parallel for
   for (int i = 0; i < layerAmount-1; i++) {
     tools[i]->identifyAreas(tools[i + 1]->getStreaks());
 
