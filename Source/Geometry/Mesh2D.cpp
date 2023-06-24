@@ -50,7 +50,7 @@ Mesh2D::Mesh2D(Model& modl, const std::vector<std::vector<glm::dvec3>>& loops) {
   for (size_t i = 0; i < loops.size(); i++) {
     loops2d[i].resize(loops[i].size());
     for (size_t j = 0; j < loops[i].size(); j++) {
-      loops2d[i][j] = modl.getUV(loops[i][j]);
+      loops2d[i][j] = modl.world2UV(loops[i][j]);
     }
   }
 
@@ -107,38 +107,9 @@ std::shared_ptr<Mesh2D> Mesh2D::difference(const Mesh2D& other) {
 
   for (size_t a = 0; a < p->poly.size(); a++) {
     //https://doc.cgal.org/latest/Boolean_set_operations_2/index.html
-/*
-[.] Closed Boundary - both the outer boundary and the holes must be closed polygons as defined above.
-[ ] Simplicity - the outer boundary must be a relatively simple polygon (as defined above). Every hole must be a simple polygon.
-[x] Orientation - The polygon with holes must have an outer boundary with counter clockwise orientation. Every hole's outer boundary should have clockwise orientation.
-[ ] The holes and the outer boundary must be pairwise disjoint,except maybe on vertices.
-[ ] All holes are contained in the outer boundary - holes must be contained inside the outer boundary and must be disjoint from it (except on vertices).
-[ ] Pairwise disjoint holes (on interior) - the polygon's holes must be pairwise disjoint, except for intersection on a joint vertex/vertices.
-*/
-    //if (!p->poly[a].outer_boundary().is_counterclockwise_oriented())
-    //  throw std::runtime_error(":(");
-    //if (!p->poly[a].outer_boundary().is_simple())
-    //  throw std::runtime_error(":(");
-    //for (auto& x : p->poly[a].holes()) {
-    //  if(!x.is_clockwise_oriented()) 
-    //    throw std::runtime_error(":(");
-    //  if (!x.is_simple())
-    //    throw std::runtime_error(":(");
-    //}
+
 
     for (size_t b = 0; b < other.p->poly.size(); b++) {
-
-      //if (!other.p->poly[b].outer_boundary().is_counterclockwise_oriented())
-      //  throw std::runtime_error(":(");
-      //if (!other.p->poly[b].outer_boundary().is_simple())
-      //  throw std::runtime_error(":(");
-      //for (auto& x : other.p->poly[b].holes()) {
-      //  if (!x.is_clockwise_oriented())
-      //    throw std::runtime_error(":(");
-      //  if (!x.is_simple())
-      //    throw std::runtime_error(":(");
-      //}
-
       CGAL::difference(p->poly[a], other.p->poly[b], std::back_inserter(result->p->poly));
     }
   }

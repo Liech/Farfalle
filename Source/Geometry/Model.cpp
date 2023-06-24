@@ -6,6 +6,9 @@
 #include "CGALDefs.h"
 #include "Mesh2D.h"
 
+typedef PMP::Face_location<Surface_mesh, FT> Face_location;
+namespace CP = CGAL::parameters;
+
 class ModelPimpl {
 public:
   Surface_mesh mesh;
@@ -196,7 +199,7 @@ double Model::getUVLayerWidth() {
   return 0.4;
 }
 
-glm::dvec2 Model::getUV(const glm::dvec3& pos) {
+glm::dvec2 Model::world2UV(const glm::dvec3& pos) {
   assert(hasUVMap);
 
   auto onSurface = CGAL::Polygon_mesh_processing::locate(Point(pos.x, pos.y, pos.z), p->mesh);
@@ -237,4 +240,24 @@ std::vector<glm::dvec3> Model::projectLine(const glm::dvec3& start, const glm::d
   for (auto x : points)
     result.push_back(glm::dvec3(x.x(), x.y(), x.z()));
   return result;
+}
+
+glm::dvec3 Model::uv2World(const glm::dvec2& uv){
+  //https://doc.cgal.org/latest/Polygon_mesh_processing/Polygon_mesh_processing_2locate_example_8cpp-example.html
+  //Section: "Locate the same 3D point but in a 2D context"
+  Face_location onSurface = PMP::locate(Point_2(uv.x,uv.y), p->mesh, CP::vertex_point_map(p->uvmap));
+  auto h1 = p->mesh.halfedge(onSurface.first);
+  auto h2 = p->mesh.next(h1);
+  auto h3 = p->mesh.next(h2);
+
+  vertex_descriptor v1 = p->mesh.source(h1);
+  vertex_descriptor v2 = p->mesh.source(h2);
+  vertex_descriptor v3 = p->mesh.source(h3);
+  Point p1 = p->mesh.point(v1);
+  Point p2 = p->mesh.point(v2);
+  Point p3 = p->mesh.point(v3);
+  glm::dvec3 g1 = glm::dvec3(p1.x(), p1.y(), p1.z());
+  glm::dvec3 g2 = glm::dvec3(p2.x(), p2.y(), p2.z());
+  glm::dvec3 g3 = glm::dvec3(p3.x(), p3.y(), p3.z());
+  return g1 * onSurface.second[0] + g2 * onSurface.second[1] + g3 * onSurface.second[2];
 }

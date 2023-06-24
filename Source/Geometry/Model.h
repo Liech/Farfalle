@@ -21,7 +21,8 @@ public:
 
   void generateUVMap();
   double getUVLayerWidth();
-  glm::dvec2 getUV(const glm::dvec3& pos);
+  glm::dvec2 world2UV(const glm::dvec3& pos);
+  glm::dvec3 uv2World(const glm::dvec2& uv);
 
   glm::dvec3 getMin() const;
   glm::dvec3 getMax() const;
