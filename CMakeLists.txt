@@ -23,6 +23,8 @@ set(Tools_Files
     "Source/Tools/String2File.h"
     "Source/Tools/String2File.cpp"
     "Source/Tools/MovementType.h"
+    "Source/Tools/glm2svg.h"
+    "Source/Tools/glm2svg.cpp"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 

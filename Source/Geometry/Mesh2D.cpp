@@ -11,6 +11,7 @@
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polyline_simplification_2/simplify.h>
+#include <CGAL/Polygon_vertical_decomposition_2.h>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
@@ -192,5 +193,21 @@ std::vector<Polygon_with_holes_2> Mesh2DPIMPL::loopSoup2Polys(const std::vector<
     result.push_back(Polygon_with_holes_2(outer[i], assignedHoles[i].begin(), assignedHoles[i].end()));
   }
 
+  return result;
+}
+
+std::vector<std::shared_ptr<Mesh2D>> Mesh2D::decompose() {
+  //https://doc.cgal.org/latest/Minkowski_sum_2/classPolygonWithHolesConvexDecomposition__2.html
+  //PolygonWithHolesConvexDecomposition_2
+  std::vector<Polygon_2> polys;
+  std::vector<Polygon_2> empty;
+  auto decomposer =CGAL::Polygon_vertical_decomposition_2< Kernel>();
+  for (auto x : p->poly)
+    decomposer(x, std::back_inserter(polys));
+  std::vector<std::shared_ptr<Mesh2D>> result;
+  for (auto x : polys) {
+    std::shared_ptr<Mesh2D> m = std::make_shared<Mesh2D>();
+    m->p->poly = { Polygon_with_holes_2(x, empty.begin(),empty.end()) };
+  }
   return result;
 }
