@@ -199,7 +199,7 @@ double Model::getUVLayerWidth() {
   return 0.4;
 }
 
-glm::dvec2 Model::world2UV(const glm::dvec3& pos) {
+glm::dvec2 Model::world2UV(const glm::dvec3& pos) const {
   assert(hasUVMap);
 
   auto onSurface = CGAL::Polygon_mesh_processing::locate(Point(pos.x, pos.y, pos.z), p->mesh);
@@ -242,7 +242,7 @@ std::vector<glm::dvec3> Model::projectLine(const glm::dvec3& start, const glm::d
   return result;
 }
 
-glm::dvec3 Model::uv2World(const glm::dvec2& uv){
+glm::dvec3 Model::uv2World(const glm::dvec2& uv) const {
   //https://doc.cgal.org/latest/Polygon_mesh_processing/Polygon_mesh_processing_2locate_example_8cpp-example.html
   //Section: "Locate the same 3D point but in a 2D context"
   Face_location onSurface = PMP::locate(Point_2(uv.x,uv.y), p->mesh, CP::vertex_point_map(p->uvmap));
@@ -279,6 +279,6 @@ std::array<size_t, 3> Model::getFaceIndices(size_t number) const {
 }
 
 glm::dvec3 Model::getVertexPosition(size_t idx) const {
-  Point p = p->mesh.point(CGAL::SM_Vertex_index(idx));
-  return glm::dvec3(p.x(), p.y(), p.z());
+  Point r = p->mesh.point(CGAL::SM_Vertex_index(idx));
+  return glm::dvec3(r.x(), r.y(), r.z());
 }

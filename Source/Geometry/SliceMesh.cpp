@@ -1,6 +1,7 @@
 #include "SliceMesh.h"
 
 #include "Mesh2D.h"
+#include "LineSoup.h"
 
 SliceMesh::SliceMesh(const Model& target, std::function<double(const glm::dvec3& point)> fun, const SliceConfig& conf) :
   targetModel(target) {
@@ -10,6 +11,7 @@ SliceMesh::SliceMesh(const Model& target, std::function<double(const glm::dvec3&
   sliceMesh = std::make_shared<Model>(fun, conf.CenterPoint, conf.BoundingSphereRadius, conf.Precision);
   sliceMesh->save("debug.stl");
   sliceMesh->generateUVMap();
+  lineSoup = std::make_shared<LineSoup>(*sliceMesh);
 }
 
 std::shared_ptr<Model> SliceMesh::getModel() {

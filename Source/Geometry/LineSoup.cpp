@@ -1,19 +1,35 @@
 #include "LineSoup.h"
 
+#include <set>
+
 #include "Model.h"
 
-LineSoup::LineSoup(const Model& model) {
+LineSoup::LineSoup(const Model& model) : target(model){
   size_t faces = model.getNumberFaces();
+  soup.reserve(faces * 3 / 2);
+  std::set<std::pair<size_t, size_t>> used;
 
   for (size_t faceID = 0; faceID < faces; faceID++) {
-    auto vertexIndices = model.getFaceIndices(faceID);
-    glm::dvec3 p1 = model.getVertexPosition(vertexIndices[0]);
-    glm::dvec3 p2 = model.getVertexPosition(vertexIndices[1]);
-    glm::dvec3 p3 = model.getVertexPosition(vertexIndices[2]);
+    auto vi = model.getFaceIndices(faceID); //vertex indices
+    glm::dvec3 p1 = model.getVertexPosition(vi[0]);
+    glm::dvec3 p2 = model.getVertexPosition(vi[1]);
+    glm::dvec3 p3 = model.getVertexPosition(vi[2]);
 
-    soup.push_back(std::make_pair(p1, p2));
-    soup.push_back(std::make_pair(p2, p3));
-    soup.push_back(std::make_pair(p3, p1));
+    if (!used.contains(std::make_pair(vi[0], vi[1]))) {
+      addToSoup(std::make_pair(p1, p2));
+      used.insert(std::make_pair(vi[0], vi[1]));
+      used.insert(std::make_pair(vi[1], vi[0]));
+    }
+    if (!used.contains(std::make_pair(vi[0], vi[1]))) {
+      addToSoup(std::make_pair(p2, p3));
+      used.insert(std::make_pair(vi[1], vi[2]));
+      used.insert(std::make_pair(vi[2], vi[1]));
+    }
+    if (!used.contains(std::make_pair(vi[0], vi[1]))) {
+      addToSoup(std::make_pair(p3, p1));
+      used.insert(std::make_pair(vi[2], vi[0]));
+      used.insert(std::make_pair(vi[0], vi[2]));
+    }
   }
 
 }
@@ -26,3 +42,9 @@ void LineSoup::save(const std::string& filename) {
 
 }
 
+
+void LineSoup::addToSoup(const std::pair<glm::dvec3, glm::dvec3>& pair) {
+  glm::dvec2 a = target.world2UV(pair.first);
+  glm::dvec2 b = target.world2UV(pair.second);
+  soup.push_back(std::make_pair(a, b));
+}

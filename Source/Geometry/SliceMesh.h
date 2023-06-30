@@ -10,6 +10,7 @@
 
 class Model;
 class Mesh2D;
+class LineSoup;
 
 class SliceMesh {
 public:
@@ -28,11 +29,12 @@ private:
 
   std::vector<std::vector<glm::dvec3>> getFill(std::vector<glm::dvec3>);
 
-  SliceConfig             config;
-  const Model&            targetModel;
-  std::shared_ptr<Model>  sliceMesh;
-  std::shared_ptr<Mesh2D> uvMesh;
-  std::shared_ptr<Mesh2D> projectedUVMesh;
+  SliceConfig               config;
+  const Model&              targetModel;
+  std::shared_ptr<Model>    sliceMesh;
+  std::shared_ptr<Mesh2D>   uvMesh;
+  std::shared_ptr<Mesh2D>   projectedUVMesh;
+  std::shared_ptr<LineSoup> lineSoup;
   std::vector<std::vector<glm::dvec3>> streaks;
   std::function<double(const glm::dvec3& point)> densityFunction;
 };
