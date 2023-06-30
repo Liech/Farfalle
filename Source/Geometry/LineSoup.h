@@ -6,6 +6,8 @@
 
 #include  "Model.h"
 
+class LineSoup_PIMPL;
+
 class LineSoup {
 public:
   LineSoup(const Model&);
@@ -17,5 +19,5 @@ private:
   void addToSoup(const std::pair<glm::dvec3, glm::dvec3>&);
 
   const Model& target;
-  std::vector<std::pair<glm::dvec2, glm::dvec2>> soup;
+  std::shared_ptr<LineSoup_PIMPL> p;
 };

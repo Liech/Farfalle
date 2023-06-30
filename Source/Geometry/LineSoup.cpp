@@ -1,12 +1,27 @@
 #include "LineSoup.h"
 
 #include <set>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Arr_segment_traits_2.h>
+#include <CGAL/Surface_sweep_2_algorithms.h>
 
 #include "Model.h"
 
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel       Kernel;
+typedef Kernel::Point_2                                         Point_2;
+typedef CGAL::Arr_segment_traits_2<Kernel>                      Traits_2;
+typedef Traits_2::Curve_2                                       Segment_2;
+
+class LineSoup_PIMPL {
+public:
+  std::vector< Segment_2> soup;
+};
+
 LineSoup::LineSoup(const Model& model) : target(model){
+  p = std::make_shared<LineSoup_PIMPL>();
   size_t faces = model.getNumberFaces();
-  soup.reserve(faces * 3 / 2);
+  p->soup.reserve(faces * 3 / 2);
   std::set<std::pair<size_t, size_t>> used;
 
   for (size_t faceID = 0; faceID < faces; faceID++) {
@@ -32,6 +47,7 @@ LineSoup::LineSoup(const Model& model) : target(model){
     }
   }
 
+  
 }
 
 std::vector<std::pair<glm::dvec2, glm::dvec2>> LineSoup::segmentCut(glm::dvec2 start, glm::dvec2 end) {
@@ -46,5 +62,5 @@ void LineSoup::save(const std::string& filename) {
 void LineSoup::addToSoup(const std::pair<glm::dvec3, glm::dvec3>& pair) {
   glm::dvec2 a = target.world2UV(pair.first);
   glm::dvec2 b = target.world2UV(pair.second);
-  soup.push_back(std::make_pair(a, b));
+  p->soup.push_back(Segment_2(Point_2(a.x,a.y), Point_2(b.x,b.y)));
 }
