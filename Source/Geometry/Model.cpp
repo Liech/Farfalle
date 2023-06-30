@@ -261,3 +261,24 @@ glm::dvec3 Model::uv2World(const glm::dvec2& uv){
   glm::dvec3 g3 = glm::dvec3(p3.x(), p3.y(), p3.z());
   return g1 * onSurface.second[0] + g2 * onSurface.second[1] + g3 * onSurface.second[2];
 }
+
+size_t Model::getNumberFaces() const {
+  return p->mesh.number_of_faces();
+}
+
+std::array<size_t, 3> Model::getFaceIndices(size_t number) const {
+  Surface_mesh::Face_iterator iterator = p->mesh.faces_begin() + number;
+  auto descriptor = *iterator;
+  auto h1 = p->mesh.halfedge(descriptor);
+  auto h2 = p->mesh.next(h1);
+  auto h3 = p->mesh.next(h2);
+  vertex_descriptor v1 = p->mesh.source(h1);
+  vertex_descriptor v2 = p->mesh.source(h2);
+  vertex_descriptor v3 = p->mesh.source(h3);
+  return { v1.idx(),v2.idx(),v3.idx() };
+}
+
+glm::dvec3 Model::getVertexPosition(size_t idx) const {
+  Point p = p->mesh.point(CGAL::SM_Vertex_index(idx));
+  return glm::dvec3(p.x(), p.y(), p.z());
+}

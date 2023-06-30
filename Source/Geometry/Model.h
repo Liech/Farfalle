@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <array>
 #include <string>
 #include <functional>
 #include <glm/glm.hpp>
@@ -29,6 +30,11 @@ public:
   void getBoundingSphere(glm::dvec3& center, double& radius) const;
 
   void save(const std::string& filename) const;
+
+
+  size_t                getNumberFaces() const;
+  std::array<size_t, 3> getFaceIndices(size_t number) const;
+  glm::dvec3            getVertexPosition(size_t idx) const;
 
 private:
   void init();
