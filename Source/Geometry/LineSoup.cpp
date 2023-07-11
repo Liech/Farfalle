@@ -4,6 +4,11 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Surface_sweep_2_algorithms.h>
+#include <CGAL/intersections.h>
+#include <CGAL/Segment_2.h>
+#include <CGAL/number_utils.h>
+
+
 
 #include "Model.h"
 
@@ -11,7 +16,7 @@
 typedef CGAL::Exact_predicates_exact_constructions_kernel       Kernel;
 typedef Kernel::Point_2                                         Point_2;
 typedef CGAL::Arr_segment_traits_2<Kernel>                      Traits_2;
-typedef Traits_2::Curve_2                                       Segment_2;
+typedef Kernel::Segment_2                                       Segment_2;
 
 class LineSoup_PIMPL {
 public:
@@ -46,12 +51,39 @@ LineSoup::LineSoup(const Model& model) : target(model){
       used.insert(std::make_pair(vi[0], vi[2]));
     }
   }
-
-  
 }
 
 std::vector<std::pair<glm::dvec2, glm::dvec2>> LineSoup::segmentCut(glm::dvec2 start, glm::dvec2 end) {
-  return {};
+  Segment_2 seg(Point_2(start.x, start.y), Point_2(end.x, end.y));
+  std::vector<glm::dvec2> intersections;
+
+  //todo: use something else than poor mans brute force
+  for (auto& line : p->soup) {
+    auto x = CGAL::intersection(line, seg);
+    if (x.has_value() && x.value().type() == typeid(Point_2)) {
+      Point_2 p = boost::get<Point_2>(x.value());
+      double xcoord = CGAL::to_double(p.x());
+      double ycoord = CGAL::to_double(p.y());
+      glm::dvec2 intersectionPoint = glm::dvec2(xcoord, ycoord);
+      intersections.push_back(intersectionPoint);
+    }
+  }
+
+  //sort by distance
+  std::sort(intersections.begin(), intersections.end(), [start](const glm::dvec2& a, const glm::dvec2& b) -> bool
+    {
+      return glm::distance(start, a) > glm::distance(start, b);
+    });
+
+  std::vector<std::pair<glm::dvec2, glm::dvec2>> result;
+
+  result.push_back(std::make_pair(start, intersections[0]));
+
+  for (int i = 1; i < intersections.size(); i++) {
+    result.push_back(std::make_pair(intersections[i - 1], intersections[i]));
+  }
+
+  return result;
 }
 
 void LineSoup::save(const std::string& filename) {
