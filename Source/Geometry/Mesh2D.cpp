@@ -211,3 +211,9 @@ std::vector<std::shared_ptr<Mesh2D>> Mesh2D::decompose() {
   }
   return result;
 }
+
+std::vector<std::vector<glm::dvec2>> Mesh2D::fill(double distance, glm::dvec3 direction) {
+  std::vector<std::vector<glm::dvec2>> result;
+
+  return result;
+}

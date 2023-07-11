@@ -55,7 +55,7 @@ int main() {
   model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  //layerAmount = 50;
+  layerAmount = 5;
   int startLayer = 0;
 
   SliceConfig config;

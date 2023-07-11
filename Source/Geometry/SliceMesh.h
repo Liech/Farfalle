@@ -33,6 +33,8 @@ private:
   const Model&              targetModel;
   std::shared_ptr<Model>    sliceMesh;
   std::shared_ptr<Mesh2D>   uvMesh;
+  std::shared_ptr<Mesh2D>   topMesh;
+  std::shared_ptr<Mesh2D>   insideMesh;
   std::shared_ptr<Mesh2D>   projectedUVMesh;
   std::shared_ptr<LineSoup> lineSoup;
   std::vector<std::vector<glm::dvec3>> streaks;
