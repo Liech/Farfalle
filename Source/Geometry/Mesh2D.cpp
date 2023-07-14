@@ -12,10 +12,13 @@
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polyline_simplification_2/simplify.h>
 #include <CGAL/Polygon_vertical_decomposition_2.h>
+#include <CGAL/Ray_2.h>
+
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
 typedef Kernel::Point_3                                           Point3;
+typedef Kernel::Ray_2                                           Ray2;
 typedef Kernel::Point_2                                   Point_2;
 typedef CGAL::Polygon_with_holes_2<Kernel>                Polygon_with_holes_2;
 typedef std::list<Polygon_with_holes_2>                   Pwh_list_2;
@@ -212,8 +215,51 @@ std::vector<std::shared_ptr<Mesh2D>> Mesh2D::decompose() {
   return result;
 }
 
-std::vector<std::vector<glm::dvec2>> Mesh2D::fill(double distance, glm::dvec3 direction) {
+std::vector<std::vector<glm::dvec2>> Mesh2D::fill(double distance) {
   std::vector<std::vector<glm::dvec2>> result;
 
+  for (int i = 0; i < p->poly.size();i++) {
+    if (p->poly[i].has_holes())
+      throw std::runtime_error("Does not work with holes!");
+    auto sub = fill(distance, i);
+    if (sub.size() != 0)
+      result.push_back(sub);
+  }
   return result;
+}
+
+std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
+  std::vector<glm::dvec2> result;
+  auto get = [this, index](int vertex) {
+    auto result = p->poly[index].outer_boundary().vertex(vertex);
+    return glm::dvec2(result.x(), result.y());
+    };
+
+  //find leftmost
+  glm::dvec2 start = get(0);
+  int numberVertex = p->poly[index].outer_boundary().vertices().size();
+  for (int i = 0; i < numberVertex; i++) {
+    auto glmVertex = get(i);
+    if (start.x > glmVertex.x)
+      start = glmVertex;
+  }
+
+  glm::dvec2 currentPosition = start;
+  currentPosition.x += distance;
+  auto bound = p->poly[index].outer_boundary();
+  typedef CGAL::Polygon_set_2<Kernel, std::vector<Kernel::Point_2>> Polygon_set_2;
+  Polygon_set_2 ps;
+  ps.insert(bound);
+  auto raycast = [ps, bound](const glm::dvec2& start, const glm::dvec2& dir) {
+    //todo: this poly line intersection the cgal way does looks really weird. I guess im missing something here, theres got to be a better way
+    Ray2 l = Ray2(Point_2(start.x, start.y), Point_2(start.x + dir.x, start.y + dir.y));
+    std::vector<Polygon_with_holes_2> list;
+    std::vector<Point_2> rawRayPoly{};
+    Polygon_2 ray(rawRayPoly.begin(), rawRayPoly.end());
+    auto sub = CGAL::intersection(ray, bound, std::back_inserter(list));
+
+    };
+
+
+  return {};
 }
