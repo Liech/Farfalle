@@ -18,8 +18,9 @@
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
 typedef Kernel::Point_3                                           Point3;
-typedef Kernel::Ray_2                                           Ray2;
-typedef Kernel::Point_2                                   Point_2;
+typedef Kernel::Ray_2                                             Ray2;
+typedef Kernel::Point_2                                           Point_2;
+typedef Kernel::Segment_2                                         Segment2;
 typedef CGAL::Polygon_with_holes_2<Kernel>                Polygon_with_holes_2;
 typedef std::list<Polygon_with_holes_2>                   Pwh_list_2;
 typedef CGAL::Polygon_2<K>                                Polygon_2;
@@ -228,6 +229,39 @@ std::vector<std::vector<glm::dvec2>> Mesh2D::fill(double distance) {
   return result;
 }
 
+glm::dvec2 Mesh2D::raycast(const glm::dvec2& start, const glm::dvec2& dir, int index, bool& doesIntersect) {
+  doesIntersect = true;
+  auto bound = p->poly[index].outer_boundary();
+  Ray2 l = Ray2(Point_2(start.x, start.y), Point_2(start.x + dir.x, start.y + dir.y));
+  double bestDistance = std::numeric_limits<double>::max();
+  glm::dvec2 bestIntersection;
+  glm::dvec2 bestNormal;
+  for (int i = 1; i < bound.vertices().size(); i++) {
+    Segment2 s(bound.vertex(i - 1), bound.vertex(i));
+    auto insertEntry = [&bestDistance, &bestIntersection, start,s](const Point_2& p) {
+      auto current = glm::dvec2(p.x(), p.y());
+      double currentDistance = glm::distance(current, start);
+      if (currentDistance < bestDistance) {
+        bestDistance = currentDistance;
+        bestIntersection = current;
+      }
+    };
+    auto subResult = CGAL::intersection(l, s);
+    if (subResult.has_value()) {
+      if (subResult.value().type() == typeid(Point_2)) {
+        insertEntry(boost::get<Point_2>(subResult.value()));
+      }
+      else if (subResult.value().type() == typeid(Segment2)) {
+        insertEntry(boost::get<Segment2>(subResult.value()).start());
+        insertEntry(boost::get<Segment2>(subResult.value()).end());
+      }
+    }
+  }
+  if (bestDistance == std::numeric_limits<double>::max())
+    doesIntersect = false;
+  return bestIntersection;
+}
+
 std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
   std::vector<glm::dvec2> result;
   auto get = [this, index](int vertex) {
@@ -246,20 +280,21 @@ std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
 
   glm::dvec2 currentPosition = start;
   currentPosition.x += distance;
-  auto bound = p->poly[index].outer_boundary();
-  typedef CGAL::Polygon_set_2<Kernel, std::vector<Kernel::Point_2>> Polygon_set_2;
-  Polygon_set_2 ps;
-  ps.insert(bound);
-  auto raycast = [ps, bound](const glm::dvec2& start, const glm::dvec2& dir) {
-    //todo: this poly line intersection the cgal way does looks really weird. I guess im missing something here, theres got to be a better way
-    Ray2 l = Ray2(Point_2(start.x, start.y), Point_2(start.x + dir.x, start.y + dir.y));
-    std::vector<Polygon_with_holes_2> list;
-    std::vector<Point_2> rawRayPoly{};
-    Polygon_2 ray(rawRayPoly.begin(), rawRayPoly.end());
-    auto sub = CGAL::intersection(ray, bound, std::back_inserter(list));
+  bool doesIntersect = false;
+  currentPosition = raycast(currentPosition, glm::dvec2(0, 1), index, doesIntersect);
+  result.push_back(currentPosition);
+  if (!doesIntersect) return {};
 
-    };
+  double directionSign = -1;
+  while (doesIntersect) {
+    currentPosition = raycast(currentPosition, glm::dvec2(0, directionSign), index, doesIntersect);
+    result.push_back(currentPosition);
+    currentPosition += glm::dvec2(distance, 0);
+    currentPosition = raycast(currentPosition, glm::dvec2(0, directionSign), index, doesIntersect);
+    directionSign *= -1;
+    if (doesIntersect)
+      result.push_back(currentPosition);
+  }
 
-
-  return {};
+  return result;
 }

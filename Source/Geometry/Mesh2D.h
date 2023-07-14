@@ -22,7 +22,7 @@ public:
   void savePoly(const std::string& filename) const;
 private:
   std::vector<glm::dvec2> fill(double distance, int index);
-
+  glm::dvec2 raycast(const glm::dvec2& start, const glm::dvec2& dir, int index, bool& doesIntersect);
 
   void init(const std::vector<std::vector<glm::dvec2>>&);
 
