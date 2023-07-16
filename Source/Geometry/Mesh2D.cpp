@@ -205,13 +205,14 @@ std::vector<std::shared_ptr<Mesh2D>> Mesh2D::decompose() {
   //PolygonWithHolesConvexDecomposition_2
   std::vector<Polygon_2> polys;
   std::vector<Polygon_2> empty;
-  auto decomposer =CGAL::Polygon_vertical_decomposition_2< Kernel>();
+  auto decomposer =CGAL::Polygon_vertical_decomposition_2< Kernel>(); // p2.w.holes -> p2 does not exist :(?
   for (auto x : p->poly)
     decomposer(x, std::back_inserter(polys));
   std::vector<std::shared_ptr<Mesh2D>> result;
   for (auto x : polys) {
     std::shared_ptr<Mesh2D> m = std::make_shared<Mesh2D>();
     m->p->poly = { Polygon_with_holes_2(x, empty.begin(),empty.end()) };
+    result.push_back(m);
   }
   return result;
 }

@@ -52,6 +52,11 @@ void SliceMesh::identifyAreas(const std::vector<std::vector<glm::dvec3>>& next) 
   //projectedUVMesh->savePoly("dbg/Ceiling" + std::to_string(sliceNumber) + ".svg");
   topMesh    = projectedUVMesh->difference(*uvMesh);
   insideMesh = uvMesh->difference(*projectedUVMesh);
+  topMesh->savePoly("dbg/difference" + std::to_string(sliceNumber) + ".svg");
+  auto decomp = topMesh->decompose();
+  for(int i = 0;i < decomp.size();i++){
+    decomp[i]->savePoly("dbg/decomposition" + std::to_string(sliceNumber) + "_" + std::to_string(i) + ".svg");
+  }
   //top->savePoly("dbg/difference" + std::to_string(sliceNumber) + ".svg");
 }
 
