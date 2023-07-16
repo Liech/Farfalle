@@ -5,6 +5,10 @@
 
 This is an experimental Slicer in a very rough state.
 
+# Issues
+
+CGAL does not support a conversion from Polygon_with_holes_2 to std::vector<Polygon_2> or a convex decomposition of Polygon_with_holes_2 and its a really tough problem, which is integral to this slicer :(
+
 # Current Form
 
 It can only generate vertical walls. It can does this either with planar slicing or with implicit surface slicing.
