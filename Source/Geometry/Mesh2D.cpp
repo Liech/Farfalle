@@ -13,12 +13,14 @@
 #include <CGAL/Polyline_simplification_2/simplify.h>
 #include <CGAL/Polygon_vertical_decomposition_2.h>
 #include <CGAL/Ray_2.h>
+#include <CGAL/Line_2.h>
 
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel       Kernel;
 typedef Kernel::Point_3                                           Point3;
 typedef Kernel::Ray_2                                             Ray2;
+typedef Kernel::Line_2                                            Line_2;
 typedef Kernel::Point_2                                           Point_2;
 typedef Kernel::Segment_2                                         Segment2;
 typedef CGAL::Polygon_with_holes_2<Kernel>                Polygon_with_holes_2;
@@ -227,6 +229,59 @@ std::vector<std::vector<glm::dvec2>> Mesh2D::fill(double distance) {
     if (sub.size() != 0)
       result.push_back(sub);
   }
+  return result;
+}
+
+//returns sorted collision points along the given line
+std::vector<glm::dvec2> Mesh2D::intersectLine(const glm::dvec2& start, const glm::dvec2& end) {
+  std::vector<glm::dvec2> result;
+  Line_2 l(Point_2(start.x, start.y), Point_2(end.x, end.y));
+
+  //Intersection
+  auto intersect = [&result, l](const Polygon_2& poly) {
+    auto& vertecies = poly.vertices();
+
+    auto insertEntry = [&result](const Point_2& p) {
+      glm::dvec2 glmP = glm::dvec2(p.x(), p.y());
+      result.push_back(glmP);
+      };
+
+    auto lineIntersect = [&result, insertEntry](const Line_2& line, const Segment2& seg) {
+      auto subResult = CGAL::intersection(line, seg);
+      if (subResult.has_value()) {
+        if (subResult.value().type() == typeid(Point_2)) {
+          insertEntry(boost::get<Point_2>(subResult.value()));
+        }
+        else if (subResult.value().type() == typeid(Segment2)) {
+          insertEntry(boost::get<Segment2>(subResult.value()).start());
+          insertEntry(boost::get<Segment2>(subResult.value()).end());
+        }
+      }
+    };
+
+    for (int i = 1; i < vertecies.size(); i++) {
+      Segment2 seg = Segment2(vertecies[i - 1], vertecies[i]);
+      lineIntersect(l, seg);
+    }
+    Segment2 wrapAround = Segment2(vertecies[vertecies.size() - 1], vertecies[0]);
+    lineIntersect(l, wrapAround);
+  };
+  
+  //Loop through polygons
+  for (auto& poly : p->poly) {
+    intersect(poly.outer_boundary());
+    for (auto& hole : poly.holes())
+      intersect(hole);
+  }
+
+  //sort by along line
+  glm::dvec2 sortDirection = glm::normalize(start - end);
+  std::sort(result.begin(), result.end(),   
+    [sortDirection](const glm::dvec2& a, const glm::dvec2& b) {
+      //Non Normalized Dot Product should result in an good value for directional sort
+      return glm::dot(sortDirection,a) > glm::dot(sortDirection,b); }
+  );
+
   return result;
 }
 
