@@ -1,12 +1,15 @@
 #include "InfillGenerator.h"
 
+#include <glm/gtx/closest_point.hpp>
 
-InfillGenerator::InfillGenerator(const Mesh2D& t) : target(t) {
+#include "Mesh2D.h"
+
+InfillGenerator::InfillGenerator(Mesh2D& t) : target(t) {
 
 }
 
 void InfillGenerator::setSliceDirection(const glm::dvec2& dir) {
-  sliceDirection = dir;
+  sliceDirection = glm::normalize(dir);
 }
 
 void InfillGenerator::setSliceDistance(double distance) {
@@ -30,12 +33,37 @@ std::vector<std::vector<glm::dvec2>> InfillGenerator::generateInfill() const {
 //edge case can be recognized by checking if the center of the line is inside the polygon
 std::vector<std::vector<glm::dvec2>> InfillGenerator::calculateEggSliceIntersections() const {
   std::vector<std::vector<glm::dvec2>> result;
+  glm::dvec2 sliceStart = getPolePoint(sliceDirection);
+  glm::dvec2 sliceEnd   = getPolePoint(-sliceDirection);
+  
+  sliceEnd  = getClosestPointOnInfiniteLine(sliceStart, sliceEnd, sliceEnd + sliceDirection);
+  
+  glm::dvec2 orthogonal = glm::normalize(sliceStart - sliceEnd);
+  double distance  = glm::distance(sliceStart, sliceEnd);
+  double increment = sliceDistance / distance;
+
+  for (double location = 0; location < distance; location += increment) {
+    glm::dvec2 position = sliceStart + orthogonal * location;
+
+    std::vector<glm::dvec2> intersections = target.intersectLine(position, sliceDirection);
+    result.push_back(intersections);
+  }
 
   return result;
 }
 
-//point of poly that is farthest placed into direction of "north"
-//e.g. if north is -Xaxis it would be a point with: point.x < AllOther.x 
-glm::dvec2 InfillGenerator::getPolePoint(const glm::dvec2 north) const {
-  return glm::dvec2(0, 0);
+//copied from
+//glm::closestPointOnLine(sliceStart, sliceEnd, sliceEnd + sliceDirection);
+//to function with lines instead of line segments
+glm::dvec2 InfillGenerator::getClosestPointOnInfiniteLine(const glm::dvec2 point, const glm::dvec2 a, const glm::dvec2 b){
+  double LineLength = glm::distance(a, b);
+  glm::dvec2 Vector = point - a;
+  glm::dvec2 LineDirection = (b - a) / LineLength;
+
+  // Project Vector to LineDirection to get the distance of point from a
+  double Distance = dot(Vector, LineDirection);
+
+  // /*removal here is difference to original*/if (Distance <= 0) return a;
+  // /*removal here is difference to original*/if (Distance >= LineLength) return b;
+  return a + LineDirection * Distance;
 }

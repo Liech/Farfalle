@@ -233,7 +233,7 @@ std::vector<std::vector<glm::dvec2>> Mesh2D::fill(double distance) {
 }
 
 //returns sorted collision points along the given line
-std::vector<glm::dvec2> Mesh2D::intersectLine(const glm::dvec2& start, const glm::dvec2& end) {
+std::vector<glm::dvec2> Mesh2D::intersectLine(const glm::dvec2& start, const glm::dvec2& end) const{
   std::vector<glm::dvec2> result;
   Line_2 l(Point_2(start.x, start.y), Point_2(end.x, end.y));
 
@@ -353,4 +353,28 @@ std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
   }
 
   return result;
+}
+
+//point of poly that is farthest placed into direction of "north"
+//e.g. if north is -Xaxis it would be a point with: point.x < AllOther.x 
+glm::dvec2 Mesh2D::getPolePoint(const glm::dvec2& north) const {
+  double     bestMetric = 0;
+  glm::dvec2 bestPoint = glm::dvec2(0, 0);
+
+  auto evaluate = [north](const glm::dvec2& point) {
+    glm::dvec2 projectedPoint;// = closestpointoninfiniteline
+    //project on line
+    //get signed distancce as metric
+    //compare and maybe replace best
+  };
+
+  for (auto& poly : p->poly) {
+    for(auto point : poly.outer_boundary().vertices())
+      evaluate(glm::dvec2(point.x(), point.y()));
+    for(auto hole : poly.holes())
+      for(auto point : hole.vertices())
+        evaluate(glm::dvec2(point.x(), point.y()));
+  }
+
+  return bestPoint;
 }

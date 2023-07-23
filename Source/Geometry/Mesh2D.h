@@ -21,7 +21,8 @@ public:
   std::vector<std::shared_ptr<Mesh2D>> decompose(); //poly w. holes to polys
   void savePoly(const std::string& filename) const;
 
-  std::vector<glm::dvec2> intersectLine(const glm::dvec2& start, const glm::dvec2& end);
+  std::vector<glm::dvec2> intersectLine(const glm::dvec2& start, const glm::dvec2& end) const;
+  glm::dvec2 getPolePoint(const glm::dvec2& north) const;
 private:
   std::vector<glm::dvec2> fill(double distance, int index);
   glm::dvec2 raycast(const glm::dvec2& start, const glm::dvec2& dir, int index, bool& doesIntersect);
