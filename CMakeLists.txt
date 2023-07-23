@@ -60,6 +60,8 @@ set(Geometry_Files
     "Source/Geometry/SliceConfig.cpp"
     "Source/Geometry/LineSoup.h"
     "Source/Geometry/LineSoup.cpp"
+    "Source/Geometry/InfillGenerator.h"
+    "Source/Geometry/InfillGenerator.cpp"	
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
 
