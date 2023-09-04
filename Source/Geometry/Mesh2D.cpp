@@ -401,7 +401,7 @@ std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
 //  return bestPoint;
 //}
 
-std::vector<glm::dvec2> Mesh2D::getTriangulation() {
+std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation() {
   CDT cdt;
   std::list<Point> list_of_seeds;
   for (auto& poly : p->poly) {
@@ -432,16 +432,28 @@ std::vector<glm::dvec2> Mesh2D::getTriangulation() {
     CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
   }
 
-  std::vector<glm::dvec2> result;
+  typedef CGAL::internal::CC_iterator<CGAL::Compact_container<CGAL::Triangulation_vertex_base_2<CGAL::Exact_predicates_inexact_constructions_kernel, CGAL::Triangulation_ds_vertex_base_2<Tds>>>, false> vertexPointer;
+  std::map< vertexPointer, int> indexMap;
+  
+  std::pair<std::vector<glm::dvec2>, std::vector<int>> result = std::make_pair(std::vector<glm::dvec2>{}, std::vector<int>{});
+  std::vector<glm::dvec2>& resultPoints = result.first;
+  std::vector<int>&        resultIndices = result.second;
+
+  int counter = 0;
   for (CDT::Finite_faces_iterator it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); ++it) {
     if (it->is_in_domain())
       continue;    
-    auto v0 = cdt.point(it->vertex(0));
-    auto v1 = cdt.point(it->vertex(1));
-    auto v2 = cdt.point(it->vertex(2));
-    result.push_back(glm::dvec2(v0.x(), v0.y()));
-    result.push_back(glm::dvec2(v1.x(), v1.y()));
-    result.push_back(glm::dvec2(v2.x(), v2.y()));
+       
+    for (int i = 0; i < 3; i++) {
+      vertexPointer v = it->vertex(i);
+      if (indexMap.count(v) == 0) {
+        indexMap[v] = counter;
+        auto point = cdt.point(v);
+        resultPoints.push_back(glm::dvec2(point.x(), point.y()));
+        counter++;
+      }
+      resultIndices.push_back(indexMap[v]);
+    }
   }
   return result;
 }

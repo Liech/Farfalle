@@ -36,10 +36,24 @@ Model::Model(const std::string& filename) {
   init();
 }
 
-Model::Model(const std::vector<glm::dvec3>& triangleSoup) {
+Model::Model(const std::vector<glm::dvec3>& vertecies, const std::vector<int>& indices) {
   p = std::make_shared<ModelPimpl>();
   Surface_mesh mesh;
-  throw std::runtime_error("Not implemented yet!");
+  //https://doc.cgal.org/latest/Surface_mesh/Surface_mesh_2sm_iterators_8cpp-example.html
+  std::map<int, vertex_descriptor> vertexMap;
+  int counter = 0;
+  for (auto& x : vertecies) {
+    vertex_descriptor desc = mesh.add_vertex(Point(x.x, x.y, x.z));
+    vertexMap[counter] = desc;
+    counter++;
+  }
+  for (int i = 0; i < indices.size(); i+=3) {
+    vertex_descriptor a = vertexMap[indices[i + 0]];
+    vertex_descriptor b = vertexMap[indices[i + 1]];
+    vertex_descriptor c = vertexMap[indices[i + 2]];
+    mesh.add_face(a, b, c);
+  }
+
   p->mesh = mesh;
   init();
 }

@@ -14,7 +14,7 @@ class Model {
 public:
   Model(const std::string& filename);
   Model(std::function<double(const glm::dvec3&)>&, const glm::dvec3& boundingSphereCenter, double boundingSphereRadius, double detail = 0.4);
-  Model(const std::vector<glm::dvec3>& triangleSoup);
+  Model(const std::vector<glm::dvec3>& vertecies, const std::vector<int>& indices);
   Model();
 
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);

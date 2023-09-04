@@ -24,7 +24,7 @@ public:
 
   std::vector<glm::dvec2> intersectLine(const glm::dvec2& start, const glm::dvec2& end) const;
   //glm::dvec2 getPolePoint(const glm::dvec2& north) const;
-  std::vector<glm::dvec2> getTriangulation();
+  std::pair<std::vector<glm::dvec2>,std::vector<int>> getTriangulation();
 private:
   std::vector<glm::dvec2> fill(double distance, int index);
   glm::dvec2 raycast(const glm::dvec2& start, const glm::dvec2& dir, int index, bool& doesIntersect);
