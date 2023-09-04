@@ -46,8 +46,8 @@ int main() {
   Printer  printer;
   Geometry geometry;
   
-  //std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\OneDrive\\3dDruck\\Modelle\\Gifts\\Flexi-Rex-improved.stl";
 
   std::cout << "Loading Mesh: " << filename << std::endl;
@@ -87,15 +87,15 @@ int main() {
     std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
   }
 
-  progress = 0;
-#pragma omp parallel for
-  for (int i = 0; i < layerAmount-1; i++) {
-    tools[i]->identifyAreas(tools[i + 1]->getStreaks());
-
-#pragma omp atomic
-    progress++;
-    std::cout << "Projection: " << progress << "/" << layerAmount << std::endl;
-  }
+//  progress = 0;
+//#pragma omp parallel for
+//  for (int i = 0; i < layerAmount-1; i++) {
+//    tools[i]->identifyAreas(tools[i + 1]->getStreaks());
+//
+//#pragma omp atomic
+//    progress++;
+//    std::cout << "Projection: " << progress << "/" << layerAmount << std::endl;
+//  }
 
   std::string data = "";
   data += "; Farfalle GCODE Generator\n";

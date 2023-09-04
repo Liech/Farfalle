@@ -33,21 +33,21 @@ std::vector<std::vector<glm::dvec2>> InfillGenerator::generateInfill() const {
 //edge case can be recognized by checking if the center of the line is inside the polygon
 std::vector<std::vector<glm::dvec2>> InfillGenerator::calculateEggSliceIntersections() const {
   std::vector<std::vector<glm::dvec2>> result;
-  glm::dvec2 sliceStart = getPolePoint(sliceDirection);
-  glm::dvec2 sliceEnd   = getPolePoint(-sliceDirection);
-  
-  sliceEnd  = getClosestPointOnInfiniteLine(sliceStart, sliceEnd, sliceEnd + sliceDirection);
-  
-  glm::dvec2 orthogonal = glm::normalize(sliceStart - sliceEnd);
-  double distance  = glm::distance(sliceStart, sliceEnd);
-  double increment = sliceDistance / distance;
+  //glm::dvec2 sliceStart = getPolePoint(sliceDirection);
+  //glm::dvec2 sliceEnd   = getPolePoint(-sliceDirection);
+  //
+  //sliceEnd  = getClosestPointOnInfiniteLine(sliceStart, sliceEnd, sliceEnd + sliceDirection);
+  //
+  //glm::dvec2 orthogonal = glm::normalize(sliceStart - sliceEnd);
+  //double distance  = glm::distance(sliceStart, sliceEnd);
+  //double increment = sliceDistance / distance;
 
-  for (double location = 0; location < distance; location += increment) {
-    glm::dvec2 position = sliceStart + orthogonal * location;
+  //for (double location = 0; location < distance; location += increment) {
+  //  glm::dvec2 position = sliceStart + orthogonal * location;
 
-    std::vector<glm::dvec2> intersections = target.intersectLine(position, sliceDirection);
-    result.push_back(intersections);
-  }
+  //  std::vector<glm::dvec2> intersections = target.intersectLine(position, sliceDirection);
+  //  result.push_back(intersections);
+  //}
 
   return result;
 }

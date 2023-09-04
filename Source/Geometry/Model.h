@@ -8,11 +8,13 @@
 #include <glm/glm.hpp>
 
 class ModelPimpl;
+class Mesh2D;
 
 class Model {
 public:
   Model(const std::string& filename);
   Model(std::function<double(const glm::dvec3&)>&, const glm::dvec3& boundingSphereCenter, double boundingSphereRadius, double detail = 0.4);
+  Model(const std::vector<glm::dvec3>& triangleSoup);
   Model();
 
   std::vector<std::vector<glm::dvec3>> slice(const glm::dvec3& normal, double z);
@@ -24,13 +26,14 @@ public:
   double getUVLayerWidth();
   glm::dvec2 world2UV(const glm::dvec3& pos) const;
   glm::dvec3 uv2World(const glm::dvec2& uv)  const;
+  std::vector<glm::dvec3> uv2World(const std::vector<glm::dvec2>& uv)  const;
 
   glm::dvec3 getMin() const;
   glm::dvec3 getMax() const;
   void getBoundingSphere(glm::dvec3& center, double& radius) const;
 
   void save(const std::string& filename) const;
-
+  std::unique_ptr<Model> from2D(const Mesh2D&) const;
 
   size_t                getNumberFaces() const;
   std::array<size_t, 3> getFaceIndices(size_t number) const;

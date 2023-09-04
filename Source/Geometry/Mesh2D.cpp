@@ -14,6 +14,16 @@
 #include <CGAL/Polygon_vertical_decomposition_2.h>
 #include <CGAL/Ray_2.h>
 #include <CGAL/Line_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Constrained_Delaunay_triangulation_2.h>
+#include <CGAL/Delaunay_mesher_2.h>
+#include <CGAL/Delaunay_mesh_face_base_2.h>
+#include <CGAL/Delaunay_mesh_size_criteria_2.h>
+#include <CGAL/IO/STL.h>
+#include <CGAL/Boolean_set_operations_2.h>
+#include <CGAL/Polygon_with_holes_2.h>
+#include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/Boolean_set_operations_2.h>
 
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
@@ -29,6 +39,14 @@ typedef CGAL::Polygon_2<K>                                Polygon_2;
 namespace PS = CGAL::Polyline_simplification_2;
 typedef PS::Stop_below_count_ratio_threshold Stop;
 typedef PS::Squared_distance_cost            Cost;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Triangulation_vertex_base_2<K> Vb;
+typedef CGAL::Delaunay_mesh_face_base_2<K> Fb;
+typedef CGAL::Triangulation_data_structure_2<Vb, Fb> Tds;
+typedef CGAL::Constrained_Delaunay_triangulation_2<K, Tds> CDT;
+typedef CGAL::Delaunay_mesh_size_criteria_2<CDT> Criteria;
+typedef CDT::Vertex_handle Vertex_handle;
+typedef CDT::Point Point;
 
 class Mesh2DPIMPL {
 public:
@@ -36,6 +54,10 @@ public:
 
  std::vector<Polygon_with_holes_2> poly;
 };
+
+Mesh2D::~Mesh2D() {
+
+}
 
 Mesh2D::Mesh2D(const std::vector<std::vector<glm::dvec3>>& loops) {
   std::vector<std::vector<glm::dvec2>> loops2d;
@@ -354,27 +376,72 @@ std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
 
   return result;
 }
+//
+////point of poly that is farthest placed into direction of "north"
+////e.g. if north is -Xaxis it would be a point with: point.x < AllOther.x 
+//glm::dvec2 Mesh2D::getPolePoint(const glm::dvec2& north) const {
+//  double     bestMetric = 0;
+//  glm::dvec2 bestPoint = glm::dvec2(0, 0);<
+//
+//  auto evaluate = [north](const glm::dvec2& point) {
+//    glm::dvec2 projectedPoint;// = closestpointoninfiniteline
+//    //project on line
+//    //get signed distancce as metric
+//    //compare and maybe replace best
+//  };
+//
+//  for (auto& poly : p->poly) {
+//    for(auto point : poly.outer_boundary().vertices())
+//      evaluate(glm::dvec2(point.x(), point.y()));
+//    for(auto hole : poly.holes())
+//      for(auto point : hole.vertices())
+//        evaluate(glm::dvec2(point.x(), point.y()));
+//  }
+//
+//  return bestPoint;
+//}
 
-//point of poly that is farthest placed into direction of "north"
-//e.g. if north is -Xaxis it would be a point with: point.x < AllOther.x 
-glm::dvec2 Mesh2D::getPolePoint(const glm::dvec2& north) const {
-  double     bestMetric = 0;
-  glm::dvec2 bestPoint = glm::dvec2(0, 0);
-
-  auto evaluate = [north](const glm::dvec2& point) {
-    glm::dvec2 projectedPoint;// = closestpointoninfiniteline
-    //project on line
-    //get signed distancce as metric
-    //compare and maybe replace best
-  };
-
+std::vector<glm::dvec2> Mesh2D::getTriangulation() {
+  CDT cdt;
+  std::list<Point> list_of_seeds;
   for (auto& poly : p->poly) {
-    for(auto point : poly.outer_boundary().vertices())
-      evaluate(glm::dvec2(point.x(), point.y()));
-    for(auto hole : poly.holes())
-      for(auto point : hole.vertices())
-        evaluate(glm::dvec2(point.x(), point.y()));
+    int outerSize = poly.outer_boundary().size();
+    for (int i = 0; i < outerSize; i++) {
+      int current = i;
+      int previous = i == 0 ? outerSize : i - 1;
+      Point_2 currentP = poly.outer_boundary().vertex(current);
+      Point_2 previousP= poly.outer_boundary().vertex(previous);
+      cdt.insert_constraint(previousP, currentP);
+    }
+    for (auto& hole : poly.holes()) {
+      int holeSize = hole.size();
+      for (int i = 0; i < holeSize; i++) {
+        int current = i;
+        int previous = i == 0 ? holeSize : i - 1;
+        Point_2 currentP  = hole.vertex(current);
+        Point_2 previousP = hole.vertex(previous);
+        cdt.insert_constraint(currentP, previousP);
+      }
+    }
+    glm::dvec2 first  = glm::dvec2(poly.outer_boundary().vertex(0).x(), poly.outer_boundary().vertex(0).y());
+    glm::dvec2 second = glm::dvec2(poly.outer_boundary().vertex(1).x(), poly.outer_boundary().vertex(1).y());
+    glm::dvec2 dir = glm::normalize(second - first);
+    glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 1e-8;
+    glm::dvec2 seedPos = glm::dvec2(first + second) / 2.0 + outerDir;
+    list_of_seeds.push_back(Point(seedPos.x, seedPos.y));
+    CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
   }
 
-  return bestPoint;
+  std::vector<glm::dvec2> result;
+  for (CDT::Finite_faces_iterator it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); ++it) {
+    if (it->is_in_domain())
+      continue;    
+    auto v0 = cdt.point(it->vertex(0));
+    auto v1 = cdt.point(it->vertex(1));
+    auto v2 = cdt.point(it->vertex(2));
+    result.push_back(glm::dvec2(v0.x(), v0.y()));
+    result.push_back(glm::dvec2(v1.x(), v1.y()));
+    result.push_back(glm::dvec2(v2.x(), v2.y()));
+  }
+  return result;
 }

@@ -14,6 +14,7 @@ public:
   Mesh2D(const std::vector<std::vector<glm::dvec3>>&);
   Mesh2D(Model&, const std::vector<std::vector<glm::dvec3>>& loops);
   Mesh2D();
+  virtual ~Mesh2D();
 
   std::vector<std::vector<glm::dvec2>> fill(double distance);
 
@@ -22,7 +23,8 @@ public:
   void savePoly(const std::string& filename) const;
 
   std::vector<glm::dvec2> intersectLine(const glm::dvec2& start, const glm::dvec2& end) const;
-  glm::dvec2 getPolePoint(const glm::dvec2& north) const;
+  //glm::dvec2 getPolePoint(const glm::dvec2& north) const;
+  std::vector<glm::dvec2> getTriangulation();
 private:
   std::vector<glm::dvec2> fill(double distance, int index);
   glm::dvec2 raycast(const glm::dvec2& start, const glm::dvec2& dir, int index, bool& doesIntersect);

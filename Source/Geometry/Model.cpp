@@ -5,6 +5,7 @@
 #include "Primitives.h"
 #include "CGALDefs.h"
 #include "Mesh2D.h"
+#include <CGAL/IO/polygon_soup_io.h>
 
 typedef PMP::Face_location<Surface_mesh, FT> Face_location;
 namespace CP = CGAL::parameters;
@@ -31,6 +32,14 @@ Model::Model(const std::string& filename) {
     throw std::runtime_error("Invalid Input");
     return;
   }
+  p->mesh = mesh;
+  init();
+}
+
+Model::Model(const std::vector<glm::dvec3>& triangleSoup) {
+  p = std::make_shared<ModelPimpl>();
+  Surface_mesh mesh;
+  throw std::runtime_error("Not implemented yet!");
   p->mesh = mesh;
   init();
 }
@@ -262,6 +271,15 @@ glm::dvec3 Model::uv2World(const glm::dvec2& uv) const {
   return g1 * onSurface.second[0] + g2 * onSurface.second[1] + g3 * onSurface.second[2];
 }
 
+std::vector<glm::dvec3> Model::uv2World(const std::vector<glm::dvec2>& uv)  const{
+  std::vector<glm::dvec3> result;
+  result.reserve(uv.size());
+  for (const auto& x : uv) {
+    result.push_back(uv2World(x));
+  }
+  return result;
+}
+
 size_t Model::getNumberFaces() const {
   return p->mesh.number_of_faces();
 }
@@ -281,4 +299,24 @@ std::array<size_t, 3> Model::getFaceIndices(size_t number) const {
 glm::dvec3 Model::getVertexPosition(size_t idx) const {
   Point r = p->mesh.point(CGAL::SM_Vertex_index(idx));
   return glm::dvec3(r.x(), r.y(), r.z());
+}
+
+std::unique_ptr<Model> Model::from2D(const Mesh2D& mesh2d) const {
+  std::unique_ptr<Model> result = std::make_unique<Model>();
+  auto& mesh = result->p->mesh;
+  std::vector<Point> points;
+  std::vector<std::array<size_t, 3>> faces;
+  std::vector<CGAL::SM_Vertex_index> indices;
+  indices.reserve(points.size());
+
+  
+
+  for (size_t i = 0; i < points.size(); i++) {    
+    indices.push_back(mesh.add_vertex(points[i]));
+  }
+  for (size_t i = 0; i < faces.size(); i++) {
+    auto& face = faces[i];
+    mesh.add_face(indices[face[0]], indices[face[1]], indices[face[2]]);
+  }
+  return std::move(result);
 }
