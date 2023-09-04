@@ -1,5 +1,7 @@
 #include "Mesh2D.h"
 
+#include <set>
+
 #include "Model.h"
 #include "Tools/glm2svg.h"
 
@@ -198,7 +200,7 @@ std::vector<Polygon_with_holes_2> Mesh2DPIMPL::loopSoup2Polys(const std::vector<
       auto& p = outer[poly];
       bool inside = CGAL::oriented_side(hole[0], p);
       for(auto& x: hole) 
-        inside &= CGAL::oriented_side(x, p);
+        inside = inside && CGAL::oriented_side(x, p);
 
       bool areaBetter = bestArea > area[bestPoly];
       if (inside && areaBetter) {
@@ -401,36 +403,57 @@ std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
 //  return bestPoint;
 //}
 
-std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation() {
+std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Model* representaion3D) {
   CDT cdt;
   std::list<Point> list_of_seeds;
+  std::set<std::array<double,2>> allPoints;
   for (auto& poly : p->poly) {
     int outerSize = poly.outer_boundary().size();
     for (int i = 0; i < outerSize; i++) {
       int current = i;
-      int previous = i == 0 ? outerSize : i - 1;
+      int previous = (i == 0) ? (outerSize-1) : (i - 1);
       Point_2 currentP = poly.outer_boundary().vertex(current);
       Point_2 previousP= poly.outer_boundary().vertex(previous);
       cdt.insert_constraint(previousP, currentP);
+      allPoints.insert(std::array<double, 2>{currentP.x(), currentP.y()});
+      allPoints.insert(std::array<double, 2>{previousP.x(), previousP.y()});
     }
     for (auto& hole : poly.holes()) {
       int holeSize = hole.size();
       for (int i = 0; i < holeSize; i++) {
         int current = i;
-        int previous = i == 0 ? holeSize : i - 1;
+        int previous = (i == 0) ? (holeSize - 1) : (i - 1);
         Point_2 currentP  = hole.vertex(current);
         Point_2 previousP = hole.vertex(previous);
         cdt.insert_constraint(currentP, previousP);
+        allPoints.insert(std::array<double, 2>{currentP.x(), currentP.y()});
+        allPoints.insert(std::array<double, 2>{previousP.x(), previousP.y()});
       }
     }
+
     glm::dvec2 first  = glm::dvec2(poly.outer_boundary().vertex(0).x(), poly.outer_boundary().vertex(0).y());
     glm::dvec2 second = glm::dvec2(poly.outer_boundary().vertex(1).x(), poly.outer_boundary().vertex(1).y());
     glm::dvec2 dir = glm::normalize(second - first);
     glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 1e-8;
     glm::dvec2 seedPos = glm::dvec2(first + second) / 2.0 + outerDir;
     list_of_seeds.push_back(Point(seedPos.x, seedPos.y));
-    CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
   }
+
+  if (representaion3D != nullptr) {
+    size_t amountFaces = representaion3D->getNumberFaces();
+    for (size_t face = 0; face < amountFaces; face++) {
+      for (auto index : representaion3D->getFaceIndices(face)) {
+        auto pos = representaion3D->getVertexPosition(index);
+        auto arrayPos = std::array<double, 2>{pos.x, pos.y};
+        if (allPoints.count(arrayPos) == 0) {
+          allPoints.insert(arrayPos);
+          cdt.construct_point(Point_2(pos.x, pos.y));
+        }
+      }
+    }
+  }
+
+  CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
 
   typedef CGAL::internal::CC_iterator<CGAL::Compact_container<CGAL::Triangulation_vertex_base_2<CGAL::Exact_predicates_inexact_constructions_kernel, CGAL::Triangulation_ds_vertex_base_2<Tds>>>, false> vertexPointer;
   std::map< vertexPointer, int> indexMap;

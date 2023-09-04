@@ -25,6 +25,12 @@ std::vector<std::vector<glm::dvec3>> SliceMesh::getStreaks() {
 void SliceMesh::cut() {
   streaks = targetModel.slice(*sliceMesh);
   uvMesh = std::make_shared<Mesh2D>(*sliceMesh,streaks);
+  sliceMesh->save("dbg/slice" + std::to_string(sliceNumber) + ".stl");
+  auto triangulation = uvMesh->getTriangulation(sliceMesh.get());
+  auto vertecies3d = sliceMesh->uv2World(triangulation.first);
+  auto& indices = triangulation.second;
+  std::unique_ptr<Model> m = std::make_unique<Model>(vertecies3d, indices);
+  m->save("dbg/prep" + std::to_string(sliceNumber) + ".stl");
   //uvMesh->savePoly("dbg/slice" + std::to_string(sliceNumber) + ".svg");
 }
 
