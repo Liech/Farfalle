@@ -405,8 +405,32 @@ std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
 
 std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Model* representaion3D) {
   CDT cdt;
-  std::list<Point> list_of_seeds;
+
+
   std::set<std::array<double,2>> allPoints;
+  if (representaion3D != nullptr) {
+    size_t amountFaces = representaion3D->getNumberFaces();
+    for (size_t face = 0; face < amountFaces; face++) {
+      for (auto index : representaion3D->getFaceIndices(face)) {
+        auto pos = representaion3D->world2UV(representaion3D->getVertexPosition(index));
+        auto arrayPos = std::array<double, 2>{pos.x, pos.y};
+        if (allPoints.count(arrayPos) == 0) {
+          allPoints.insert(arrayPos);
+          cdt.push_back(Point_2(pos.x, pos.y));
+        }
+      }
+    }
+  }
+  
+  std::list<Point> list_of_seeds;
+
+  auto addSeed = [&list_of_seeds](glm::dvec2 a, glm::dvec2 b) {
+    glm::dvec2 dir = glm::normalize(b - a);
+    glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 1e-8;
+    glm::dvec2 seedPos = glm::dvec2(a + b) / 2.0 + outerDir;
+    list_of_seeds.push_back(Point(seedPos.x, seedPos.y));
+  };
+
   for (auto& poly : p->poly) {
     int outerSize = poly.outer_boundary().size();
     for (int i = 0; i < outerSize; i++) {
@@ -414,7 +438,7 @@ std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Mo
       int previous = (i == 0) ? (outerSize-1) : (i - 1);
       Point_2 currentP = poly.outer_boundary().vertex(current);
       Point_2 previousP= poly.outer_boundary().vertex(previous);
-      cdt.insert_constraint(previousP, currentP);
+      cdt.insert_constraint(currentP, previousP);
       allPoints.insert(std::array<double, 2>{currentP.x(), currentP.y()});
       allPoints.insert(std::array<double, 2>{previousP.x(), previousP.y()});
     }
@@ -429,29 +453,17 @@ std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Mo
         allPoints.insert(std::array<double, 2>{currentP.x(), currentP.y()});
         allPoints.insert(std::array<double, 2>{previousP.x(), previousP.y()});
       }
-    }
 
-    glm::dvec2 first  = glm::dvec2(poly.outer_boundary().vertex(0).x(), poly.outer_boundary().vertex(0).y());
-    glm::dvec2 second = glm::dvec2(poly.outer_boundary().vertex(1).x(), poly.outer_boundary().vertex(1).y());
-    glm::dvec2 dir = glm::normalize(second - first);
-    glm::dvec2 outerDir = glm::dvec2(-dir.y, dir.x) * 1e-8;
-    glm::dvec2 seedPos = glm::dvec2(first + second) / 2.0 + outerDir;
-    list_of_seeds.push_back(Point(seedPos.x, seedPos.y));
+      glm::dvec2 hsecond = glm::dvec2(hole.vertex(0).x(), hole.vertex(0).y());
+      glm::dvec2 hfirst = glm::dvec2(hole.vertex(1).x(), hole.vertex(1).y());
+      addSeed(hfirst, hsecond);
+    }
+  
+    glm::dvec2 second  = glm::dvec2(poly.outer_boundary().vertex(0).x(), poly.outer_boundary().vertex(0).y());
+    glm::dvec2 first = glm::dvec2(poly.outer_boundary().vertex(1).x(), poly.outer_boundary().vertex(1).y());
+    //addSeed(first, second);
   }
 
-  if (representaion3D != nullptr) {
-    size_t amountFaces = representaion3D->getNumberFaces();
-    for (size_t face = 0; face < amountFaces; face++) {
-      for (auto index : representaion3D->getFaceIndices(face)) {
-        auto pos = representaion3D->getVertexPosition(index);
-        auto arrayPos = std::array<double, 2>{pos.x, pos.y};
-        if (allPoints.count(arrayPos) == 0) {
-          allPoints.insert(arrayPos);
-          cdt.construct_point(Point_2(pos.x, pos.y));
-        }
-      }
-    }
-  }
 
   CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
 
@@ -464,7 +476,7 @@ std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Mo
 
   int counter = 0;
   for (CDT::Finite_faces_iterator it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); ++it) {
-    if (it->is_in_domain())
+    if (!it->is_in_domain())
       continue;    
        
     for (int i = 0; i < 3; i++) {
