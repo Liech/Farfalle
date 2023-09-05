@@ -25,6 +25,8 @@ set(Tools_Files
     "Source/Tools/MovementType.h"
     "Source/Tools/glm2svg.h"
     "Source/Tools/glm2svg.cpp"
+	"Source/Tools/LineSimplification.h"
+	"Source/Tools/LineSimplification.cpp"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 
@@ -62,14 +64,23 @@ set(Geometry_Files
     "Source/Geometry/LineSoup.cpp"
     "Source/Geometry/InfillGenerator.h"
     "Source/Geometry/InfillGenerator.cpp"	
+    "Source/Geometry/Spagetthifyer.h"
+    "Source/Geometry/Spagetthifyer.cpp"	
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
+
+
+set(Lib_Files
+	"Lib/psimpl/psimpl.h"
+)
+source_group("Lib" FILES ${Lib_Files})
 
 set(ALL_FILES
     ${Source_Files}
     ${Tools_Files}
     ${GCode_Files}
     ${Geometry_Files}
+    ${Lib_Files}
 )
 
 ############################################################################
@@ -89,6 +100,7 @@ OpenMP::OpenMP_CXX
 
 target_include_directories(Farfalle PRIVATE 
 ./Source/
+./Lib/
 )
 
 #add_dependencies(AssimpSupCom 

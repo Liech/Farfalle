@@ -15,11 +15,13 @@ class LineSoup;
 class SliceMesh {
 public:
   SliceMesh(const Model& target, std::function<double(const glm::dvec3& point)>, const SliceConfig& config);
+  virtual ~SliceMesh();
 
   void cut();
   void identifyAreas(const std::vector<std::vector<glm::dvec3>>& next);
 
   std::shared_ptr<Model> getModel();
+  Model& getResult() const;
   std::vector<std::vector<glm::dvec3>> getStreaks();
   std::vector<std::vector<glm::dvec3>> getFill();
   int sliceNumber = 0;
@@ -31,6 +33,7 @@ private:
 
   SliceConfig               config;
   const Model&              targetModel;
+  std::unique_ptr<Model>    resultMesh;
   std::shared_ptr<Model>    sliceMesh;
   std::shared_ptr<Mesh2D>   uvMesh;
   std::shared_ptr<Mesh2D>   topMesh;

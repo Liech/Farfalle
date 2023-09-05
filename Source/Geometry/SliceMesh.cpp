@@ -14,6 +14,10 @@ SliceMesh::SliceMesh(const Model& target, std::function<double(const glm::dvec3&
   lineSoup = std::make_shared<LineSoup>(*sliceMesh);
 }
 
+SliceMesh::~SliceMesh() {
+
+}
+
 std::shared_ptr<Model> SliceMesh::getModel() {
   return sliceMesh;
 }
@@ -31,7 +35,7 @@ void SliceMesh::cut() {
   auto& indices = triangulation.second;
   std::unique_ptr<Model> m = std::make_unique<Model>(vertecies3d, indices);
   m->save("dbg/prep" + std::to_string(sliceNumber) + ".stl");
-  //uvMesh->savePoly("dbg/slice" + std::to_string(sliceNumber) + ".svg");
+  resultMesh = std::move(m);
 }
 
 std::vector<std::vector<glm::dvec3>> SliceMesh::getFill(std::vector<glm::dvec3> input) {
@@ -85,4 +89,8 @@ void SliceMesh::projectNextToUV(const std::vector<std::vector<glm::dvec3>>& next
 
 void SliceMesh::cutUVs() {
 
+}
+
+Model& SliceMesh::getResult() const {
+  return *resultMesh;
 }

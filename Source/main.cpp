@@ -17,6 +17,7 @@
 #include "Geometry/Model.h"
 #include "Geometry/SliceMesh.h"
 #include "Geometry/Mesh2D.h"
+#include "Geometry/Spagetthifyer.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -45,7 +46,7 @@ std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const Slic
 int main() {
   Printer  printer;
   Geometry geometry;
-  
+
   std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\OneDrive\\3dDruck\\Modelle\\Gifts\\Flexi-Rex-improved.stl";
@@ -73,62 +74,67 @@ int main() {
     tools.back()->sliceNumber = i;
   }
 
-  std::vector<std::vector<std::vector<glm::dvec3>>> streaks;
-  streaks.resize(layerAmount);
+  //std::vector<std::vector<std::vector<glm::dvec3>>> streaks;
+  //streaks.resize(layerAmount);
   int progress = 0;
 #pragma omp parallel for
   for (int i = 0; i < layerAmount; i++) {
     //double h = (i + 1) * geometry.layerHeight;
     //streaks.push_back(model->slice(glm::dvec3(0, 0, 1), h); //Planar slicing
-    tools[i]->cut();    
+    tools[i]->cut();
 
 #pragma omp atomic
     progress++;
     std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
   }
 
-//  progress = 0;
-//#pragma omp parallel for
-//  for (int i = 0; i < layerAmount-1; i++) {
-//    tools[i]->identifyAreas(tools[i + 1]->getStreaks());
-//
-//#pragma omp atomic
-//    progress++;
-//    std::cout << "Projection: " << progress << "/" << layerAmount << std::endl;
-//  }
+  Spagetthifyer noodlizer(*model, config);
+  std::vector<std::vector<glm::dvec3>> pasta;
+  for (int i = 0; i < layerAmount; i++) {
+    auto subPasta = noodlizer.spagetthify(tools[i]->getResult());
+    pasta.insert(pasta.end(), subPasta.begin(), subPasta.end());
+  }
+
+  //  progress = 0;
+  //#pragma omp parallel for
+  //  for (int i = 0; i < layerAmount-1; i++) {
+  //    tools[i]->identifyAreas(tools[i + 1]->getStreaks());
+  //
+  //#pragma omp atomic
+  //    progress++;
+  //    std::cout << "Projection: " << progress << "/" << layerAmount << std::endl;
+  //  }
 
   std::string data = "";
   data += "; Farfalle GCODE Generator\n";
 
-  printer .startup       (data);
+  printer.startup(data);
 
   data += "\n; ;;;;;;;;;;;;;;;;;;";
   data += "\n; Printing:  ";
   data += "\n; ;;;;;;;;;;;;;;;;;;\n";
-  
 
-  for (int i = startLayer; i < layerAmount; i++) {
-    std::cout << "GCode: " << i << "/" << layerAmount << std::endl;
 
-    for (auto streak : tools[i]->getStreaks()) {
-      GCode::LinearPrint line(printer);
-      line.controlPoints = streak;
-      line.feedrate = 0.03;
-      GCode::Travel travel(printer);
-      travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],printer.movement->currentPosition[2] + 1), streak[0] };
-      
-      printer.extruder->retract(data);
-      printer.movement->travelMode(data);
-      travel.toString(data);
-      printer.extruder->unretract(data);
-      printer.movement->printMode(data);
-      line.toString(data);
-      printer.extruder->retract(data);
-    }
+  for (int i = 0; i < pasta.size(); i++) {
+    std::cout << "GCode: " << i << "/" << pasta.size() << std::endl;
+    auto& streak = pasta[i];
+    GCode::LinearPrint line(printer);
+    line.controlPoints = streak;
+    line.feedrate = 0.03;
+    GCode::Travel travel(printer);
+    travel.controlPoints = { printer.movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],printer.movement->currentPosition[2] + 1), streak[0] };
+
+    printer.extruder->retract(data);
+    printer.movement->travelMode(data);
+    travel.toString(data);
+    printer.extruder->unretract(data);
+    printer.movement->printMode(data);
+    line.toString(data);
+    printer.extruder->retract(data);
   }
 
   printer.shutdown(data);
 
-  Tools::String2File("output.gcode",data);
+  Tools::String2File("dbg/output.gcode", data);
   return 0;
 }
