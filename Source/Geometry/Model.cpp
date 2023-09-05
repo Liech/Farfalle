@@ -153,6 +153,30 @@ std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
   return result;
 }
 
+std::vector<std::vector<glm::dvec3>> Model::getBorder() const {
+  std::vector<halfedge_descriptor> border_cycles;
+  PMP::extract_boundary_cycles(p->mesh, std::back_inserter(border_cycles));
+  std::vector<std::vector<glm::dvec3>> result;
+  for (halfedge_descriptor h : border_cycles)
+  {
+
+    std::vector<glm::dvec3> sub;
+    halfedge_descriptor current = p->mesh.next(h);
+    auto startIndex = p->mesh.source(h);
+    auto startPoint = p->mesh.point(startIndex);
+    sub.push_back(glm::dvec3(startPoint.x(), startPoint.y(), startPoint.z()));
+
+    while (current != h) {
+      auto Index = p->mesh.source(current);
+      auto Point = p->mesh.point(Index);
+      sub.push_back(glm::dvec3(Point.x(), Point.y(), Point.z()));
+      current = p->mesh.next(current);
+    }
+    result.push_back(sub);
+  }
+  return result;
+}
+
 glm::dvec3 Model::getMin() const {
   return min;
 }

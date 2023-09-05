@@ -8,10 +8,10 @@ class SliceConfig;
 class Model;
 
 //Converts Slices of a model into Line Streaks by Slicing
-class Spagetthifyer {
+class Spaghettifyer {
 public:
-  Spagetthifyer(Model& mainModel,const SliceConfig&);
-  virtual ~Spagetthifyer();
+  Spaghettifyer(Model& mainModel,const SliceConfig&);
+  virtual ~Spaghettifyer();
 
   std::vector<std::vector<glm::dvec3>> spaghettify(Model&) const;
 private:

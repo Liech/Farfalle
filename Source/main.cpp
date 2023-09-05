@@ -17,7 +17,8 @@
 #include "Geometry/Model.h"
 #include "Geometry/SliceMesh.h"
 #include "Geometry/Mesh2D.h"
-#include "Geometry/Spagetthifyer.h"
+#include "Geometry/Spaghettifyer.h"
+#include "Geometry/Macaronifyer.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -47,6 +48,9 @@ int main() {
   Printer  printer;
   Geometry geometry;
 
+  bool spaghetti = false;
+  bool macaroni = true;
+
   std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\OneDrive\\3dDruck\\Modelle\\Gifts\\Flexi-Rex-improved.stl";
@@ -56,7 +60,7 @@ int main() {
   model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  //layerAmount = 3;
+  layerAmount = 10;
   int startLayer = 0;
 
   SliceConfig config;
@@ -84,12 +88,22 @@ int main() {
     std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
   }
 
-  Spagetthifyer noodlizer(*model, config);
   std::vector<std::vector<glm::dvec3>> pasta;
-  for (int i = 0; i < layerAmount; i++) {
-    std::cout << "Spaghettification: " << i << "/" << layerAmount << std::endl;
-    auto subPasta = noodlizer.spaghettify(tools[i]->getResult());
-    pasta.insert(pasta.end(), subPasta.begin(), subPasta.end());
+  if (spaghetti) {
+    Spaghettifyer noodlizer(*model, config);
+    for (int i = 0; i < layerAmount; i++) {
+      std::cout << "Spaghettification: " << i << "/" << layerAmount << std::endl;
+      auto subPasta = noodlizer.spaghettify(tools[i]->getResult());
+      pasta.insert(pasta.end(), subPasta.begin(), subPasta.end());
+    }
+  }
+  if (macaroni) {
+    Macaronifyer noodlizer(config);
+    for (int i = 0; i < layerAmount; i++) {
+      std::cout << "Macaronification: " << i << "/" << layerAmount << std::endl;
+      auto subPasta = noodlizer.macaronify(tools[i]->getResult());
+      pasta.insert(pasta.end(), subPasta.begin(), subPasta.end());
+    }
   }
 
   //  progress = 0;

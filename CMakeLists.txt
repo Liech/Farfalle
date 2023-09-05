@@ -64,8 +64,10 @@ set(Geometry_Files
     "Source/Geometry/LineSoup.cpp"
     "Source/Geometry/InfillGenerator.h"
     "Source/Geometry/InfillGenerator.cpp"	
-    "Source/Geometry/Spagetthifyer.h"
-    "Source/Geometry/Spagetthifyer.cpp"	
+    "Source/Geometry/Spaghettifyer.h"
+    "Source/Geometry/Spaghettifyer.cpp"	
+    "Source/Geometry/Macaronifyer.h"
+    "Source/Geometry/Macaronifyer.cpp"	
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
 

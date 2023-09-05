@@ -1,4 +1,4 @@
-#include "Spagetthifyer.h"
+#include "Spaghettifyer.h"
 
 #include <iostream>
 
@@ -6,7 +6,7 @@
 #include "SliceConfig.h"
 #include "Model.h"
 
-Spagetthifyer::Spagetthifyer(Model& mainModel, const SliceConfig& config){
+Spaghettifyer::Spaghettifyer(Model& mainModel, const SliceConfig& config){
   double offset = mainModel.getMin()[0];
   size_t size = (mainModel.getMax()[0]- mainModel.getMin()[0]) / config.layerWidth;
   for (int i = 0; i < size; i++) {
@@ -37,11 +37,11 @@ Spagetthifyer::Spagetthifyer(Model& mainModel, const SliceConfig& config){
   }
 }
 
-Spagetthifyer::~Spagetthifyer() {
+Spaghettifyer::~Spaghettifyer() {
 
 }
 
-std::vector<std::vector<glm::dvec3>> Spagetthifyer::spaghettify(Model& toNoodlize) const {
+std::vector<std::vector<glm::dvec3>> Spaghettifyer::spaghettify(Model& toNoodlize) const {
   std::vector<std::vector<glm::dvec3>> result;
   for (int i = 0; i < tools.size(); i++) {
     
