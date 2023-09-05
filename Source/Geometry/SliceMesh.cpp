@@ -8,7 +8,7 @@ SliceMesh::SliceMesh(const Model& target, std::function<double(const glm::dvec3&
   densityFunction = fun;
   config          = conf;
 
-  sliceMesh = std::make_shared<Model>(fun, conf.CenterPoint, conf.BoundingSphereRadius, conf.Precision);
+  sliceMesh = std::make_shared<Model>(fun, conf.CenterPoint, conf.BoundingSphereRadius*1.5, conf.Precision);
   sliceMesh->save("debug.stl");
   sliceMesh->generateUVMap();
   lineSoup = std::make_shared<LineSoup>(*sliceMesh);

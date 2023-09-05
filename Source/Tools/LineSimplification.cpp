@@ -5,15 +5,15 @@
 
 std::vector<glm::dvec3> LineSimplification::simplify(const std::vector<glm::dvec3>& input, double tolerance) {
 
-  std::vector <float> polyline;
+  std::vector <double> polyline;
   polyline.reserve(input.size() * 3);
   for (auto& x : input) for (int i = 0; i < 3; i++) 
     polyline.push_back(x[i]);
   
-  std::vector <float> result;   // resulting simplified polyline
+  std::vector <double> result;   // resulting simplified polyline
   
   // simplify the 2d polyline
-  psimpl::simplify_radial_distance <2>(
+  psimpl::simplify_radial_distance <3>(
     polyline.begin(), polyline.end(),
     tolerance, std::back_inserter(result));
   

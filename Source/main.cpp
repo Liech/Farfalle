@@ -56,13 +56,13 @@ int main() {
   model->repair();
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  layerAmount = 3;
+  //layerAmount = 3;
   int startLayer = 0;
 
   SliceConfig config;
   model->getBoundingSphere(config.CenterPoint, config.BoundingSphereRadius);
   config.BoundingSphereRadius *= 1.3;
-  config.Precision = 20;
+  config.Precision = 10;
   config.layerWidth = geometry.layerWidth;
 
   std::vector<std::shared_ptr<SliceMesh>> tools;
@@ -74,13 +74,9 @@ int main() {
     tools.back()->sliceNumber = i;
   }
 
-  //std::vector<std::vector<std::vector<glm::dvec3>>> streaks;
-  //streaks.resize(layerAmount);
   int progress = 0;
 #pragma omp parallel for
   for (int i = 0; i < layerAmount; i++) {
-    //double h = (i + 1) * geometry.layerHeight;
-    //streaks.push_back(model->slice(glm::dvec3(0, 0, 1), h); //Planar slicing
     tools[i]->cut();
 
 #pragma omp atomic
@@ -91,7 +87,8 @@ int main() {
   Spagetthifyer noodlizer(*model, config);
   std::vector<std::vector<glm::dvec3>> pasta;
   for (int i = 0; i < layerAmount; i++) {
-    auto subPasta = noodlizer.spagetthify(tools[i]->getResult());
+    std::cout << "Spaghettification: " << i << "/" << layerAmount << std::endl;
+    auto subPasta = noodlizer.spaghettify(tools[i]->getResult());
     pasta.insert(pasta.end(), subPasta.begin(), subPasta.end());
   }
 

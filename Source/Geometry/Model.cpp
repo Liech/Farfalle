@@ -98,6 +98,26 @@ std::vector<std::vector<glm::dvec3>> Model::slice(const glm::dvec3& normal, doub
   return result;
 }
 
+std::vector<std::vector<glm::dvec3>> Model::slice2(Model& sliceTool) const {
+  //CGAL::Polygon_mesh_processing::surface_intersection	
+  Polylines polylines;
+
+  Surface_mesh meshCopy = p->mesh;
+  Surface_mesh sliceToolMeshCopy = sliceTool.p->mesh;
+
+  CGAL::Polygon_mesh_processing::surface_intersection(meshCopy, sliceToolMeshCopy,std::back_inserter(polylines));
+  
+  std::vector<std::vector<glm::dvec3>> result;
+  for (const auto& line : polylines) {
+    std::vector<glm::dvec3> sub;
+    for (const auto& point : line) {
+      sub.push_back(glm::dvec3(point.x(), point.y(), point.z()));
+    }
+    result.push_back(sub);
+  }
+  return result;
+}
+
 std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
   Polylines polylines;
 

@@ -5,5 +5,5 @@
 
 class LineSimplification {
 public:
-  static std::vector<glm::dvec3> simplify(const std::vector<glm::dvec3>&, double tolerance = 0.01f);
+  static std::vector<glm::dvec3> simplify(const std::vector<glm::dvec3>&, double tolerance = 0.001f);
 };
