@@ -21,7 +21,7 @@ namespace Tools {
       }
     }
 
-    data += "\n<\/svg>";
+    data += "\n</svg>";
     Tools::String2File(filename, data);
   }
 }

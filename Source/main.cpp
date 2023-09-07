@@ -13,12 +13,13 @@
 #include "GCode/Extruder.h"
 #include "GCode/Movement.h"
 
-#include "Geometry/Geometry.h"
+#include "Geometry.h"
 #include "Geometry/Model.h"
 #include "Geometry/SliceMesh.h"
 #include "Geometry/Mesh2D.h"
 #include "Geometry/Spaghettifyer.h"
 #include "Geometry/Macaronifyer.h"
+#include "Geometry/Volume.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -51,8 +52,8 @@ int main() {
   bool spaghetti = false;
   bool macaroni = true;
 
-  std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  //std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\OneDrive\\3dDruck\\Modelle\\Gifts\\Flexi-Rex-improved.stl";
 
   std::cout << "Loading Mesh: " << filename << std::endl;

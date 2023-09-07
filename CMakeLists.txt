@@ -16,6 +16,10 @@ find_package(cgal REQUIRED)
 
 set(Source_Files
     "Source/main.cpp"
+    "Source/SliceConfig.h"
+    "Source/SliceConfig.cpp"
+    "Source/Geometry.h"
+    "Source/Geometry.cpp"
 )
 source_group("Source" FILES ${Source_Files})
 
@@ -50,24 +54,24 @@ set(Geometry_Files
     "Source/Geometry/CGALDefs.h"
     "Source/Geometry/Model.h"
     "Source/Geometry/Model.cpp"
+    "Source/Geometry/ModelImplementation.h"
+    "Source/Geometry/ModelImplementation.cpp"
     "Source/Geometry/Mesh2D.h"
     "Source/Geometry/Mesh2D.cpp"
-    "Source/Geometry/Geometry.h"
-    "Source/Geometry/Geometry.cpp"
     "Source/Geometry/Primitives.h"
     "Source/Geometry/Primitives.cpp"
     "Source/Geometry/SliceMesh.h"
     "Source/Geometry/SliceMesh.cpp"
-    "Source/Geometry/SliceConfig.h"
-    "Source/Geometry/SliceConfig.cpp"
     "Source/Geometry/LineSoup.h"
     "Source/Geometry/LineSoup.cpp"
-    "Source/Geometry/InfillGenerator.h"
-    "Source/Geometry/InfillGenerator.cpp"	
     "Source/Geometry/Spaghettifyer.h"
     "Source/Geometry/Spaghettifyer.cpp"	
     "Source/Geometry/Macaronifyer.h"
     "Source/Geometry/Macaronifyer.cpp"	
+    "Source/Geometry/Volume.h"
+    "Source/Geometry/Volume.cpp"	
+    "Source/Geometry/VolumeImplementation.h"
+    "Source/Geometry/VolumeImplementation.cpp"	
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
 

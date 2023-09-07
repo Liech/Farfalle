@@ -6,24 +6,20 @@
 #include "CGALDefs.h"
 #include "Mesh2D.h"
 #include <CGAL/IO/polygon_soup_io.h>
+#include "VolumeImplementation.h"
+#include "Volume.h"
+#include "ModelImplementation.h"
 
 typedef PMP::Face_location<Surface_mesh, FT> Face_location;
 namespace CP = CGAL::parameters;
 
-class ModelPimpl {
-public:
-  Surface_mesh mesh;
-  AABB_tree    tree;
-  UV_pmap      uvmap;
-};
-
 Model::Model() {
-  p = std::make_shared<ModelPimpl>();
+  p = std::make_unique<ModelImplementation>();
 }
 
 
 Model::Model(const std::string& filename) {
-  p = std::make_shared<ModelPimpl>();
+  p = std::make_unique<ModelImplementation>();
 
   Surface_mesh mesh;
   if (!PMP::IO::read_polygon_mesh(filename, mesh))
@@ -37,7 +33,7 @@ Model::Model(const std::string& filename) {
 }
 
 Model::Model(const std::vector<glm::dvec3>& vertecies, const std::vector<int>& indices) {
-  p = std::make_shared<ModelPimpl>();
+  p = std::make_unique<ModelImplementation>();
   Surface_mesh mesh;
   //https://doc.cgal.org/latest/Surface_mesh/Surface_mesh_2sm_iterators_8cpp-example.html
   std::map<int, vertex_descriptor> vertexMap;
@@ -58,6 +54,15 @@ Model::Model(const std::vector<glm::dvec3>& vertecies, const std::vector<int>& i
   init();
 }
 
+Model::Model(std::unique_ptr<ModelImplementation> core) {
+  p = std::move(core);
+  init();
+}
+
+Model::~Model() {
+
+}
+
 std::function<double(const glm::dvec3&)> implicitModelMakerFunction = [](const glm::dvec3& p) {return p.z; };
 FT implicitFunctionModelMeshGen(const Point& p)
 {
@@ -68,7 +73,7 @@ Model::Model(std::function<double(const glm::dvec3&)>& func, const glm::dvec3& b
   //https://doc.cgal.org/latest/Surface_mesher/index.html
   //https://doc.cgal.org/latest/Surface_mesh_parameterization/index.html
   assert(func(glm::dvec3(0, 0, 0)) <= 0);
-  p = std::make_shared<ModelPimpl>();
+  p = std::make_unique<ModelImplementation>();
   implicitModelMakerFunction = func;
   Tr tr;            
   C2t3 c2t3(tr);
@@ -376,5 +381,11 @@ std::unique_ptr<Model> Model::from2D(const Mesh2D& mesh2d) const {
     auto& face = faces[i];
     mesh.add_face(indices[face[0]], indices[face[1]], indices[face[2]]);
   }
+  return std::move(result);
+}
+
+std::unique_ptr<Volume> Model::getVolume() const {
+  std::unique_ptr<VolumeImplementation> volCore = std::make_unique<VolumeImplementation>(p->mesh);
+  auto result = std::make_unique<Volume>(std::move(volCore));
   return std::move(result);
 }
