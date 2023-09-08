@@ -54,6 +54,9 @@ void nef(Model& model) {
   sphere->save("dbg/minkowskiSphere.stl");
   std::cout << "Volumize sphere..." << std::endl;
   auto volSphere = sphere->getVolume();
+  std::cout << "Back sphere..." << std::endl;
+  auto backSphere = volSphere->getModel();
+  backSphere->save("dbg/backAndForthSphere.stl");
   std::cout << "Start conversion..." << std::endl;
   auto vol = model.getVolume();
   std::cout << "Minkowski..." << std::endl;
@@ -72,8 +75,8 @@ int main() {
   bool spaghetti = false;
   bool macaroni = true;
 
-  //std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   //std::string filename = "C:\\Users\\nicol\\OneDrive\\3dDruck\\Modelle\\Gifts\\Flexi-Rex-improved.stl";
 
   std::cout << "Loading Mesh: " << filename << std::endl;
