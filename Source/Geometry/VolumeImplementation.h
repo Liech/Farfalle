@@ -31,4 +31,7 @@ public:
 
 private:
   std::unique_ptr<NefPolyhedron> nefRepresentation;
+
+  std::unique_ptr<ESurface_Mesh> convert(Surface_Mesh&)     const;
+  std::unique_ptr<Surface_Mesh> convertBack(ESurface_Mesh&) const;
 };
