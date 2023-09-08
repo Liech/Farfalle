@@ -1,9 +1,13 @@
 #include "Primitives.h"
 
+#include "CGALDefs.h"
+
 #define M_PI 3.14159265358979323846264338327950288   /* pi */
 
+#include "Model.h"
+#include "ModelImplementation.h"
   
-std::shared_ptr<Nef_polyhedron> Primitives::sphere(const glm::dvec3& position, double radius, int xyAmount, int zAmount) {
+std::unique_ptr<Model> Primitives::sphere(const glm::dvec3& position, double radius, int xyAmount, int zAmount) {
   //https://stackoverflow.com/questions/33197841/create-parameterized-3d-primitives-with-cgal
   
   std::vector<Point> pts;
@@ -23,9 +27,8 @@ std::shared_ptr<Nef_polyhedron> Primitives::sphere(const glm::dvec3& position, d
 
   std::cout << "convex hull.." << std::endl;
 
-  Surface_mesh poly_sphere;
-  CGAL::convex_hull_3(pts.begin(), pts.end(), poly_sphere);
-
-  std::cout << "converting to nef poly.." << std::endl;
-  return std::make_shared<Nef_polyhedron>(poly_sphere);
+  std::unique_ptr<ModelImplementation> impl = std::make_unique<ModelImplementation>();
+  CGAL::convex_hull_3(pts.begin(), pts.end(), impl->mesh);
+  auto result = std::make_unique<Model>(std::move(impl));
+  return std::move(result);
 }

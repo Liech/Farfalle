@@ -12,7 +12,8 @@ public:
 
   std::unique_ptr<Model> getModel() const;
 
+  void minkowski(Volume&);
+
 private:
-  class Pimpl;
   std::unique_ptr<VolumeImplementation> p;
 };

@@ -16,7 +16,6 @@
 #include <CGAL/Polygon_vertical_decomposition_2.h>
 #include <CGAL/Ray_2.h>
 #include <CGAL/Line_2.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_mesher_2.h>
 #include <CGAL/Delaunay_mesh_face_base_2.h>

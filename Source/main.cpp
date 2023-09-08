@@ -20,6 +20,7 @@
 #include "Geometry/Spaghettifyer.h"
 #include "Geometry/Macaronifyer.h"
 #include "Geometry/Volume.h"
+#include "Geometry/Primitives.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -45,6 +46,25 @@ std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const Slic
   return std::make_shared<SliceMesh>(input, planeFun, config);
 }
 
+void nef(Model& model) {
+
+  std::cout << "Create sphere..." << std::endl;
+  auto sphere = Primitives::sphere(glm::dvec3(0, 0, 0), 1,4,4);
+  std::cout << "Save sphere..." << std::endl;
+  sphere->save("dbg/minkowskiSphere.stl");
+  std::cout << "Volumize sphere..." << std::endl;
+  auto volSphere = sphere->getVolume();
+  std::cout << "Start conversion..." << std::endl;
+  auto vol = model.getVolume();
+  std::cout << "Minkowski..." << std::endl;
+  vol->minkowski(*volSphere);
+  std::cout << "Start back conversion..." << std::endl;
+  auto back = vol->getModel();
+  std::cout << "Saving..." << std::endl;
+  back->save("dbg/backAndForth.stl");
+  std::cout << "Saved" << std::endl;
+}
+
 int main() {
   Printer  printer;
   Geometry geometry;
@@ -59,6 +79,8 @@ int main() {
   std::cout << "Loading Mesh: " << filename << std::endl;
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
   model->repair();
+
+  nef(*model);
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
   layerAmount = 10;
