@@ -112,8 +112,23 @@ std::vector<size_t> MeshSurfaceOffsetting::getPureBorderTriangles() {
   return result;
 }
 
-void MeshSurfaceOffsetting::subdivideTriangle(size_t) {
+void MeshSurfaceOffsetting::subdivideTriangle(size_t faceID) {
+  auto& face = faces[faceID];
+  size_t a = face[0];
+  size_t b = face[1];
+  size_t c = face[2];
+  
+  glm::dvec3 center = (points[a] + points[b] + points[c]) / 2.0;
+  points.push_back(center);
+  border.push_back(false);
+  size_t d = points.size() - 1;
+  std::array<size_t, 3> faceA = { a, d,b };
+  std::array<size_t, 3> faceB = { b, d,c };
+  std::array<size_t, 3> faceC = { c, a,d };
 
+  faces[faceID] = faceA;
+  faces.push_back(faceB);
+  faces.push_back(faceC);
 }
 
 void MeshSurfaceOffsetting::initializeDistances() {
