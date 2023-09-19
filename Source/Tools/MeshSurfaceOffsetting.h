@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <map>
+#include <set>
 #include <array>
 
 class MeshSurfaceOffsetting {
@@ -13,6 +14,7 @@ public:
 private:
   void initialize();
   void fillBorder();
+  std::set<std::pair<size_t, char>> getBorderEdges();
   std::vector<size_t> getPureBorderTriangles();
   void subdivideTriangle(size_t);
   void initializeDistances();

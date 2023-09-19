@@ -44,7 +44,32 @@ std::vector<std::vector<glm::dvec3>> MeshSurfaceOffsetting::offset(double distan
 }
 
 void MeshSurfaceOffsetting::fillBorder(){
+  border.resize(points.size());
+  for (size_t i = 0; i < border.size(); i++)
+    border[i] = false;
 
+  auto edges = getBorderEdges();
+  for (auto& edge : edges) {
+    auto& tri = faces[edge.first];
+    if (edge.second == 0) {
+      border[tri[0]] = true;
+      border[tri[1]] = true;
+    }
+    if (edge.second == 1) {
+      border[tri[1]] = true;
+      border[tri[2]] = true;
+    }
+    if (edge.second == 2) {
+      border[tri[2]] = true;
+      border[tri[0]] = true;
+    }
+  }
+}
+
+std::set<std::pair<size_t, char>> MeshSurfaceOffsetting::getBorderEdges() {
+  std::set<std::pair<size_t, char>> result;
+
+  return result;
 }
 
 std::vector<size_t> MeshSurfaceOffsetting::getPureBorderTriangles() {
