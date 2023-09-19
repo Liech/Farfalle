@@ -68,7 +68,35 @@ void MeshSurfaceOffsetting::fillBorder(){
 
 std::set<std::pair<size_t, char>> MeshSurfaceOffsetting::getBorderEdges() {
   std::set<std::pair<size_t, char>> result;
+  std::map<std::pair<size_t, size_t>, size_t> edges;
+  std::map<std::pair<size_t, size_t>, std::pair<size_t, char>> pointPoint2EdgeID;
 
+  //count how often each edge occurs
+  for (size_t faceID = 0; faceID < faces.size();faceID++) {
+    auto& face = faces[faceID];
+    for (int i = 0; i < 3; i++) {
+      int a = face[(i + 0) % 3];
+      int b = face[(i + 1) % 3];
+      if (b < a) 
+        std::swap(a, b);
+      auto edge = std::make_pair(a, b);
+      if (edges.count(edge) == 0) {
+        edges[edge] = 1;
+        pointPoint2EdgeID[edge] = std::make_pair(faceID, i);
+      }
+      else
+        edges[edge]++;
+    }
+  }
+
+  //edges with occurence of 1 are border edges
+  for (auto& x : edges) {
+    if (x.second == 1) {
+      auto& id = pointPoint2EdgeID[x.first];
+      result.insert(id);
+    }
+  }
+  
   return result;
 }
 
