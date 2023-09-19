@@ -31,6 +31,8 @@ set(Tools_Files
     "Source/Tools/glm2svg.cpp"
 	"Source/Tools/LineSimplification.h"
 	"Source/Tools/LineSimplification.cpp"
+	"Source/Tools/MeshSurfaceOffsetting.cpp"
+	"Source/Tools/MeshSurfaceOffsetting.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 
