@@ -16,28 +16,24 @@ void MeshSurfaceOffsetting::initialize() {
   auto borderTris = getPureBorderTriangles();
   for (auto& tri : borderTris) 
     subdivideTriangle(tri);
-  initializeDistances();
+  fillNeighbours();
+  fillDistances();
   while (hasInfiniteDistances())
     spreadDistance();
 }
 
-std::vector<std::vector<glm::dvec3>> MeshSurfaceOffsetting::offset(double distance) const {
-  std::vector<std::vector<glm::dvec3>> result;
-  std::vector<std::pair<size_t, char>> edges = getIsoEdges(distance);
-
-  std::set<std::pair<size_t, char>> allEdges(edges.begin(), edges.end());
-  std::set<std::pair<size_t, char>> unprocessed(allEdges);
-  auto traceLoop = [&unprocessed](const std::pair<size_t, char>& currentEdge) {
-    std::vector<glm::dvec3> result;
-    unprocessed.erase(currentEdge);
-    throw std::runtime_error("Not yet implemented");
-    return result;
-  };
+MeshSurfaceOffsetting::Result MeshSurfaceOffsetting::offset(double distance) const {
+  MeshSurfaceOffsetting::Result result;
+  std::set<std::pair<size_t, char>> edges = getIsoEdges(distance);
+  std::set<std::pair<size_t, char>> unprocessed(edges);
 
   while (!unprocessed.empty()) {
     auto current = *unprocessed.begin();
-    auto loop = traceLoop(current);
-    result.push_back(loop);
+    auto loop = traceLoop(current, unprocessed, edges);
+    if (loop.first)
+      result.closed.push_back(loop.second);
+    else
+      result.open.push_back(loop.second);
   }
 
   return result;
@@ -131,7 +127,7 @@ void MeshSurfaceOffsetting::subdivideTriangle(size_t faceID) {
   faces.push_back(faceC);
 }
 
-void MeshSurfaceOffsetting::initializeDistances() {
+void MeshSurfaceOffsetting::fillDistances() {
   distancesToBorder.resize(points.size());
   for (size_t i = 0; i < points.size(); i++) {
     if (border[i])
@@ -183,8 +179,8 @@ void MeshSurfaceOffsetting::spreadDistance() {
 }
 
 
-std::vector<std::pair<size_t, char>> MeshSurfaceOffsetting::getIsoEdges(double isovalue) const {
-  std::vector<std::pair<size_t, char>> result;
+std::set<std::pair<size_t, char>> MeshSurfaceOffsetting::getIsoEdges(double isovalue) const {
+  std::set<std::pair<size_t, char>> result;
 
   for (size_t faceID = 0; faceID < faces.size(); faceID++) {
     auto& face = faces[faceID];
@@ -194,9 +190,28 @@ std::vector<std::pair<size_t, char>> MeshSurfaceOffsetting::getIsoEdges(double i
       if (distancesToBorder[b] < distancesToBorder[a])
         std::swap(a, b);
       if (distancesToBorder[a] < isovalue && distancesToBorder[b] > isovalue)
-        result.push_back(std::make_pair(faceID, i));
+        result.insert(std::make_pair(faceID, i));
     }
   }
 
   return result;
+}
+
+void MeshSurfaceOffsetting::fillNeighbours() {
+  throw std::runtime_error("Not implemented");
+}
+
+std::pair<size_t, char> MeshSurfaceOffsetting::getNextEdge(const std::pair<size_t, char>& current, const std::set<std::pair<size_t, char>>& isoEdges) const {
+  throw std::runtime_error("Not implemented");
+  return std::pair<size_t, char>();
+}
+
+std::pair<size_t, char> MeshSurfaceOffsetting::getPreviousEdge(const std::pair<size_t, char>& current, const std::set<std::pair<size_t, char>>& isoEdges) const {
+  throw std::runtime_error("Not implemented");
+  return std::pair<size_t, char>();
+}
+
+std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const std::pair<size_t, char>& seed, std::set<std::pair<size_t, char>>& unprocessed, const std::set<std::pair<size_t, char>>& all) const {
+  throw std::runtime_error("Not implemented");
+  return std::pair<bool, std::vector<glm::dvec3>>();
 }
