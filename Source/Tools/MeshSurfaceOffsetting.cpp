@@ -3,6 +3,7 @@
 #include <set>
 #include <stdexcept>
 #include <cmath>
+#include <glm/gtx/closest_point.hpp>
 
 MeshSurfaceOffsetting::MeshSurfaceOffsetting(const std::vector<glm::dvec3>& points_, const std::vector<std::array<size_t, 3>>& faces_) {
   points = points_;
@@ -149,7 +150,37 @@ bool MeshSurfaceOffsetting::hasInfiniteDistances() {
 }
 
 void MeshSurfaceOffsetting::spreadDistance() {
+  for (size_t faceID = 0; faceID < faces.size(); faceID++) {
+    auto& face = faces[faceID];
+    std::vector<double> distances = { distancesToBorder[face[0]],distancesToBorder[face[1]],distancesToBorder[face[2]] };
+    int amountInfinity = (std::isinf(distances[0]) ? 1 : 0) + (std::isinf(distances[1]) ? 1 : 0) + (std::isinf(distances[2]) ? 1 : 0);
+    if (amountInfinity != 1)
+      continue;
 
+    size_t infID;
+    size_t A;
+    size_t B;
+    if (std::isinf(distances[0])) {
+      infID = face[0];
+      A = face[1];
+      B = face[2];
+    }
+    else if (std::isinf(distances[1])) {
+      infID = face[1];
+      A = face[2];
+      B = face[0];
+    }
+    else if (std::isinf(distances[2])) {
+      infID = face[2];
+      A = face[0];
+      B = face[1];
+    }
+    //spread when amountInfinity<=1
+    //use positive infinity
+    //two smallest distances try to spread to third, but only if third gets smaller
+    //glm::closestPointOnLine(points[])
+
+  }
 }
 
 void MeshSurfaceOffsetting::fillNeighbours() {
