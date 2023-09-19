@@ -19,7 +19,6 @@ void MeshSurfaceOffsetting::initialize() {
   initializeDistances();
   while (hasInfiniteDistances())
     spreadDistance();
-  fillNeighbours();
 }
 
 std::vector<std::vector<glm::dvec3>> MeshSurfaceOffsetting::offset(double distance) const {
@@ -76,8 +75,8 @@ std::set<std::pair<size_t, char>> MeshSurfaceOffsetting::getBorderEdges() {
   for (size_t faceID = 0; faceID < faces.size();faceID++) {
     auto& face = faces[faceID];
     for (int i = 0; i < 3; i++) {
-      int a = face[(i + 0) % 3];
-      int b = face[(i + 1) % 3];
+      size_t a = face[(i + 0) % 3];
+      size_t b = face[(i + 1) % 3];
       if (b < a) 
         std::swap(a, b);
       auto edge = std::make_pair(a, b);
@@ -183,12 +182,21 @@ void MeshSurfaceOffsetting::spreadDistance() {
   }
 }
 
-void MeshSurfaceOffsetting::fillNeighbours() {
 
-}
-
-std::vector<std::pair<size_t, char>> MeshSurfaceOffsetting::getIsoEdges(double distance) const {
+std::vector<std::pair<size_t, char>> MeshSurfaceOffsetting::getIsoEdges(double isovalue) const {
   std::vector<std::pair<size_t, char>> result;
+
+  for (size_t faceID = 0; faceID < faces.size(); faceID++) {
+    auto& face = faces[faceID];
+    for (int i = 0; i < 3; i++) {
+      size_t a = face[(i + 0) % 3];
+      size_t b = face[(i + 1) % 3];
+      if (distancesToBorder[b] < distancesToBorder[a])
+        std::swap(a, b);
+      if (distancesToBorder[a] < isovalue && distancesToBorder[b] > isovalue)
+        result.push_back(std::make_pair(faceID, i));
+    }
+  }
 
   return result;
 }
