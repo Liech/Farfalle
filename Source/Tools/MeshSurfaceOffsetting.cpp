@@ -154,32 +154,32 @@ void MeshSurfaceOffsetting::spreadDistance() {
     auto& face = faces[faceID];
     std::vector<double> distances = { distancesToBorder[face[0]],distancesToBorder[face[1]],distancesToBorder[face[2]] };
     int amountInfinity = (std::isinf(distances[0]) ? 1 : 0) + (std::isinf(distances[1]) ? 1 : 0) + (std::isinf(distances[2]) ? 1 : 0);
-    if (amountInfinity != 1)
+    if (amountInfinity > 1)
       continue;
 
-    size_t infID;
+    size_t subjectToChange;
     size_t A;
     size_t B;
-    if (std::isinf(distances[0])) {
-      infID = face[0];
+    if (distances[0] > distances[1] && distances[0] > distances[2]) {
+      subjectToChange = face[0];
       A = face[1];
       B = face[2];
     }
-    else if (std::isinf(distances[1])) {
-      infID = face[1];
+    else if (distances[1] > distances[0] && distances[1] > distances[2]) {
+      subjectToChange = face[1];
       A = face[2];
       B = face[0];
     }
-    else if (std::isinf(distances[2])) {
-      infID = face[2];
+    else if (distances[2] > distances[1] && distances[2] > distances[0]) {
+      subjectToChange = face[2];
       A = face[0];
       B = face[1];
     }
-    //spread when amountInfinity<=1
-    //use positive infinity
-    //two smallest distances try to spread to third, but only if third gets smaller
-    //glm::closestPointOnLine(points[])
 
+    glm::dvec3 onSegmentPoint = glm::closestPointOnLine(points[subjectToChange], points[A], points[B]);
+    double contenderDistance = glm::distance(points[subjectToChange], onSegmentPoint);
+    if (contenderDistance < distancesToBorder[subjectToChange])
+      distancesToBorder[subjectToChange] = contenderDistance;
   }
 }
 
