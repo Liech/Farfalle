@@ -24,14 +24,14 @@ void MeshSurfaceOffsetting::initialize() {
     spreadDistance();
 }
 
-MeshSurfaceOffsetting::Result MeshSurfaceOffsetting::offset(double distance) const {
+MeshSurfaceOffsetting::Result MeshSurfaceOffsetting::offset(double isovalue) const {
   MeshSurfaceOffsetting::Result result;
-  std::set<std::pair<size_t, char>> edges = getIsoEdges(distance);
+  std::set<std::pair<size_t, char>> edges = getIsoEdges(isovalue);
   std::set<std::pair<size_t, char>> unprocessed(edges);
 
   while (!unprocessed.empty()) {
     auto current = *unprocessed.begin();
-    auto loop = traceLoop(current, unprocessed, edges);
+    auto loop = traceLoop(current, unprocessed, edges, isovalue);
     if (loop.first)
       result.closed.push_back(loop.second);
     else
@@ -232,7 +232,42 @@ std::pair<size_t, char> MeshSurfaceOffsetting::getPreviousEdge(const std::pair<s
     return std::make_pair(std::numeric_limits<size_t>::max(), std::numeric_limits<char>::max()); //no previous found
 }
 
-std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const std::pair<size_t, char>& seed, std::set<std::pair<size_t, char>>& unprocessed, const std::set<std::pair<size_t, char>>& all) const {
-  throw std::runtime_error("Not implemented");
-  return std::pair<bool, std::vector<glm::dvec3>>();
+glm::dvec3 MeshSurfaceOffsetting::interpolate(const std::pair<size_t, char>& edge, double isovalue) const {
+  return glm::dvec3(0, 0, 0);
+}
+
+std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const std::pair<size_t, char>& seed, std::set<std::pair<size_t, char>>& unprocessed, const std::set<std::pair<size_t, char>>& allIsoEdges, double isovalue) const {
+  bool                    result_isClosed = false;
+  std::vector<glm::dvec3> result_loop;
+  
+  std::pair<size_t, char> current = seed;
+  while (true) {
+    unprocessed.erase(current);
+    auto point = interpolate(current, isovalue);
+    result_loop.push_back(point);
+    auto next = getNextEdge(current, allIsoEdges);
+    if (next.second == std::numeric_limits<char>::max())
+      break;
+    if (next == seed) {
+      result_isClosed = true;
+      break;
+    }
+  }
+
+  if (!result_isClosed) {
+    std::reverse(result_loop.begin(),result_loop.end());
+    result_loop.erase(result_loop.begin() + result_loop.size() - 1); //will be readded
+    current = seed;
+    while (true) {
+      unprocessed.erase(current);
+      auto point = interpolate(current, isovalue);
+      result_loop.push_back(point);
+      auto next = getPreviousEdge(current, allIsoEdges);
+      if (next.second == std::numeric_limits<char>::max())
+        break;
+    }
+    std::reverse(result_loop.begin(), result_loop.end());
+  }
+
+  return std::make_pair(result_isClosed,result_loop);
 }
