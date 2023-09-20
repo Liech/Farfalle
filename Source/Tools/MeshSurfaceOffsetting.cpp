@@ -233,7 +233,18 @@ std::pair<size_t, char> MeshSurfaceOffsetting::getPreviousEdge(const std::pair<s
 }
 
 glm::dvec3 MeshSurfaceOffsetting::interpolate(const std::pair<size_t, char>& edge, double isovalue) const {
-  return glm::dvec3(0, 0, 0);
+  auto face = faces[edge.first];
+  size_t A = face[edge.second];
+  size_t B = face[(edge.second+1)%3];
+
+  glm::dvec3 pointA    = points[A];
+  glm::dvec3 pointB    = points[B];
+  double     distanceA = distancesToBorder[A];
+  double     distanceB = distancesToBorder[B];
+
+  double perc = (isovalue - distanceA) / (distanceB - distanceA);
+  glm::dvec3 result = pointA * (perc-1) + pointB * perc;
+  return result;
 }
 
 std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const std::pair<size_t, char>& seed, std::set<std::pair<size_t, char>>& unprocessed, const std::set<std::pair<size_t, char>>& allIsoEdges, double isovalue) const {
