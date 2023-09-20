@@ -12,11 +12,13 @@ MeshSurfaceOffsetting::MeshSurfaceOffsetting(const std::vector<glm::dvec3>& poin
 }
 
 void MeshSurfaceOffsetting::initialize() {
+  fillGraphs();
   fillBorder();
   auto borderTris = getPureBorderTriangles();
   for (auto& tri : borderTris) 
     subdivideTriangle(tri);
-  fillNeighbours();
+  if (borderTris.size() != 0)
+    fillGraphs();
   fillDistances();
   while (hasInfiniteDistances())
     spreadDistance();
@@ -39,13 +41,50 @@ MeshSurfaceOffsetting::Result MeshSurfaceOffsetting::offset(double distance) con
   return result;
 }
 
+void MeshSurfaceOffsetting::fillGraphs() {
+  std::map<std::pair<size_t, size_t>, size_t> edges;
+  std::map<std::pair<size_t, size_t>, std::pair<size_t, char>> pointPoint2EdgeID;
+
+  neighbours.clear();
+  //count how often each edge occurs
+  for (size_t faceID = 0; faceID < faces.size(); faceID++) {
+    auto& face = faces[faceID];
+    for (int i = 0; i < 3; i++) {
+      size_t a = face[(i + 0) % 3];
+      size_t b = face[(i + 1) % 3];
+      if (b < a)
+        std::swap(a, b);
+      auto edge = std::make_pair(a, b);
+      if (edges.count(edge) == 0) {
+        edges[edge] = 1;
+        pointPoint2EdgeID[edge] = std::make_pair(faceID, i);
+      }
+      else {
+        edges[edge]++;
+        auto a = pointPoint2EdgeID[edge];
+        auto b = std::make_pair(faceID, i);
+        neighbours[a] = b;
+        neighbours[b] = a;
+      }
+    }
+  }
+
+  borderEdges.clear();
+  //edges with occurence of 1 are border edges
+  for (auto& x : edges) {
+    if (x.second == 1) {
+      auto& id = pointPoint2EdgeID[x.first];
+      borderEdges.insert(id);
+    }
+  }
+}
+
 void MeshSurfaceOffsetting::fillBorder(){
   border.resize(points.size());
   for (size_t i = 0; i < border.size(); i++)
     border[i] = false;
 
-  auto edges = getBorderEdges();
-  for (auto& edge : edges) {
+  for (auto& edge : borderEdges) {
     auto& tri = faces[edge.first];
     if (edge.second == 0) {
       border[tri[0]] = true;
@@ -60,40 +99,6 @@ void MeshSurfaceOffsetting::fillBorder(){
       border[tri[0]] = true;
     }
   }
-}
-
-std::set<std::pair<size_t, char>> MeshSurfaceOffsetting::getBorderEdges() {
-  std::set<std::pair<size_t, char>> result;
-  std::map<std::pair<size_t, size_t>, size_t> edges;
-  std::map<std::pair<size_t, size_t>, std::pair<size_t, char>> pointPoint2EdgeID;
-
-  //count how often each edge occurs
-  for (size_t faceID = 0; faceID < faces.size();faceID++) {
-    auto& face = faces[faceID];
-    for (int i = 0; i < 3; i++) {
-      size_t a = face[(i + 0) % 3];
-      size_t b = face[(i + 1) % 3];
-      if (b < a) 
-        std::swap(a, b);
-      auto edge = std::make_pair(a, b);
-      if (edges.count(edge) == 0) {
-        edges[edge] = 1;
-        pointPoint2EdgeID[edge] = std::make_pair(faceID, i);
-      }
-      else
-        edges[edge]++;
-    }
-  }
-
-  //edges with occurence of 1 are border edges
-  for (auto& x : edges) {
-    if (x.second == 1) {
-      auto& id = pointPoint2EdgeID[x.first];
-      result.insert(id);
-    }
-  }
-  
-  return result;
 }
 
 std::vector<size_t> MeshSurfaceOffsetting::getPureBorderTriangles() {
@@ -197,18 +202,34 @@ std::set<std::pair<size_t, char>> MeshSurfaceOffsetting::getIsoEdges(double isov
   return result;
 }
 
-void MeshSurfaceOffsetting::fillNeighbours() {
-  throw std::runtime_error("Not implemented");
-}
-
 std::pair<size_t, char> MeshSurfaceOffsetting::getNextEdge(const std::pair<size_t, char>& current, const std::set<std::pair<size_t, char>>& isoEdges) const {
-  throw std::runtime_error("Not implemented");
-  return std::pair<size_t, char>();
+  std::pair<size_t, char> currentNeighbour = neighbours.at(current);
+  std::pair<size_t, char> candiateA = std::make_pair(currentNeighbour.first, (currentNeighbour.second + 1) % 3);//other edges of the face
+  std::pair<size_t, char> candiateB = std::make_pair(currentNeighbour.first, (currentNeighbour.second + 2) % 3);
+  bool aPossible = isoEdges.count(candiateA) != 0;
+  bool bPossible = isoEdges.count(candiateB) != 0;
+  assert(!(aPossible && bPossible));
+
+  if (aPossible)
+    return candiateA;
+  else if (bPossible)
+    return candiateB;
+  else 
+    return std::make_pair(std::numeric_limits<size_t>::max(), std::numeric_limits<char>::max()); //no next found
 }
 
 std::pair<size_t, char> MeshSurfaceOffsetting::getPreviousEdge(const std::pair<size_t, char>& current, const std::set<std::pair<size_t, char>>& isoEdges) const {
-  throw std::runtime_error("Not implemented");
-  return std::pair<size_t, char>();
+  std::pair<size_t, char> candiateA = std::make_pair(current.first, (current.second + 1) % 3);//other edges of the face
+  std::pair<size_t, char> candiateB = std::make_pair(current.first, (current.second + 2) % 3);
+  bool aPossible = isoEdges.count(candiateA) != 0;
+  bool bPossible = isoEdges.count(candiateB) != 0;
+
+  if (aPossible)
+    return neighbours.at(candiateA);
+  else if (bPossible)
+    return neighbours.at(candiateB);
+  else
+    return std::make_pair(std::numeric_limits<size_t>::max(), std::numeric_limits<char>::max()); //no previous found
 }
 
 std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const std::pair<size_t, char>& seed, std::set<std::pair<size_t, char>>& unprocessed, const std::set<std::pair<size_t, char>>& all) const {
