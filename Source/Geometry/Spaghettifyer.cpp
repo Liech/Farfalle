@@ -31,7 +31,7 @@ Spaghettifyer::Spaghettifyer(Model& mainModel, const SliceConfig& config){
     std::function<double(const glm::dvec3& point)> fun = [offset, x](const glm::dvec3& point) {
       return point.x - (x + offset);
     };
-    auto tool = std::make_unique<Model>(fun, config.CenterPoint, config.BoundingSphereRadius*1.5, config.Precision);
+    auto tool = std::make_unique<Model>(fun, config.CenterPoint, config.BoundingSphereRadius*2, config.Precision);
     tool->save("dbg/Spaghettifyer" + std::to_string(i) + ".stl");
     tools.push_back(std::move(tool));
   }

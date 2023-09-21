@@ -6,6 +6,17 @@
 #include "SliceConfig.h"
 #include "Model.h"
 
+
+/*
+
+Marching Triangles isoline distance finding:
+one full subdivision -> prohibits 3 Zero Triangles
+search&mark for edges enclosing desired value
+pick edge -> find if triangles have other marked edges -> travel along
+  visited edge?->loop finished
+  no edge left -> just streak (degenerated case)
+all marked edges visted? no? ->pick one of the remaining edges and repeat
+*/
 Macaronifyer::Macaronifyer(const SliceConfig& config) {
 
 }
