@@ -390,3 +390,14 @@ std::unique_ptr<Volume> Model::getVolume() const {
   auto result = std::make_unique<Volume>(std::move(volCore));
   return std::move(result);
 }
+
+std::pair<std::vector<glm::dvec3>, std::vector<size_t>> Model::toSoup() {
+  std::vector<glm::dvec3> result_vertices;
+  std::vector<size_t>     result_indices;
+
+  for (auto x : p->mesh.points())
+    result_vertices.push_back(glm::dvec3(x.x(), x.y(), x.z()));
+
+
+  return std::make_pair(result_vertices, result_indices);
+}
