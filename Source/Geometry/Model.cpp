@@ -394,10 +394,25 @@ std::unique_ptr<Volume> Model::getVolume() const {
 std::pair<std::vector<glm::dvec3>, std::vector<size_t>> Model::toSoup() {
   std::vector<glm::dvec3> result_vertices;
   std::vector<size_t>     result_indices;
+  std::map<CGAL::SM_Vertex_index, size_t> addressMap;
 
-  for (auto x : p->mesh.points())
-    result_vertices.push_back(glm::dvec3(x.x(), x.y(), x.z()));
-
+  for (CGAL::SM_Vertex_index x : p->mesh.vertices()) {
+    auto point = p->mesh.point(x);
+    result_vertices.push_back(glm::dvec3(point.x(), point.y(), point.z()));
+    addressMap[x] = result_vertices.size() - 1;
+  }
+  for (auto x : p->mesh.faces()) {
+    halfedge_descriptor startHalfedge = p->mesh.halfedge(x);
+    halfedge_descriptor currentHalfedge = startHalfedge;    
+    while (true) {
+      CGAL::SM_Vertex_index index = p->mesh.source(currentHalfedge);
+      size_t address = addressMap[index];
+      result_indices.push_back(address);
+      currentHalfedge = p->mesh.next(currentHalfedge);
+      if (currentHalfedge == startHalfedge)
+        break;
+    }
+  }
 
   return std::make_pair(result_vertices, result_indices);
 }
