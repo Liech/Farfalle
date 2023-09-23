@@ -72,8 +72,8 @@ int main() {
   Printer  printer;
   Geometry geometry;
 
-  bool spaghetti = true;
-  bool macaroni = false;
+  bool spaghetti = false;
+  bool macaroni = true;
 
   //std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
@@ -81,18 +81,18 @@ int main() {
 
   std::cout << "Loading Mesh: " << filename << std::endl;
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  model->repair();
+  //model->repair();
 
   //nef(*model);
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  //layerAmount = 10;
+  layerAmount = 1;
   int startLayer = 0;
 
   SliceConfig config;
   model->getBoundingSphere(config.CenterPoint, config.BoundingSphereRadius);
   config.BoundingSphereRadius *= 1.3;
-  config.Precision = 10;
+  config.Precision = 70;
   config.layerWidth = geometry.layerWidth;
 
   std::vector<std::shared_ptr<SliceMesh>> tools;

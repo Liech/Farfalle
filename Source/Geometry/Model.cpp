@@ -391,9 +391,9 @@ std::unique_ptr<Volume> Model::getVolume() const {
   return std::move(result);
 }
 
-std::pair<std::vector<glm::dvec3>, std::vector<size_t>> Model::toSoup() {
-  std::vector<glm::dvec3> result_vertices;
-  std::vector<size_t>     result_indices;
+std::pair<std::vector<glm::dvec3>, std::vector<std::array<size_t,3>>> Model::toSoup() {
+  std::vector<glm::dvec3>                 result_vertices;
+  std::vector<std::array<size_t, 3>>      result_indices;
   std::map<CGAL::SM_Vertex_index, size_t> addressMap;
 
   for (CGAL::SM_Vertex_index x : p->mesh.vertices()) {
@@ -404,14 +404,18 @@ std::pair<std::vector<glm::dvec3>, std::vector<size_t>> Model::toSoup() {
   for (auto x : p->mesh.faces()) {
     halfedge_descriptor startHalfedge = p->mesh.halfedge(x);
     halfedge_descriptor currentHalfedge = startHalfedge;    
-    while (true) {
+    std::array<size_t, 3> indices;
+    int count = 0;
+    while (count<3) {
       CGAL::SM_Vertex_index index = p->mesh.source(currentHalfedge);
       size_t address = addressMap[index];
-      result_indices.push_back(address);
+      indices[count] = address;
       currentHalfedge = p->mesh.next(currentHalfedge);
       if (currentHalfedge == startHalfedge)
         break;
+      count++;
     }
+    result_indices.push_back(indices);
   }
 
   return std::make_pair(result_vertices, result_indices);

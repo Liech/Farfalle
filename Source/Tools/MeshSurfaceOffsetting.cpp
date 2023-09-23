@@ -170,7 +170,7 @@ void MeshSurfaceOffsetting::spreadDistance() {
       A = face[2];
       B = face[0];
     }
-    else if (distances[2] > distances[1] && distances[2] > distances[0]) {
+    else {//if (distances[2] > distances[1] && distances[2] > distances[0]) {
       subjectToChange = face[2];
       A = face[0];
       B = face[1];
@@ -243,7 +243,7 @@ glm::dvec3 MeshSurfaceOffsetting::interpolate(const std::pair<size_t, char>& edg
   double     distanceB = distancesToBorder[B];
 
   double perc = (isovalue - distanceA) / (distanceB - distanceA);
-  glm::dvec3 result = pointA * (perc-1) + pointB * perc;
+  glm::dvec3 result = pointA * (1-perc) + pointB * perc;
   return result;
 }
 
@@ -263,6 +263,7 @@ std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const 
       result_isClosed = true;
       break;
     }
+    current = next;
   }
 
   if (!result_isClosed) {
@@ -276,6 +277,7 @@ std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const 
       auto next = getPreviousEdge(current, allIsoEdges);
       if (next.second == std::numeric_limits<char>::max())
         break;
+      current = next;
     }
     std::reverse(result_loop.begin(), result_loop.end());
   }
