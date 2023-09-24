@@ -35,6 +35,7 @@ std::vector<std::vector<glm::dvec3>> Macaronifyer::macaronify(Model& toNoodlize)
 
   auto soup = toNoodlize.toSoup();
   MeshSurfaceOffsetting offseting(soup.first, soup.second);
+  offseting.saveInternalMesh("dbg/offsetting.stl");
   auto offset = offseting.offset(0.4);
 
   for (auto& loop : offset.closed) {

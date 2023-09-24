@@ -5,6 +5,8 @@
 #include <cmath>
 #include <glm/gtx/closest_point.hpp>
 
+#include "Tools/STLWriter.h"
+
 MeshSurfaceOffsetting::MeshSurfaceOffsetting(const std::vector<glm::dvec3>& points_, const std::vector<std::array<size_t, 3>>& faces_) {
   points = points_;
   faces  = faces_;
@@ -17,11 +19,11 @@ void MeshSurfaceOffsetting::initialize() {
   auto borderTris = getPureBorderTriangles();
   for (auto& tri : borderTris) 
     subdivideTriangle(tri);
-  if (borderTris.size() != 0)
-    fillGraphs();
+  subdivide();
+
+  fillGraphs();
   fillDistances();
-  while (hasInfiniteDistances())
-    spreadDistance();
+  while (spreadDistance());
 }
 
 MeshSurfaceOffsetting::Result MeshSurfaceOffsetting::offset(double isovalue) const {
@@ -113,19 +115,25 @@ std::vector<size_t> MeshSurfaceOffsetting::getPureBorderTriangles() {
   return result;
 }
 
+void MeshSurfaceOffsetting::subdivide() {
+  size_t size = faces.size();
+  for (size_t i = 0;i < size;i++)
+    subdivideTriangle(i);
+}
+
 void MeshSurfaceOffsetting::subdivideTriangle(size_t faceID) {
   auto& face = faces[faceID];
   size_t a = face[0];
   size_t b = face[1];
   size_t c = face[2];
   
-  glm::dvec3 center = (points[a] + points[b] + points[c]) / 2.0;
+  glm::dvec3 center = (points[a] + points[b] + points[c]) / 3.0;
   points.push_back(center);
   border.push_back(false);
   size_t d = points.size() - 1;
-  std::array<size_t, 3> faceA = { a, d,b };
-  std::array<size_t, 3> faceB = { b, d,c };
-  std::array<size_t, 3> faceC = { c, a,d };
+  std::array<size_t, 3> faceA = { a, b, d, };
+  std::array<size_t, 3> faceB = { b, c, d };
+  std::array<size_t, 3> faceC = { c, a, d };
 
   faces[faceID] = faceA;
   faces.push_back(faceB);
@@ -149,38 +157,59 @@ bool MeshSurfaceOffsetting::hasInfiniteDistances() {
   return false;
 }
 
-void MeshSurfaceOffsetting::spreadDistance() {
+bool MeshSurfaceOffsetting::spreadDistance() {
+  bool somethingChanged = false;
   for (size_t faceID = 0; faceID < faces.size(); faceID++) {
     auto& face = faces[faceID];
     std::vector<double> distances = { distancesToBorder[face[0]],distancesToBorder[face[1]],distancesToBorder[face[2]] };
     int amountInfinity = (std::isinf(distances[0]) ? 1 : 0) + (std::isinf(distances[1]) ? 1 : 0) + (std::isinf(distances[2]) ? 1 : 0);
-    if (amountInfinity > 1)
-      continue;
 
-    size_t subjectToChange;
-    size_t A;
-    size_t B;
-    if (distances[0] > distances[1] && distances[0] > distances[2]) {
-      subjectToChange = face[0];
-      A = face[1];
-      B = face[2];
-    }
-    else if (distances[1] > distances[0] && distances[1] > distances[2]) {
-      subjectToChange = face[1];
-      A = face[2];
-      B = face[0];
-    }
-    else {//if (distances[2] > distances[1] && distances[2] > distances[0]) {
-      subjectToChange = face[2];
-      A = face[0];
-      B = face[1];
+    if (amountInfinity <= 1) {
+      size_t subjectToChange;
+      size_t A;
+      size_t B;
+      if (distances[0] > distances[1] && distances[0] > distances[2]) {
+        subjectToChange = face[0];
+        A = face[1];
+        B = face[2];
+      }
+      else if (distances[1] > distances[0] && distances[1] > distances[2]) {
+        subjectToChange = face[1];
+        A = face[2];
+        B = face[0];
+      }
+      else {//if (distances[2] > distances[1] && distances[2] > distances[0]) {
+        subjectToChange = face[2];
+        A = face[0];
+        B = face[1];
+      }
+
+      glm::dvec3 onSegmentPoint = glm::closestPointOnLine(points[subjectToChange], points[A], points[B]);
+      double contenderDistance = glm::distance(points[subjectToChange], onSegmentPoint);
+      if (contenderDistance < distancesToBorder[subjectToChange]) {
+        distancesToBorder[subjectToChange] = contenderDistance;
+        somethingChanged = true;
+      }
     }
 
-    glm::dvec3 onSegmentPoint = glm::closestPointOnLine(points[subjectToChange], points[A], points[B]);
-    double contenderDistance = glm::distance(points[subjectToChange], onSegmentPoint);
-    if (contenderDistance < distancesToBorder[subjectToChange])
-      distancesToBorder[subjectToChange] = contenderDistance;
+    for (int i = 0; i < 3; i++) {
+      auto p1 = face[i];
+      auto p2 = face[(i + 1) % 3];
+      auto p3 = face[(i + 2) % 3];
+      double distanceA = glm::distance(points[p2], points[p1]) + distancesToBorder[p2];
+      double distanceB = glm::distance(points[p3], points[p1]) + distancesToBorder[p3];
+
+      if (distanceA < distancesToBorder[p1]) {
+        distancesToBorder[p1] = distanceA;
+        somethingChanged = true;
+      }
+      if (distanceB < distancesToBorder[p1]) {
+        distancesToBorder[p1] = distanceB;
+        somethingChanged = true;
+      }
+    }
   }
+  return somethingChanged;
 }
 
 
@@ -283,4 +312,14 @@ std::pair<bool, std::vector<glm::dvec3>> MeshSurfaceOffsetting::traceLoop(const 
   }
 
   return std::make_pair(result_isClosed,result_loop);
+}
+
+void MeshSurfaceOffsetting::saveInternalMesh(const std::string& filename) {
+  std::vector<glm::dvec3> data;
+  for (size_t i = 0; i < faces.size(); i++) {
+    data.push_back(points[faces[i][0]]);
+    data.push_back(points[faces[i][1]]);
+    data.push_back(points[faces[i][2]]);
+  }
+  STLWriter::write(filename, data);
 }

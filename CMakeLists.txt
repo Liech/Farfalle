@@ -33,6 +33,8 @@ set(Tools_Files
 	"Source/Tools/LineSimplification.cpp"
 	"Source/Tools/MeshSurfaceOffsetting.cpp"
 	"Source/Tools/MeshSurfaceOffsetting.h"
+	"Source/Tools/STLWriter.cpp"
+	"Source/Tools/STLWriter.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 

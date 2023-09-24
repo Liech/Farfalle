@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <array>
+#include <string>
 
 class MeshSurfaceOffsetting {
 public:
@@ -15,15 +16,18 @@ public:
     std::vector<std::vector<glm::dvec3>> open;
   };
   MeshSurfaceOffsetting::Result offset(double distance) const; //returns loop soup
+
+  void saveInternalMesh(const std::string& filename);
 private:
   void initialize();
   void fillGraphs(); //fills neighbours and borderEdges
   void fillBorder(); //fill border
   std::vector<size_t> getPureBorderTriangles();
+  void subdivide();
   void subdivideTriangle(size_t);
   void fillDistances(); //fill distancesToBorder
   bool hasInfiniteDistances();
-  void spreadDistance(); //spreads from border into the inner and removes infinit distances
+  bool spreadDistance(); //spreads from border into the inner and removes infinit distances
   std::set<std::pair<size_t, char>> getIsoEdges(double distance) const; //result contains edge twices (as of different faces)
   std::pair<size_t, char> getNextEdge(const std::pair<size_t, char>& current, const std::set<std::pair<size_t, char>>& isoEdges) const;     //char == 4 on Not found
   std::pair<size_t, char> getPreviousEdge(const std::pair<size_t, char>& current, const std::set<std::pair<size_t, char>>& isoEdges) const; //char == 4 on Not found 
@@ -33,6 +37,7 @@ private:
   std::vector<glm::dvec3>                                     points; //input (may be changed only by subdivideTriangle)
   std::vector<std::array<size_t, 3>>                          faces;  //input (may be changed only by subdivideTriangle)
   std::vector<bool>                                           border; //size=points.size
+  std::vector<std::pair<glm::dvec3, glm::dvec3>>              borderReference;
   std::vector<double>                                         distancesToBorder; //size=points.size; Initialized with 0 or infinityz
   std::map< std::pair<size_t, char>, std::pair<size_t, char>> neighbours;
   std::set<std::pair<size_t, char>>                           borderEdges;
