@@ -6,7 +6,7 @@ void STLWriter::write(const std::string& filename, const std::vector<glm::dvec3>
   std::ofstream file;
   file.open(filename);
 
-  std::string start = "solid https://github.com/Liech/Yathsou\n";
+  std::string start = "solid https://github.com/Liech\n";
   file.write(start.c_str(),start.size());
 
   std::string outerLoop = "    outer loop\n";
@@ -34,7 +34,7 @@ void STLWriter::write(const std::string& filename, const std::vector<glm::dvec3>
     file.write(endfacet.c_str(),endfacet.size());
   }
 
-  std::string end = "endsolid https://github.com/Liech/Yathsou\n";
+  std::string end = "endsolid https://github.com/Liech\n";
   file.write(end.c_str(),end.size());
   file.close();
 }

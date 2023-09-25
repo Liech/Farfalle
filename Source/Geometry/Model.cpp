@@ -391,9 +391,9 @@ std::unique_ptr<Volume> Model::getVolume() const {
   return std::move(result);
 }
 
-std::pair<std::vector<glm::dvec3>, std::vector<std::array<size_t,3>>> Model::toSoup() {
-  std::vector<glm::dvec3>                 result_vertices;
-  std::vector<std::array<size_t, 3>>      result_indices;
+std::pair<std::vector<glm::dvec3>, std::vector<size_t>> Model::toSoup() {
+  std::vector<glm::dvec3>  result_vertices;
+  std::vector<size_t>      result_indices;
   std::map<CGAL::SM_Vertex_index, size_t> addressMap;
 
   for (CGAL::SM_Vertex_index x : p->mesh.vertices()) {
@@ -415,7 +415,7 @@ std::pair<std::vector<glm::dvec3>, std::vector<std::array<size_t,3>>> Model::toS
         break;
       count++;
     }
-    result_indices.push_back(indices);
+    result_indices.insert(result_indices.end(),indices.begin(),indices.end());
   }
 
   return std::make_pair(result_vertices, result_indices);

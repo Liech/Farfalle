@@ -35,6 +35,8 @@ set(Tools_Files
 	"Source/Tools/MeshSurfaceOffsetting.h"
 	"Source/Tools/STLWriter.cpp"
 	"Source/Tools/STLWriter.h"
+	"Source/Tools/Voxelizer.cpp"
+	"Source/Tools/Voxelizer.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 

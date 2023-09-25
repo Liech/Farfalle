@@ -40,7 +40,7 @@ public:
   void save(const std::string& filename) const;
   std::unique_ptr<Model> from2D(const Mesh2D&) const;
   std::unique_ptr<Volume> getVolume() const;
-  std::pair<std::vector<glm::dvec3>, std::vector<std::array<size_t, 3>>> toSoup();
+  std::pair<std::vector<glm::dvec3>, std::vector<size_t>> toSoup();
 
   size_t                getNumberFaces() const;
   std::array<size_t, 3> getFaceIndices(size_t number) const;

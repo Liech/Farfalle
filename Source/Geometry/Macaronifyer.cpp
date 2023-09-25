@@ -28,23 +28,23 @@ Macaronifyer::~Macaronifyer() {
 std::vector<std::vector<glm::dvec3>> Macaronifyer::macaronify(Model& toNoodlize) const {
   std::vector<std::vector<glm::dvec3>> result;
 
-  result = toNoodlize.getBorder();
-  for (int i = 0; i < result.size(); i++) {
-    result[i].push_back(result[i][0]);
-  }
+  //result = toNoodlize.getBorder();
+  //for (int i = 0; i < result.size(); i++) {
+  //  result[i].push_back(result[i][0]);
+  //}
 
-  auto soup = toNoodlize.toSoup();
-  MeshSurfaceOffsetting offseting(soup.first, soup.second);
-  offseting.saveInternalMesh("dbg/offsetting.stl");
-  auto offset = offseting.offset(0.4);
+  //auto soup = toNoodlize.toSoup();
+  //MeshSurfaceOffsetting offseting(soup.first, soup.second);
+  //offseting.saveInternalMesh("dbg/offsetting.stl");
+  //auto offset = offseting.offset(0.4);
 
-  for (auto& loop : offset.closed) {
-    result.push_back(loop);
-    result[result.size() - 1].push_back(loop[0]);
-  }
-  for (auto& streak : offset.open) {
-    result.push_back(streak);
-  }
+  //for (auto& loop : offset.closed) {
+  //  result.push_back(loop);
+  //  result[result.size() - 1].push_back(loop[0]);
+  //}
+  //for (auto& streak : offset.open) {
+  //  result.push_back(streak);
+  //}
 
   return result;
 }
