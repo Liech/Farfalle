@@ -48,11 +48,12 @@ std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dv
 
   auto& data = *result;
   glm::dvec3 rayDirection = glm::dvec3(0, 0, 1);
-  for (size_t x = 0; x < resolution.x; x++) {
+#pragma omp parallel for
+  for (int x = 0; x < resolution.x; x++) {
     for (size_t y = 0; y < resolution.y; y++) {
       size_t stackAddress = x + resolution.x * y;
       size_t resultOffset = resolution.z * resolution.y * x + resolution.z * y;
-      glm::dvec3 rayStart = start+glm::dvec3(span.x * ((double)x / (double)resolution.x), span.y * ((double)y / (double)resolution.y), 0);
+      glm::dvec3 rayStart = start+glm::dvec3(span.x * ((double)x / (double)resolution.x), span.y * ((double)y / (double)resolution.y), 0) - rayDirection;
       std::vector<double> intersections;
       for (auto& tri : triangleStack[stackAddress]) {
         const glm::dvec3& a = vertecies[indices[tri]];
@@ -135,7 +136,7 @@ void Voxelizer::boxelize(const std::vector<bool>& data, const glm::dvec3& start,
     size_t x = i / (resolution.y * resolution.z);
     size_t y = (i % (resolution.y * resolution.z)) / resolution.z;
     size_t z = i % resolution.z;
-    glm::dvec3 point = start + glm::dvec3(x * voxelSize.x, y * voxelSize.y, z * voxelSize.z);
+    glm::dvec3 point = start + glm::dvec3(x * voxelSize.x, y * voxelSize.y, z * voxelSize.z) - glm::dvec3(0.5,0.5,-0.5);
 
     //bard
     glm::dvec3 p0 = point + glm::dvec3(0          , 0          , 0);
