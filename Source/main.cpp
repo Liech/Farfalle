@@ -183,24 +183,28 @@ int main() {
   std::vector<glm::dvec3> triangles;
   std::vector<glm::dvec3> triangles2;
 
-  //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  //std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  //auto boat = model->toSoup();
-  //auto vox = v.voxelize(boat.first, boat.second, glm::dvec3(0, 0, 0), model->getMax(), glm::ivec3(32, 32, 32));
-  //STLWriter::write("dbg/box2.stl", triangles2);
-  //v.boxelize(*vox, model->getMin(), model->getMax(), glm::ivec3(32, 32, 32), triangles2);
+  std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  std::shared_ptr<Model> model = std::make_shared<Model>(filename);
+  auto boat = model->toSoup();
+  glm::ivec3 resolution = glm::ivec3(8, 8, 8)*8;
+  std::cout << "voxelize..." << std::endl;
+  auto vox = v.voxelize(boat.first, boat.second, model->getMin()-glm::dvec3(0.5,0.5,0.5), model->getMax() + glm::dvec3(1, 1, 1), resolution);
+  std::cout << "boxelize..." << std::endl;
+  v.boxelize(*vox, model->getMin(), model->getMax(), resolution, triangles2);
+  std::cout << "save..." << std::endl;
+  STLWriter::write("dbg/box2.stl", triangles2);
 
-  v.boxelize({ true}, glm::dvec3(0.3, 0.3, 0.3), glm::dvec3(0.6, 0.6, 0.6), glm::ivec3(1,1,1), triangles);
+  //v.boxelize({ true}, glm::dvec3(0.3, 0.3, 0.3), glm::dvec3(0.6, 0.6, 0.6), glm::ivec3(1,1,1), triangles);
 
-  std::vector<size_t> indices;
-  for (size_t i = 0; i < triangles.size(); i++)
-    indices.push_back(i);
+  //std::vector<size_t> indices;
+  //for (size_t i = 0; i < triangles.size(); i++)
+  //  indices.push_back(i);
 
-  glm::ivec3 resolution = glm::ivec3(16, 16, 16);
-  glm::dvec3 start = glm::dvec3(-1, 0, 0);
-  glm::dvec3 end = glm::dvec3(2,1,1);
-  auto vox = v.voxelize(triangles, indices, start, end, resolution);
-  v.boxelize(*vox, start, end, resolution, triangles2);
+  //glm::ivec3 resolution = glm::ivec3(16, 16, 16);
+  //glm::dvec3 start = glm::dvec3(-1, 0, 0);
+  //glm::dvec3 end = glm::dvec3(2,1,1);
+  //auto vox = v.voxelize(triangles, indices, start, end, resolution);
+  //v.boxelize(*vox, start, end, resolution, triangles2);
 
-  STLWriter::write("dbg/box.stl", triangles2);
+  //STLWriter::write("dbg/box.stl", triangles2);
 }

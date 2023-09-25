@@ -24,6 +24,12 @@ std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dv
 
   for (size_t i = 0; i < amountTriangles; i++) {
     size_t address = i * 3;
+    const glm::dvec3& a = vertecies[indices[address]];
+    const glm::dvec3& b = vertecies[indices[address + 1]];
+    const glm::dvec3& c = vertecies[indices[address + 2]];
+    double planarity = glm::cross(glm::normalize(a - b), glm::normalize(c - b)).z;
+    if (std::abs(planarity) < 1e-6)
+      continue;
     glm::dvec2 out_start;
     glm::dvec2 out_end;
     box(vertecies[indices[address + 0]], vertecies[indices[address + 1]], vertecies[indices[address + 2]],out_start,out_end);
@@ -46,7 +52,7 @@ std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dv
     for (size_t y = 0; y < resolution.y; y++) {
       size_t stackAddress = x + resolution.x * y;
       size_t resultOffset = resolution.z * resolution.y * x + resolution.z * y;
-      glm::dvec3 rayStart = start+glm::dvec3((double)x / (double)resolution.x, (double)y / (double)resolution.y, 0);
+      glm::dvec3 rayStart = start+glm::dvec3(span.x * ((double)x / (double)resolution.x), span.y * ((double)y / (double)resolution.y), 0);
       std::vector<double> intersections;
       for (auto& tri : triangleStack[stackAddress]) {
         const glm::dvec3& a = vertecies[indices[tri]];
