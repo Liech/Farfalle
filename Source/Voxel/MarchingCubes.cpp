@@ -386,8 +386,79 @@ glm::dvec3 MarchingCubes::VertexInterp(double isolevel, const glm::dvec3& p1, co
   return(p);
 }
 
-std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<bool>&, const glm::dvec3& origin, const glm::dvec3& voxelSize) {
+std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<bool>& data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::ivec3& resolution) {
   std::vector<glm::dvec3> result;
+
+  std::vector<std::vector<glm::dvec3>> subResult;
+  subResult.resize(resolution.x);
+
+#pragma omp parallel for
+  for (int x = 0; x < resolution.x - 1; x++) {
+    for (size_t y = 0; y < resolution.y - 1; y++) {
+      for (size_t z = 0; z < resolution.z - 1; z++) {
+        std::array<double, 8> values = {
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z + 1)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z + 1)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)] ? 1 : 0
+        };
+        glm::dvec3 o = origin + glm::dvec3(x*voxelSize.x,y*voxelSize.y,z*voxelSize.z+ voxelSize.z);
+        std::array<glm::dvec3, 8> positions = {
+         o
+        ,o + glm::dvec3(voxelSize.x,           0, 0)
+        ,o + glm::dvec3(voxelSize.x, voxelSize.y, 0)
+        ,o + glm::dvec3(0          , voxelSize.y, 0)
+        ,o + glm::dvec3(0          ,           0, voxelSize.z)
+        ,o + glm::dvec3(voxelSize.x,           0, voxelSize.z)
+        ,o + glm::dvec3(voxelSize.x, voxelSize.y, voxelSize.z)
+        ,o + glm::dvec3(0          , voxelSize.y, voxelSize.z)
+        };
+        auto sub = polygonize(positions, values, 0.5);
+        subResult[x].insert(subResult[x].begin(), sub.begin(), sub.end());
+      }
+    }
+  }
+  for (auto sub : subResult) {
+    result.insert(result.begin(), sub.begin(), sub.end());
+  }
+  return result;
+}
+
+std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::ivec3& resolution, double isovalue) {
+  std::vector<glm::dvec3> result;
+
+  for (size_t x = 0; x < resolution.x - 1; x++) {
+    for (size_t y = 0; y < resolution.y - 1; y++) {
+      for (size_t z = 0; z < resolution.z - 1; z++) {
+        std::array<double, 8> values = {
+          data[resolution.z * resolution.y * (x  ) + resolution.z * (y  ) + (z  )],
+          data[resolution.z * resolution.y * (x+1) + resolution.z * (y  ) + (z  )],
+          data[resolution.z * resolution.y * (x+1) + resolution.z * (y+1) + (z  )],
+          data[resolution.z * resolution.y * (x  ) + resolution.z * (y+1) + (z  )],
+          data[resolution.z * resolution.y * (x  ) + resolution.z * (y  ) + (z+1)],
+          data[resolution.z * resolution.y * (x+1) + resolution.z * (y  ) + (z+1)],
+          data[resolution.z * resolution.y * (x+1) + resolution.z * (y+1) + (z+1)],
+          data[resolution.z * resolution.y * (x  ) + resolution.z * (y+1) + (z+1)]
+        };
+        std::array<glm::dvec3, 8> positions = {
+        origin
+        ,origin + glm::dvec3(voxelSize.x,           0, 0)
+        ,origin + glm::dvec3(voxelSize.x, voxelSize.y, 0)
+        ,origin + glm::dvec3(0          , voxelSize.y, 0)
+        ,origin + glm::dvec3(0          ,           0, voxelSize.z)
+        ,origin + glm::dvec3(voxelSize.x,           0, voxelSize.z)
+        ,origin + glm::dvec3(voxelSize.x, voxelSize.y, voxelSize.z)
+        ,origin + glm::dvec3(0          , voxelSize.y, voxelSize.z)
+        };
+        auto sub = polygonize(positions, values, isovalue);
+        result.insert(result.begin(), sub.begin(), sub.end());
+      }
+    }
+  }
 
   return result;
 }

@@ -24,6 +24,7 @@
 #include "Geometry/Primitives.h"
 
 #include "Voxel/Voxelizer.h"
+#include "Voxel/MarchingCubes.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -187,11 +188,18 @@ int main() {
   std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
   auto boat = model->toSoup();
-  glm::ivec3 resolution = glm::ivec3(8, 8, 8)*8;
+  glm::ivec3 resolution = glm::ivec3(1, 1, 1)*1024;
   std::cout << "voxelize..." << std::endl;
-  auto vox = v.voxelize(boat.first, boat.second, model->getMin(), model->getMax(), resolution);
-  std::cout << "boxelize..." << std::endl;
-  v.boxelize(*vox, model->getMin(), model->getMax(), resolution, triangles2);
+  glm::dvec3 min = model->getMin() - (model->getMax()- model->getMin())/10.0;
+  glm::dvec3 max = model->getMax() + (model->getMax() - model->getMin()) / 10.0;
+  glm::dvec3 span = max-min;
+  glm::dvec3 voxelSize = glm::dvec3(span.x / resolution.x, span.y / resolution.y, span.z / resolution.z);
+
+  auto vox = v.voxelize(boat.first, boat.second, min, max, resolution);
+  //std::cout << "boxelize..." << std::endl;
+  //v.boxelize(*vox, model->getMin(), model->getMax(), resolution, triangles2);
+  std::cout << "marching cubes..." << std::endl;
+  triangles2 = MarchingCubes::polygonize(*vox, min, voxelSize, resolution);
   std::cout << "save..." << std::endl;
   STLWriter::write("dbg/box2.stl", triangles2);
 

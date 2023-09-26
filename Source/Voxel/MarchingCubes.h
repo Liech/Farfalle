@@ -6,9 +6,9 @@
 
 //https://paulbourke.net/geometry/polygonise/
 class MarchingCubes {
-
-  //static std::vector<glm::dvec3> polygonize(std::vector<double>, glm::dvec3 origin, glm::dvec3 voxelSize, double isovalue);
-  static std::vector<glm::dvec3> polygonize(const std::vector<bool>&, const glm::dvec3& origin, const glm::dvec3& voxelSize);
+public:
+  static std::vector<glm::dvec3> polygonize(const std::vector<bool>&, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::ivec3& resolution);
+  static std::vector<glm::dvec3> polygonize(const std::vector<double>&, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::ivec3& resolution, double isovalue);
   static std::vector<glm::dvec3> polygonize(const std::array<glm::dvec3,8>& p, const std::array<double,8>& val, double isolevel);
 
   //static std::vector<double> pack(std::vector<bool>)
