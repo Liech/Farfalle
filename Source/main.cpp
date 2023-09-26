@@ -198,8 +198,12 @@ int main() {
   auto vox = v.voxelize(boat.first, boat.second, min, max, resolution);
   //std::cout << "boxelize..." << std::endl;
   //v.boxelize(*vox, model->getMin(), model->getMax(), resolution, triangles2);
+  std::cout << "pack..." << std::endl;
+  int packFactor = 8;
+  auto pack = MarchingCubes::pack(*vox, resolution, glm::ivec3(1, 1, 1) * packFactor);
   std::cout << "marching cubes..." << std::endl;
-  triangles2 = MarchingCubes::polygonize(*vox, min, voxelSize, resolution);
+  //triangles2 = MarchingCubes::polygonize(pack, min, voxelSize, resolution);
+  triangles2 = MarchingCubes::polygonize(pack, min, voxelSize * (double)packFactor, resolution/ packFactor, 0.5);
   std::cout << "save..." << std::endl;
   STLWriter::write("dbg/box2.stl", triangles2);
 

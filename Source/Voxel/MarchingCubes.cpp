@@ -448,7 +448,7 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& dat
           data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)],
           data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)]
         };
-        glm::dvec3 o = origin + glm::dvec3(x*voxelSize.x,y*voxelSize.y,z*voxelSize.z+ voxelSize.z);
+        glm::dvec3 o = origin + glm::dvec3(x*voxelSize.x,y*voxelSize.y,z*voxelSize.z+ voxelSize.z) + glm::dvec3(0.5*voxelSize.x,0,0);
         std::array<glm::dvec3, 8> positions = {
          o
         ,o + glm::dvec3(voxelSize.x,           0, 0)
@@ -470,8 +470,26 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& dat
   return result;
 }
 
-std::vector<double> MarchingCubes::pack(const std::vector<bool>&, const glm::ivec3& resolution, const glm::ivec3& oneVoxelSize) {
+std::vector<double> MarchingCubes::pack(const std::vector<bool>& data, const glm::ivec3& resolution, const glm::ivec3& oneVoxelSize) {
   std::vector<double> result;
+  size_t packSize = oneVoxelSize.x * oneVoxelSize.y * oneVoxelSize.z;
+  result.resize(data.size() / packSize);
+  glm::ivec3 resultResolution = glm::ivec3(resolution.x / oneVoxelSize.x, resolution.y / oneVoxelSize.y, resolution.z / oneVoxelSize.z);
+
+//#pragma omp parallel for
+  for (long long i = 0; i < result.size(); i++) {
+    glm::ivec3 coord = glm::ivec3(i / (resultResolution.y* resultResolution.z), (i / resultResolution.z) % resultResolution.y, i % resultResolution.z);
+    size_t val = 0;
+    size_t offset = oneVoxelSize.z * coord.z + coord.y * oneVoxelSize.y * resolution.z + coord.x * oneVoxelSize.y * resolution.z * resolution.y;
+    for (int x = 0; x < oneVoxelSize.x; x++)
+      for (int y = 0; y < oneVoxelSize.y; y++)
+        for (int z = 0; z < oneVoxelSize.z; z++) {
+          size_t address = z + y * resolution.z + x * resolution.z * resolution.y + offset;
+          if (data[address])
+            val++;
+        }
+    result[i] = (double)val / (double)packSize;
+   }
 
   return result;
 }
