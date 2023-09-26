@@ -35,8 +35,6 @@ set(Tools_Files
 	"Source/Tools/MeshSurfaceOffsetting.h"
 	"Source/Tools/STLWriter.cpp"
 	"Source/Tools/STLWriter.h"
-	"Source/Tools/Voxelizer.cpp"
-	"Source/Tools/Voxelizer.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 
@@ -81,6 +79,13 @@ set(Geometry_Files
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
 
+set(Voxel_Files
+	"Source/Voxel/Voxelizer.cpp"
+	"Source/Voxel/Voxelizer.h"
+	"Source/Voxel/MarchingCubes.cpp"
+	"Source/Voxel/MarchingCubes.h"
+)
+source_group("Source/Voxel" FILES ${Voxel_Files})
 
 set(Lib_Files
 	"Lib/psimpl/psimpl.h"
@@ -90,6 +95,7 @@ source_group("Lib" FILES ${Lib_Files})
 set(ALL_FILES
     ${Source_Files}
     ${Tools_Files}
+    ${Voxel_Files}
     ${GCode_Files}
     ${Geometry_Files}
     ${Lib_Files}

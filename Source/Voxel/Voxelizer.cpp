@@ -68,7 +68,7 @@ std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dv
       intersections.erase(std::unique(intersections.begin(), intersections.end(), predicate), intersections.end());
 
       for (auto& zIntersection : intersections) {
-        size_t zPos = ((zIntersection - start.z) / span.z) * resolution.z;
+        size_t zPos = std::floor(((zIntersection - start.z) / span.z) * resolution.z);
         size_t memoryAddress = zPos + resultOffset;
         size_t max = resultOffset + resolution.z;
         for (size_t i = memoryAddress; i < max; i++)

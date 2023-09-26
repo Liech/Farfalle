@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 
 #include "Tools/String2File.h"
-#include "Tools/Voxelizer.h"
 #include "Tools/STLWriter.h"
 
 #include "GCode/Travel.h"
@@ -23,6 +22,8 @@
 #include "Geometry/Macaronifyer.h"
 #include "Geometry/Volume.h"
 #include "Geometry/Primitives.h"
+
+#include "Voxel/Voxelizer.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -186,7 +187,7 @@ int main() {
   std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
   auto boat = model->toSoup();
-  glm::ivec3 resolution = glm::ivec3(8, 8, 8)*16;
+  glm::ivec3 resolution = glm::ivec3(8, 8, 8)*8;
   std::cout << "voxelize..." << std::endl;
   auto vox = v.voxelize(boat.first, boat.second, model->getMin(), model->getMax(), resolution);
   std::cout << "boxelize..." << std::endl;
