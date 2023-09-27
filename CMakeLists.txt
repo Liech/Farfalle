@@ -84,6 +84,8 @@ set(Voxel_Files
 	"Source/Voxel/Voxelizer.h"
 	"Source/Voxel/MarchingCubes.cpp"
 	"Source/Voxel/MarchingCubes.h"
+	"Source/Voxel/DistanceMap.cpp"
+	"Source/Voxel/DistanceMap.h"
 )
 source_group("Source/Voxel" FILES ${Voxel_Files})
 

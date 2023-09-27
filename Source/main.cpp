@@ -25,6 +25,7 @@
 
 #include "Voxel/Voxelizer.h"
 #include "Voxel/MarchingCubes.h"
+#include "Voxel/DistanceMap.h"
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
