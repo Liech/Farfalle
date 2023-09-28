@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <functional>
 
 #include <glm/glm.hpp>
 
@@ -8,31 +9,52 @@
 //https://tc18.org/DataSets/Code/SEDT/index.html
 //Based on sedt
 //sedt is a simple program to compute the squared Euclidean distance transform of a binary object (using the VOL format) in optimal time (i.e. in O(n) if n is the number of voxels). It is an implementation of the Saito and Toriwaki algorithm [SAITO_1994] with the optimization proposed by [HIRATA_1996] and [MEIJSTER_2000].
-//template<typename T>
+template<typename T>
 class DistanceMap {
 public:
-  //static std::vector<T> distanceMap(const std::vector<bool>& data, const glm::ivec3& resolution) {
-  //  std::vector<T> result;
+  std::vector<T> distanceMap(const std::vector<bool>& data, const glm::ivec3& resolution) {
+    std::vector<T> sdt_x;
+    sdt_x.resize(data.size());
+    std::vector<T> sdt_xy;
+    sdt_xy.resize(data.size());
 
-  //  return result;
-  //}
+    phaseSaitoX(data, sdt_x,resolution);
+    phaseSaitoY(sdt_x, sdt_xy,resolution);
+    phaseSaitoZ(sdt_xy, sdt_x, resolution); //We reuse sdt_x to store the final result!!
+
+    return sdt_x;
+  }
+
+  std::vector<bool> map(const std::vector<T>& data, std::function<bool(T)> condition) {
+    assert(data.size() % 8 == 0);
+    std::vector<bool> result;
+    result.resize(data.size());
+
+#pragma omp parallel for
+    for (long long i = 0; i < data.size(); i += 8) { //std::vector<bool> is special and partially not thread safe
+      for (int j = 0; j < 8; j++)
+        result[i + j] = condition(data[i + j]);
+    }
+    return result;
+  }
+
 private:
   //operators.cc
-  long sum(long a, long b)
+  T sum(T a, T b)
   {
     if ((a == INFTY) || (b == INFTY))
       return INFTY;
     else
       return a + b;
   }
-  long prod(long a, long b)
+  T prod(T a, T b)
   {
     if ((a == INFTY) || (b == INFTY))
       return INFTY;
     else
       return a * b;
   }
-  long opp(long a) {
+  T opp(T a) {
     if (a == INFTY) {
       return INFTY;
     }
@@ -40,7 +62,7 @@ private:
       return -a;
     }
   }
-  long intdivint(long divid, long divis) {
+  T intdivint(T divid, T divis) {
     if (divis == 0)
       return  INFTY;
     if (divid == INFTY)
@@ -48,50 +70,54 @@ private:
     else
       return  divid / divis;
   }
-  long F(int x, int i, long gi2)
+  T F(int x, int i, T gi2)
   {
     return sum((x - i) * (x - i), gi2);
   }
-  long Sep(int i, int u, long gi2, long gu2) {
-    return intdivint(sum(sum((long)(u * u - i * i), gu2), opp(gi2)), 2 * (u - i));
+  T Sep(int i, int u, T gi2, T gu2) {
+    return intdivint(sum(sum((T)(u * u - i * i), gu2), opp(gi2)), 2 * (u - i));
   }
-  void phaseSaitoX(const std::vector<bool>& V, std::vector<long>& sdt_x, const glm::ivec3& resolution)
+  size_t getAddress(int x, int y, int z, const glm::ivec3& resolution) const {
+    return z + resolution.z * y + resolution.z * resolution.y * x;
+  }
+  void phaseSaitoX(const std::vector<bool>& V, std::vector<T>& sdt_x, const glm::ivec3& resolution)
   {
-    auto Vt = [&V, resolution](int x, int y, int z) -> bool {
-      return V[z + resolution.z * y + resolution.z * resolution.y * x];
-    };
-    auto Lt = [&sdt_x, resolution](int x, int y, int z) -> long& {
-      return sdt_x[z + resolution.z * y + resolution.z * resolution.y * x];
-    };
-    for (int z = 0; z < resolution.z; z++)
+#pragma omp parallel for
+    for (int z = 0; z < resolution.z; z++) {
       for (int y = 0; y < resolution.y; y++)
       {
-        if (Vt(0, y, z) == 0)
-          Lt(0, y, z) = 0;
+        size_t addressA = getAddress(0, y, z, resolution);
+        if (V[addressA] == 0)
+          sdt_x[addressA] = 0;
         else
-          Lt(0, y, z) = INFTY;
+          sdt_x[addressA] = INFTY;
 
         // Forward scan
-        for (int x = 1; x < resolution.x; x++)
-          if (Vt(x, y, z) == 0)
-            Lt(x, y, z) = 0;
-          else
-            Lt(x, y, z) = sum(1, Lt(x - 1, y, z));;
+        for (int x = 1; x < resolution.x; x++) {
+          size_t addressB = getAddress(x, y, z, resolution);
+          if (V[addressB] == 0)
+            sdt_x[addressB] = 0;
+          else {
+            size_t prev = getAddress(x - 1, y, z, resolution);
+            T vv = sum(1, sdt_x[prev]);
+            sdt_x[addressB] = vv;
+          }
+        }
 
         //Backward scan
-        for (int x = resolution.x - 2; x >= 0; x--)
-          if (Lt(x + 1, y, z) < Lt(x, y, z))
-            Lt(x, y, z) = sum(1, Lt(x + 1, y, z));
+        for (int x = resolution.x - 2; x >= 0; x--) {
+          size_t backward = getAddress(x + 1, y, z, resolution);
+          size_t current = getAddress(x, y, z, resolution);
+          if (sdt_x[backward] < sdt_x[current]) {
+            T vv = sum(1, sdt_x[backward]);
+            sdt_x[current] = vv;
+          }
+        }
       }
+    }
   }
-  void phaseSaitoY(const std::vector<long>& sdt_x_, std::vector<long>& sdt_xy_, const glm::ivec3& resolution)
+  void phaseSaitoY(const std::vector<T>& sdt_x, std::vector<T>& sdt_xy, const glm::ivec3& resolution)
   {
-    auto sdt_x = [&sdt_x_, resolution](int x, int y, int z) -> long {
-      return sdt_x_[z + resolution.z * y + resolution.z * resolution.y * x];
-    };
-    auto sdt_xy = [&sdt_xy_, resolution](int x, int y, int z) -> long& {
-      return sdt_xy_[z + resolution.z * y + resolution.z * resolution.y * x];
-    };
     std::vector<int> s;
     s.resize(resolution.y); //Center of the upper envelope parabolas
     std::vector<int> t;
@@ -99,7 +125,7 @@ private:
     int q;
     int w;
 
-    for (int z = 0; z < resolution.z; z++)
+    for (int z = 0; z < resolution.z; z++) {
       for (int x = 0; x < resolution.x; x++)
       {
         q = 0;
@@ -110,8 +136,8 @@ private:
         for (int u = 1; u < resolution.y; u++)
         {
           while ((q >= 0) &&
-            (F(t[q], s[q], prod(sdt_x(x, s[q], z), sdt_x(x, s[q], z))) >
-            F(t[q], u, prod(sdt_x(x, u, z), sdt_x(x, u, z))))
+            (F(t[q], s[q], prod(sdt_x[getAddress(x, s[q], z, resolution)], sdt_x[getAddress(x, s[q], z, resolution)])) >
+            F(t[q], u, prod(sdt_x[getAddress(x, u, z, resolution)], sdt_x[getAddress(x, u, z, resolution)])))
             )
             q--;
 
@@ -124,8 +150,8 @@ private:
           {
             w = 1 + Sep(s[q],
               u,
-              prod(sdt_x(x, s[q], z), sdt_x(x, s[q], z)),
-              prod(sdt_x(x, u, z), sdt_x(x, u, z)));
+              prod(sdt_x[getAddress(x, s[q], z, resolution)], sdt_x[getAddress(x, s[q], z, resolution)]),
+              prod(sdt_x[getAddress(x, u, z, resolution)], sdt_x[getAddress(x, u, z, resolution)]));
 
             if (w < resolution.y)
             {
@@ -139,20 +165,15 @@ private:
         //Backward Scan
         for (int u = resolution.y - 1; u >= 0; --u)
         {
-          sdt_xy(x, u, z) = F(u, s[q], prod(sdt_x(x, s[q], z), sdt_x(x, s[q], z)));
+          sdt_xy[getAddress(x, u, z, resolution)] = F(u, s[q], prod(sdt_x[getAddress(x, s[q], z, resolution)], sdt_x[getAddress(x, s[q], z, resolution)]));
           if (u == t[q])
             q--;
         }
       }
+    }
   }
-  void phaseSaitoZ(const std::vector<long>& sdt_xy, std::vector<long>& sdt_xyz, const glm::ivec3& resolution)
+  void phaseSaitoZ(const std::vector<T>& sdt_xy, std::vector<T>& sdt_xyz, const glm::ivec3& resolution)
   {
-    auto xyz = [&sdt_xyz, resolution](int x, int y, int z) -> long& {
-      return sdt_xyz[z + resolution.z * y + resolution.z * resolution.y * x];
-    };
-    auto xy = [&sdt_xy, resolution](int x, int y, int z) -> long{
-      return sdt_xy[y + resolution.z * resolution.y * x];
-    };
     std::vector<int> s;
     s.resize(resolution.z); //Center of the upper envelope parabolas
     std::vector<int> t;
@@ -160,7 +181,7 @@ private:
     int q;
     int w;
 
-    for (int y = 0; y < resolution.y; y++)
+    for (int y = 0; y < resolution.y; y++) {
       for (int x = 0; x < resolution.x; x++)
       {
         q = 0;
@@ -171,8 +192,8 @@ private:
         for (int u = 1; u < resolution.z; u++)
         {
           while ((q >= 0) &&
-            (F(t[q], s[q], xy(x, y, s[q])) >
-            F(t[q], u, xy(x, y, u)))
+            (F(t[q], s[q], sdt_xy[getAddress(x, y, s[q], resolution)]) >
+            F(t[q], u, sdt_xy[getAddress(x, y, u, resolution)]))
             )
             q--;
 
@@ -181,12 +202,12 @@ private:
             q = 0;
             s[0] = u;
           }
-          else 
+          else
           {
             w = 1 + Sep(s[q],
               u,
-              xy(x, y, s[q]),
-              xy(x, y, u));
+              sdt_xy[getAddress(x, y, s[q], resolution)],
+              sdt_xy[getAddress(x, y, u, resolution)]);
 
             if (w < resolution.z)
             {
@@ -200,10 +221,11 @@ private:
         //Backward Scan
         for (int u = resolution.z - 1; u >= 0; --u)
         {
-          xyz(x, y, u) = F(u, s[q], xy(x, y, s[q]));
+          sdt_xyz[getAddress(x, y, u, resolution)] = F(u, s[q], sdt_xy[getAddress(x, y, s[q], resolution)]);
           if (u == t[q])
             q--;
         }
       }
+    }
   }
 };
