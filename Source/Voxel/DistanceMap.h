@@ -39,7 +39,15 @@ public:
   }
 
   std::vector<T> distanceMapXY(const std::vector<bool>& data, const glm::ivec3& resolution) {
-    return distanceMap(data, resolution);
+    std::vector<T> sdt_x;
+    sdt_x.resize(data.size());
+    std::vector<T> sdt_xy;
+    sdt_xy.resize(data.size());
+
+    phaseSaitoX(data, sdt_x, resolution);
+    phaseSaitoY(sdt_x, sdt_xy, resolution);
+
+    return sdt_xy;
   }
 
 private:

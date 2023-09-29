@@ -91,7 +91,7 @@ void slice() {
   //nef(*model);
 
   int layerAmount = ((model->getMax()[2] - model->getMin()[2]) / geometry.layerHeight) + 1;
-  layerAmount = 1;
+  //layerAmount = 20;
   int startLayer = 0;
 
   SliceConfig config;
@@ -110,14 +110,14 @@ void slice() {
   }
 
   int progress = 0;
-#pragma omp parallel for
-  for (int i = 0; i < layerAmount; i++) {
-    tools[i]->cut();
-
-#pragma omp atomic
-    progress++;
-    std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
-  }
+//#pragma omp parallel for
+//  for (int i = 0; i < layerAmount; i++) {
+//    tools[i]->cut();
+//
+//#pragma omp atomic
+//    progress++;
+//    std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
+//  }
 
   std::vector<std::vector<glm::dvec3>> pasta;
   if (spaghetti) {
