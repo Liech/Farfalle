@@ -129,10 +129,10 @@ void slice() {
     }
   }
   if (macaroni) {
-    Macaronifyer noodlizer(config);
+    Macaronifyer noodlizer(*model, config);
     for (int i = 0; i < layerAmount; i++) {
       std::cout << "Macaronification: " << i << "/" << layerAmount << std::endl;
-      auto subPasta = noodlizer.macaronify(tools[i]->getResult());
+      auto subPasta = noodlizer.macaronify(*tools[i]->getModel());
       pasta.insert(pasta.end(), subPasta.begin(), subPasta.end());
     }
   }
@@ -181,36 +181,37 @@ void slice() {
 }
 
 int main() {
-  Voxelizer v;
+  slice();
+  //Voxelizer v;
 
-  std::vector<glm::dvec3> triangles;
-  std::vector<glm::dvec3> triangles2;
+  //std::vector<glm::dvec3> triangles;
+  //std::vector<glm::dvec3> triangles2;
 
-  std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  auto boat = model->toSoup();
-  glm::ivec3 resolution = glm::ivec3(1, 1, 1)*128;
-  std::cout << "voxelize..." << std::endl;
-  glm::dvec3 min = model->getMin() - (model->getMax()- model->getMin())/10.0;
-  glm::dvec3 max = model->getMax() + (model->getMax() - model->getMin()) / 10.0;
-  glm::dvec3 span = max-min;
-  glm::dvec3 voxelSize = glm::dvec3(span.x / resolution.x, span.y / resolution.y, span.z / resolution.z);
+  //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
+  //std::shared_ptr<Model> model = std::make_shared<Model>(filename);
+  //auto boat = model->toSoup();
+  //glm::ivec3 resolution = glm::ivec3(1, 1, 1)*128;
+  //std::cout << "voxelize..." << std::endl;
+  //glm::dvec3 min = model->getMin() - (model->getMax()- model->getMin())/10.0;
+  //glm::dvec3 max = model->getMax() + (model->getMax() - model->getMin()) / 10.0;
+  //glm::dvec3 span = max-min;
+  //glm::dvec3 voxelSize = glm::dvec3(span.x / resolution.x, span.y / resolution.y, span.z / resolution.z);
 
-  auto vox = v.voxelize(boat.first, boat.second, min, max, resolution);
-  //std::cout << "boxelize..." << std::endl;
-  //v.boxelize(*vox, model->getMin(), model->getMax(), resolution, triangles2);
-  //std::cout << "pack..." << std::endl;
-  //int packFactor = 8;
-  //auto pack = MarchingCubes::pack(*vox, resolution, glm::ivec3(1, 1, 1) * packFactor);
-  std::cout << "marching cubes..." << std::endl;
-  auto distanceMap = DistanceMap<int>().distanceMap(*vox, resolution);
+  //auto vox = v.voxelize(boat.first, boat.second, min, max, resolution);
+  ////std::cout << "boxelize..." << std::endl;
+  ////v.boxelize(*vox, model->getMin(), model->getMax(), resolution, triangles2);
+  ////std::cout << "pack..." << std::endl;
+  ////int packFactor = 8;
+  ////auto pack = MarchingCubes::pack(*vox, resolution, glm::ivec3(1, 1, 1) * packFactor);
+  //std::cout << "marching cubes..." << std::endl;
+  //auto distanceMap = DistanceMap<int>().distanceMap(*vox, resolution);
 
-  for (int i = 0; i < 30; i++) {
-    std::cout << i << std::endl;
-    auto unpack = DistanceMap<int>().map(distanceMap, [i](int distance) { return distance > i; });
-    triangles2 = MarchingCubes::polygonize(unpack, min, voxelSize, resolution);
-    STLWriter::write("dbg/erode" + std::to_string(i) + ".stl", triangles2);
-  }
+  //for (int i = 0; i < 30; i++) {
+  //  std::cout << i << std::endl;
+  //  auto unpack = DistanceMap<int>().map(distanceMap, [i](int distance) { return distance > i; });
+  //  triangles2 = MarchingCubes::polygonize(unpack, min, voxelSize, resolution);
+  //  STLWriter::write("dbg/erode" + std::to_string(i) + ".stl", triangles2);
+  //}
 
   //v.boxelize({ true}, glm::dvec3(0.3, 0.3, 0.3), glm::dvec3(0.6, 0.6, 0.6), glm::ivec3(1,1,1), triangles);
 

@@ -38,6 +38,10 @@ public:
     return result;
   }
 
+  std::vector<T> distanceMapXY(const std::vector<bool>& data, const glm::ivec3& resolution) {
+    return distanceMap(data, resolution);
+  }
+
 private:
   //operators.cc
   T sum(T a, T b)
@@ -122,13 +126,13 @@ private:
     s.resize(resolution.y); //Center of the upper envelope parabolas
     std::vector<int> t;
     t.resize(resolution.y); //Separating index between 2 upper envelope parabolas 
-    int q;
-    int w;
 
+
+//#pragma omp parallel for
     for (int z = 0; z < resolution.z; z++) {
       for (int x = 0; x < resolution.x; x++)
       {
-        q = 0;
+        int q = 0;
         s[0] = 0;
         t[0] = 0;
 
@@ -148,7 +152,7 @@ private:
           }
           else
           {
-            w = 1 + Sep(s[q],
+            int w = 1 + Sep(s[q],
               u,
               prod(sdt_x[getAddress(x, s[q], z, resolution)], sdt_x[getAddress(x, s[q], z, resolution)]),
               prod(sdt_x[getAddress(x, u, z, resolution)], sdt_x[getAddress(x, u, z, resolution)]));
@@ -178,13 +182,12 @@ private:
     s.resize(resolution.z); //Center of the upper envelope parabolas
     std::vector<int> t;
     t.resize(resolution.z); //Separating index between 2 upper envelope parabolas 
-    int q;
-    int w;
 
+//#pragma omp parallel for
     for (int y = 0; y < resolution.y; y++) {
       for (int x = 0; x < resolution.x; x++)
       {
-        q = 0;
+        int q = 0;
         s[0] = 0;
         t[0] = 0;
 
@@ -204,7 +207,7 @@ private:
           }
           else
           {
-            w = 1 + Sep(s[q],
+            int w = 1 + Sep(s[q],
               u,
               sdt_xy[getAddress(x, y, s[q], resolution)],
               sdt_xy[getAddress(x, y, u, resolution)]);
