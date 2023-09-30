@@ -50,12 +50,8 @@ Macaronifyer::Macaronifyer(Model& mainModel, const SliceConfig& config_) : confi
     std::cout << "    Triangles: " << tri.size() << std::endl;
     if (tri.size() == 0)
       break;
-    std::vector<int> indices;
-    indices.resize(tri.size());
-    for (size_t i = 0; i < tri.size(); i++) {
-      indices[i] = i;
-    }
-    auto tool = std::make_unique<Model>(tri, indices);
+
+    auto tool = std::make_unique<Model>(tri);
     tool->save("dbg/tool" + std::to_string(streakCount) + ".stl");
     tools.push_back(std::move(tool));
     distance += config.layerWidth / voxelSize;

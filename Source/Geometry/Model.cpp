@@ -1,6 +1,7 @@
 #include "Model.h"
 
 #include <iostream>
+#include <map>
 
 #include "Primitives.h"
 #include "CGALDefs.h"
@@ -45,6 +46,45 @@ Model::Model(const std::vector<glm::dvec3>& vertecies, const std::vector<int>& i
     counter++;
   }
   for (int i = 0; i < indices.size(); i+=3) {
+    vertex_descriptor a = vertexMap[indices[i + 0]];
+    vertex_descriptor b = vertexMap[indices[i + 1]];
+    vertex_descriptor c = vertexMap[indices[i + 2]];
+    mesh.add_face(a, b, c);
+  }
+
+  p->mesh = mesh;
+  init();
+}
+
+Model::Model(const std::vector<glm::dvec3>& input) {
+  std::map<std::tuple<double,double,double>, size_t> indexMap;
+  std::vector<glm::dvec3> vertecies;
+  std::vector<size_t>     indices;
+  for (glm::dvec3 x : input) {
+    size_t index = 0;
+    std::tuple<double, double, double> key = std::make_tuple(x.x, x.y, x.z);
+    if (indexMap.count(key) != 0) {
+      index = indexMap[key];
+    }
+    else {
+      vertecies.push_back(x);
+      index = vertecies.size() - 1;
+      indexMap[key] = index;
+    }
+    indices.push_back(index);
+  }
+
+  p = std::make_unique<ModelImplementation>();
+  Surface_mesh mesh;
+  //https://doc.cgal.org/latest/Surface_mesh/Surface_mesh_2sm_iterators_8cpp-example.html
+  std::map<int, vertex_descriptor> vertexMap;
+  int counter = 0;
+  for (auto& x : vertecies) {
+    vertex_descriptor desc = mesh.add_vertex(Point(x.x, x.y, x.z));
+    vertexMap[counter] = desc;
+    counter++;
+  }
+  for (int i = 0; i < indices.size(); i += 3) {
     vertex_descriptor a = vertexMap[indices[i + 0]];
     vertex_descriptor b = vertexMap[indices[i + 1]];
     vertex_descriptor c = vertexMap[indices[i + 2]];
