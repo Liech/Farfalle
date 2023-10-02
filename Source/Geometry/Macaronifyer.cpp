@@ -28,7 +28,7 @@ Macaronifyer::Macaronifyer(Model& mainModel, const SliceConfig& config_) : confi
   double biggest = glm::max(span.x, glm::max(span.y, span.z));
   max = min + glm::dvec3(biggest, biggest, biggest);
   span = max - min;
-  glm::ivec3 resolution = glm::ivec3(1, 1, 1) * 256;
+  glm::ivec3 resolution = glm::ivec3(1, 1, 1) * 1024;
 
   std::cout << "  Soup..." << std::endl;
   auto soup = mainModel.toSoup();
@@ -45,8 +45,11 @@ Macaronifyer::Macaronifyer(Model& mainModel, const SliceConfig& config_) : confi
     std::cout << "Tool: " << tools.size() << std::endl;
     std::cout << "    Erode: " << distance << " voxels" << std::endl;
     auto erosion = DistanceMap<int>().map(distanceMap, [distance](int distanceSqrt) { return distance * distance < distanceSqrt; });
+    std::cout << "    pack: " << std::endl;
+    auto pack = MarchingCubes::pack(erosion, resolution, glm::ivec3(2, 2, 2));
     std::cout << "    Marching Cubes" << std::endl;
-    auto tri = MarchingCubes::polygonize(erosion, min, glm::dvec3(voxelSize, voxelSize, voxelSize), resolution);
+    //auto tri = MarchingCubes::polygonize(erosion, min, glm::dvec3(voxelSize, voxelSize, voxelSize), resolution);
+    auto tri = MarchingCubes::polygonize(pack, min, glm::dvec3(voxelSize, voxelSize, voxelSize)*2.0, resolution/2,0.5);
     std::cout << "    Triangles: " << tri.size() << std::endl;
     if (tri.size() == 0)
       break;
