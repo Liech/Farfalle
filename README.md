@@ -2,6 +2,8 @@
 ![image](https://github.com/Liech/Farfalle/assets/16963076/ee5b53db-d740-4cae-b1f6-14f932f8427a)
 ![image](https://github.com/Liech/Farfalle/assets/16963076/6dd55645-5d1d-4bfa-b919-280fd44da71f)
 ![image](https://github.com/Liech/Farfalle/assets/16963076/ad9b9606-e378-4d03-9b52-6494d5518c83)
+![image](https://github.com/Liech/Farfalle/assets/16963076/ef65e40f-aeb2-402b-a6e6-e2b9f377ca49)
+![image](https://github.com/Liech/Farfalle/assets/16963076/65dfe39b-06e8-44b0-b824-0f57ff15acee)
 
 # Farfalle
 
