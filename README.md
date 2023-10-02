@@ -7,6 +7,12 @@
 
 This is an experimental Slicer in a very rough state.
 
+# Current Form
+
+* Slice with implicit surfaces for infill and plane
+* Slice implicit surfaces circular
+* Voxel based Mesh manipulation/remeshing
+
 # Finished Form
 
 An basic Slicer that is capable of non-planar-slicing with zero steps.
@@ -15,6 +21,10 @@ An basic Slicer that is capable of non-planar-slicing with zero steps.
 * Slice along the density field with implicit surface slicing
 * obtain horizontal walls by planar parameterization and triangulated shortest paths on surface
 * Some kind of Infill capability that im not sure of yet
+
+# License
+
+https://www.gnu.org/licenses/lgpl-3.0.html
 
 # Dependencies
 
