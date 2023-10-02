@@ -1,17 +1,10 @@
 ![image](https://github.com/Liech/FarfalleGCodeGen/assets/16963076/b692805e-53cc-418e-be39-0091a5623fb7)
 ![image](https://github.com/Liech/Farfalle/assets/16963076/ee5b53db-d740-4cae-b1f6-14f932f8427a)
+![image](https://github.com/Liech/Farfalle/assets/16963076/6dd55645-5d1d-4bfa-b919-280fd44da71f)
 
 # Farfalle
 
 This is an experimental Slicer in a very rough state.
-
-# Issues
-
-CGAL does not support a conversion from Polygon_with_holes_2 to std::vector<Polygon_2> or a convex decomposition of Polygon_with_holes_2 and its a really tough problem, which is integral to this slicer :(
-
-# Current Form
-
-It can only generate vertical walls. It can does this either with planar slicing or with implicit surface slicing.
 
 # Finished Form
 
