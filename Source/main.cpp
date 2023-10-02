@@ -77,8 +77,8 @@ void slice() {
   Printer  printer;
   Geometry geometry;
 
-  bool spaghetti = false;
-  bool macaroni = true;
+  bool spaghetti = true;
+  bool macaroni = false;
 
   //std::string filename = "C:\\Users\\Niki\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
   std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
@@ -86,7 +86,7 @@ void slice() {
 
   std::cout << "Loading Mesh: " << filename << std::endl;
   std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  //model->repair();
+  model->repair();
 
   //nef(*model);
 
@@ -110,14 +110,14 @@ void slice() {
   }
 
   int progress = 0;
-//#pragma omp parallel for
-//  for (int i = 0; i < layerAmount; i++) {
-//    tools[i]->cut();
-//
-//#pragma omp atomic
-//    progress++;
-//    std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
-//  }
+#pragma omp parallel for
+  for (int i = 0; i < layerAmount; i++) {
+    tools[i]->cut();
+
+#pragma omp atomic
+    progress++;
+    std::cout << "Slice: " << progress << "/" << layerAmount << std::endl;
+  }
 
   std::vector<std::vector<glm::dvec3>> pasta;
   if (spaghetti) {
