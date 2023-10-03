@@ -5,6 +5,8 @@
     "nlohmann-json",
     "glm",
 	"eigen3",
-	"cgal"
+	"cgal",
+    "lua",
+	"pybind11"
   ]
 }

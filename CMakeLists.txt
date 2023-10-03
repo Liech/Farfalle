@@ -10,6 +10,8 @@ find_package(Eigen3 CONFIG REQUIRED)
 find_package(glm REQUIRED)
 find_package(cgal REQUIRED)
 
+add_subdirectory(Lib)
+
 ############################################################################
 ############################################################################
 ############################################################################
@@ -20,6 +22,8 @@ set(Source_Files
     "Source/SliceConfig.cpp"
     "Source/Geometry.h"
     "Source/Geometry.cpp"
+    "Source/FarfalleAPI.h"
+    "Source/FarfalleAPI.cpp"
 )
 source_group("Source" FILES ${Source_Files})
 
@@ -118,6 +122,7 @@ glm::glm
 Eigen3::Eigen
 CGAL::CGAL
 OpenMP::OpenMP_CXX
+PolyglotAPI
 )
 
 target_include_directories(Farfalle PRIVATE 
