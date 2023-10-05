@@ -30,6 +30,8 @@
 #include "PolyglotAPI/Python/PythonEngine.h"
 #include "PolyglotAPI/API/API.h"
 #include "API/FarfalleAPI.h"
+#include <fstream>
+#include <filesystem>
 
 void enforceWorkingDir(std::string exeDir) {
   const size_t last_slash_idx = exeDir.find_last_of("\\/");
@@ -203,8 +205,16 @@ int main(int argc, char** argv) {
   py.addAPI(farfalle.getAPI(py.getRelay()));
   py.initialize();
 
-  
-  py.execute("print('Wub')");
+  std::string current = argv[0];
+  std::string fullpath ="main.py"; 
+  std::cout << fullpath << std::endl;
+  std::ifstream t(fullpath);
+  std::string s((std::istreambuf_iterator<char>(t)),
+    std::istreambuf_iterator<char>());
+  std::cout << s << std::endl;
+  std::cout << " --------execution start------- " << std::endl;
+  py.execute(s);
+  std::cout << " --------execution end--------- " << std::endl;
 
 
   py.dispose();
