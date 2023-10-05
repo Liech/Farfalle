@@ -1,4 +1,4 @@
-#include "FarfalleAPI.h"
+#include "VoxelAPI.h"
 
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -9,52 +9,52 @@
 
 #include "Geometry/Model.h"
 
-FarfalleAPI::FarfalleAPI() {
+VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
 }
 
-FarfalleAPI::~FarfalleAPI() {
+VoxelAPI::~VoxelAPI() {
 
 }
 
-void FarfalleAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
+void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   //create empty voxel volume
-  std::unique_ptr<PolyglotAPI::APIFunction> createVolumeAPI = std::make_unique<PolyglotAPI::APIFunction>("createVolume", createVolume);
+  std::unique_ptr<PolyglotAPI::APIFunction> createVolumeAPI = std::make_unique<PolyglotAPI::APIFunction>("createVolume", [this](const nlohmann::json& input) { return createVolume(input); });
   createVolumeAPI->setDescription(createVolumeDescription());
   api.addFunction(std::move(createVolumeAPI));
 
   //delete voxel volume
-  std::unique_ptr<PolyglotAPI::APIFunction> deleteVolumeAPI = std::make_unique<PolyglotAPI::APIFunction>("deleteVolume", deleteVolume);
+  std::unique_ptr<PolyglotAPI::APIFunction> deleteVolumeAPI = std::make_unique<PolyglotAPI::APIFunction>("deleteVolume", [this](const nlohmann::json& input) { return deleteVolume(input); });
   deleteVolumeAPI->setDescription(deleteVolumeDescription());
   api.addFunction(std::move(deleteVolumeAPI));
 
 }
 
-nlohmann::json FarfalleAPI::deleteVolume(const nlohmann::json& input) {
-  voxel.erase(input["Name"]);
+nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
+  database.voxel.erase(input["Name"]);
   return "";
 }
 
-std::string FarfalleAPI::createVolumeDescription() {
+std::string VoxelAPI::deleteVolumeDescription() {
   return R"(
 deletes a voxel volume
 
-createVolume({
+deleteVolume({
     'Name': 'Name',
 });
 )";
 }
 
-nlohmann::json FarfalleAPI::createVolume(const nlohmann::json& input) {
+nlohmann::json VoxelAPI::createVolume(const nlohmann::json& input) {
   assert(input["Dimension"[2] % 8 == 0);
   size_t x = input["Dimension"][0];
   size_t y = input["Dimension"][1];
   size_t z = input["Dimension"][2];
-  voxel[input["Name"]] = std::vector<bool>(x * y * z, false);
+  database.voxel[input["Name"]] = std::vector<bool>(x * y * z, false);
   return "";
 }
 
-std::string FarfalleAPI::createVolumeDescription() {
+std::string VoxelAPI::createVolumeDescription() {
   return R"(
 create a named voxel volume
 

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include "apiDatabase.h"
 
 namespace PolyglotAPI {
   class API;
@@ -14,10 +15,10 @@ namespace PolyglotAPI {
 
 class Model;
 
-class FarfalleAPI {
+class VoxelAPI {
 public:
-  FarfalleAPI();
-  virtual ~FarfalleAPI();
+  VoxelAPI(apiDatabase& db);
+  virtual ~VoxelAPI();
 
   void add(PolyglotAPI::API&, PolyglotAPI::FunctionRelay& relay);
 
@@ -28,6 +29,5 @@ private:
   nlohmann::json deleteVolume(const nlohmann::json& input);
   std::string deleteVolumeDescription();
 
-  std::map<std::string, std::vector<bool>>                   voxel;
-  std::map<std::string, std::vector<std::unique_ptr<Model>>> models;
+  apiDatabase& database;
 };

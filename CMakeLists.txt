@@ -22,8 +22,6 @@ set(Source_Files
     "Source/SliceConfig.cpp"
     "Source/Geometry.h"
     "Source/Geometry.cpp"
-    "Source/FarfalleAPI.h"
-    "Source/FarfalleAPI.cpp"
 )
 source_group("Source" FILES ${Source_Files})
 
@@ -95,6 +93,18 @@ set(Voxel_Files
 )
 source_group("Source/Voxel" FILES ${Voxel_Files})
 
+set(API_Files
+	"Source/API/FarfalleAPI.cpp"
+	"Source/API/FarfalleAPI.h"
+	"Source/API/ModelAPI.cpp"
+	"Source/API/ModelAPI.h"
+	"Source/API/VoxelAPI.cpp"
+	"Source/API/VoxelAPI.h"
+	"Source/API/apiDatabase.cpp"
+	"Source/API/apiDatabase.h"
+)
+source_group("Source/API" FILES ${API_Files})
+
 set(Lib_Files
 	"Lib/psimpl/psimpl.h"
 )
@@ -105,6 +115,7 @@ set(ALL_FILES
     ${Tools_Files}
     ${Voxel_Files}
     ${GCode_Files}
+	${API_Files}
     ${Geometry_Files}
     ${Lib_Files}
 )
