@@ -8,6 +8,7 @@
 #include "PolyglotAPI/Source/PolyglotAPI/API/FunctionRelay.h"
 
 #include "Geometry/Model.h"
+#include "Voxel/MarchingCubes.h"
 
 VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
@@ -69,9 +70,15 @@ createVolume({
 )";
 }
 
-
 nlohmann::json VoxelAPI::triangulateVolume(const nlohmann::json& input) {
-  
+
+  glm::dvec3 start = glm::dvec3(input["Start"][0], input["Start"][1], input["Start"][2]);
+  glm::dvec3 end   = glm::dvec3(input["End"][0], input["End"][1], input["End"][2]);
+  glm::dvec3 voxelSize = (end - start);
+  glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
+  voxelSize = glm::dvec3(voxelSize.x / resolution.x, voxelSize.y / resolution.y, voxelSize.z / resolution.z);
+  auto tri = MarchingCubes::polygonize(*database.voxel[input["VoxelName"]], start, voxelSize, resolution);
+  database.models[input["ModelName"]] = std::make_unique<Model>(tri);
   return "";
 }
 
@@ -82,6 +89,7 @@ triangulate voxels
 triangulateVolume({
     'VoxelName': 'VoxelBenchy',
     'ModelName': 'Benchy',
+    'Resolution' : [128,128,128], //divideable by 8
     'Start' : [3,3,3],
     'End'   : [6,6,6]
 });

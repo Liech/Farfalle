@@ -27,6 +27,8 @@
 #include "Voxel/MarchingCubes.h"
 #include "Voxel/DistanceMap.h"
 
+#include "PolyglotAPI/Python/PythonEngine.h"
+
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
     if (point.z < config.CenterPoint.z) {
@@ -181,49 +183,11 @@ void slice() {
 }
 
 int main() {
-  slice();
-  //Voxelizer v;
+  //slice();
+  PolyglotAPI::Python::PythonEngine::instance().initialize();
+  
+  PolyglotAPI::Python::PythonEngine::instance().execute("print('Wub'");
 
-  //std::vector<glm::dvec3> triangles;
-  //std::vector<glm::dvec3> triangles2;
 
-  //std::string filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_torture-test_by_CreativeTools_se_763622\\files\\3DBenchyFixed.stl";
-  //std::shared_ptr<Model> model = std::make_shared<Model>(filename);
-  //auto boat = model->toSoup();
-  //glm::ivec3 resolution = glm::ivec3(1, 1, 1)*128;
-  //std::cout << "voxelize..." << std::endl;
-  //glm::dvec3 min = model->getMin() - (model->getMax()- model->getMin())/10.0;
-  //glm::dvec3 max = model->getMax() + (model->getMax() - model->getMin()) / 10.0;
-  //glm::dvec3 span = max-min;
-  //glm::dvec3 voxelSize = glm::dvec3(span.x / resolution.x, span.y / resolution.y, span.z / resolution.z);
-
-  //auto vox = v.voxelize(boat.first, boat.second, min, max, resolution);
-  ////std::cout << "boxelize..." << std::endl;
-  ////v.boxelize(*vox, model->getMin(), model->getMax(), resolution, triangles2);
-  ////std::cout << "pack..." << std::endl;
-  ////int packFactor = 8;
-  ////auto pack = MarchingCubes::pack(*vox, resolution, glm::ivec3(1, 1, 1) * packFactor);
-  //std::cout << "marching cubes..." << std::endl;
-  //auto distanceMap = DistanceMap<int>().distanceMap(*vox, resolution);
-
-  //for (int i = 0; i < 30; i++) {
-  //  std::cout << i << std::endl;
-  //  auto unpack = DistanceMap<int>().map(distanceMap, [i](int distance) { return distance > i; });
-  //  triangles2 = MarchingCubes::polygonize(unpack, min, voxelSize, resolution);
-  //  STLWriter::write("dbg/erode" + std::to_string(i) + ".stl", triangles2);
-  //}
-
-  //v.boxelize({ true}, glm::dvec3(0.3, 0.3, 0.3), glm::dvec3(0.6, 0.6, 0.6), glm::ivec3(1,1,1), triangles);
-
-  //std::vector<size_t> indices;
-  //for (size_t i = 0; i < triangles.size(); i++)
-  //  indices.push_back(i);
-
-  //glm::ivec3 resolution = glm::ivec3(16, 16, 16);
-  //glm::dvec3 start = glm::dvec3(-1, 0, 0);
-  //glm::dvec3 end = glm::dvec3(2,1,1);
-  //auto vox = v.voxelize(triangles, indices, start, end, resolution);
-  //v.boxelize(*vox, start, end, resolution, triangles2);
-
-  //STLWriter::write("dbg/box.stl", triangles2);
+  PolyglotAPI::Python::PythonEngine::instance().dispose();
 }
