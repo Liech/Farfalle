@@ -28,6 +28,16 @@
 #include "Voxel/DistanceMap.h"
 
 #include "PolyglotAPI/Python/PythonEngine.h"
+#include "PolyglotAPI/API/API.h"
+#include "API/FarfalleAPI.h"
+
+void enforceWorkingDir(std::string exeDir) {
+  const size_t last_slash_idx = exeDir.find_last_of("\\/");
+  if (std::string::npos != last_slash_idx) {
+    exeDir.erase(last_slash_idx + 1);
+  }
+  std::filesystem::current_path(exeDir);
+}
 
 std::shared_ptr<SliceMesh> genSliceTool(const Model& input, double z, const SliceConfig& config) {
   std::function<double(const glm::dvec3& point)> sphereFun = [z, &config](const glm::dvec3& point) {
@@ -182,12 +192,20 @@ void slice() {
   Tools::String2File("dbg/output.gcode", data);
 }
 
-int main() {
+int main(int argc, char** argv) {
   //slice();
-  PolyglotAPI::Python::PythonEngine::instance().initialize();
+  enforceWorkingDir(std::string(argv[0]));
+  int width = 800;
+  int height = 800;
+
+  auto& py = PolyglotAPI::Python::PythonEngine::instance();
+  FarfalleAPI farfalle;
+  py.addAPI(farfalle.getAPI(py.getRelay()));
+  py.initialize();
+
   
-  PolyglotAPI::Python::PythonEngine::instance().execute("print('Wub'");
+  py.execute("print('Wub')");
 
 
-  PolyglotAPI::Python::PythonEngine::instance().dispose();
+  py.dispose();
 }

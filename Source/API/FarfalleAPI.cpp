@@ -26,3 +26,11 @@ void FarfalleAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) 
   model = std::make_unique<ModelAPI>(db);
   model->add(api, relay);
 }
+
+std::unique_ptr<PolyglotAPI::API> FarfalleAPI::getAPI(PolyglotAPI::FunctionRelay& relay) {
+  std::unique_ptr<PolyglotAPI::API> result = std::make_unique<PolyglotAPI::API>("Farfalle");
+
+  add(*result, relay);
+
+  return std::move(result);
+}

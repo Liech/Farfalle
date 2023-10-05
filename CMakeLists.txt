@@ -141,8 +141,14 @@ target_include_directories(Farfalle PRIVATE
 ./Lib/
 )
 
-#add_dependencies(AssimpSupCom 
-#)
+get_filename_component(pyDir "${Python3_EXECUTABLE}" DIRECTORY )
+
+add_custom_command(TARGET Farfalle POST_BUILD 
+               COMMAND ${CMAKE_COMMAND} -E copy_directory 
+               ${pyDir}              
+                $<TARGET_FILE_DIR:Farfalle>/Data/python)
+
+
 	
 
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Farfalle)

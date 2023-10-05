@@ -22,6 +22,7 @@ public:
 
   void add(PolyglotAPI::API&, PolyglotAPI::FunctionRelay& relay);
 
+  std::unique_ptr<PolyglotAPI::API> getAPI(PolyglotAPI::FunctionRelay&);
 private:
   std::unique_ptr<VoxelAPI> voxel;
   std::unique_ptr<ModelAPI> model;
