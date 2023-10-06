@@ -31,6 +31,8 @@ private:
   std::string saveModelDescription();
   nlohmann::json voxelizeModel(const nlohmann::json& input);
   std::string voxelizeModelDescription();
+  nlohmann::json modelBoundary(const nlohmann::json& input);
+  std::string modelBoundaryDescription();
 
   apiDatabase& database;
 };

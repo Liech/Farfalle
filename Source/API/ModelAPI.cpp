@@ -39,6 +39,11 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> voxelizeModelAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizeModel", [this](const nlohmann::json& input) { return voxelizeModel(input); });
   voxelizeModelAPI->setDescription(voxelizeModelDescription());
   api.addFunction(std::move(voxelizeModelAPI));
+
+  //model boundary
+  std::unique_ptr<PolyglotAPI::APIFunction> modelBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("modelBoundary", [this](const nlohmann::json& input) { return modelBoundary(input); });
+  modelBoundaryAPI->setDescription(modelBoundaryDescription());
+  api.addFunction(std::move(modelBoundaryAPI));
 }
 
 std::string ModelAPI::loadModelDescription() {
@@ -110,4 +115,44 @@ nlohmann::json ModelAPI::voxelizeModel(const nlohmann::json& input) {
   auto voxel = Voxelizer().voxelize(soup.first, soup.second, start, end, resolution);
   database.voxel[input["VoxelName"]] = std::move(voxel);
   return "";
+}
+
+nlohmann::json ModelAPI::modelBoundary(const nlohmann::json& input) {
+  nlohmann::json result;
+  auto& model = *database.models[input["Name"]];
+  auto min = model.getMin();
+  auto max = model.getMax();
+  result["Min"] = nlohmann::json::array();
+  result["Min"].push_back(min[0]);
+  result["Min"].push_back(min[1]);
+  result["Min"].push_back(min[2]);
+
+  result["Max"] = nlohmann::json::array();
+  result["Max"].push_back(max[0]);
+  result["Max"].push_back(max[1]);
+  result["Max"].push_back(max[2]);
+
+  result["Size"] = nlohmann::json::array();
+  result["Size"].push_back(max[0] - min[0]);
+  result["Size"].push_back(max[1] - min[1]);
+  result["Size"].push_back(max[2] - min[2]);
+
+  return result;
+}
+
+std::string ModelAPI::modelBoundaryDescription() {
+  return R"(
+gets the boundary of a model
+
+modelBoundary({
+    'Name'  : 'Benchy'
+});
+
+result = { 
+  'Min' : [3,3,3],
+  'Max' : [6,6,6],
+  'Size': [3,3,3]
+};
+
+)";
 }

@@ -197,8 +197,6 @@ void slice() {
 int main(int argc, char** argv) {
   //slice();
   enforceWorkingDir(std::string(argv[0]));
-  int width = 800;
-  int height = 800;
 
   auto& py = PolyglotAPI::Python::PythonEngine::instance();
   FarfalleAPI farfalle;
