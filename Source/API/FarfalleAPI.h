@@ -10,6 +10,7 @@
 class VoxelAPI;
 class ModelAPI;
 class LineAPI;
+class GCodeAPI;
 
 namespace PolyglotAPI {
   class API;
@@ -28,5 +29,6 @@ private:
   std::unique_ptr<VoxelAPI> voxel;
   std::unique_ptr<ModelAPI> model;
   std::unique_ptr<LineAPI>  line;
+  std::unique_ptr<GCodeAPI> gcode;
   apiDatabase db;
 };

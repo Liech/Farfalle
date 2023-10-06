@@ -7,8 +7,6 @@
 #include "PolyglotAPI/Source/PolyglotAPI/API/APIFunction.h"
 #include "PolyglotAPI/Source/PolyglotAPI/API/FunctionRelay.h"
 
-#include "Geometry/Model.h"
-#include "Voxel/MarchingCubes.h"
 
 LineAPI::LineAPI(apiDatabase& db) : database(db) {
 
