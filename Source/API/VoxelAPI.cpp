@@ -34,6 +34,11 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   triangulateVolumeAPI->setDescription(triangulateVolumeDescription());
   api.addFunction(std::move(triangulateVolumeAPI));
 
+  //triangulate double volume
+  std::unique_ptr<PolyglotAPI::APIFunction> triangulateDoubleAPI = std::make_unique<PolyglotAPI::APIFunction>("triangulateDouble", [this](const nlohmann::json& input) { return triangulateDouble(input); });
+  triangulateDoubleAPI->setDescription(triangulateDoubleDescription());
+  api.addFunction(std::move(triangulateDoubleAPI));
+
   //pack voxel volume
   std::unique_ptr<PolyglotAPI::APIFunction> packVolumeAPI = std::make_unique<PolyglotAPI::APIFunction>("packVolume", [this](const nlohmann::json& input) { return packVolume(input); });
   packVolumeAPI->setDescription(packVolumeDescription());
@@ -98,6 +103,32 @@ triangulate voxels
 
 triangulateVolume({
     'VoxelName': 'VoxelBenchy',
+    'ModelName': 'Benchy',
+    'Resolution' : [128,128,128], //divideable by 8
+    'Start' : [3,3,3],
+    'End'   : [6,6,6]
+});
+)";
+}
+
+nlohmann::json VoxelAPI::triangulateDouble(const nlohmann::json& input) {
+
+  glm::dvec3 start = glm::dvec3(input["Start"][0], input["Start"][1], input["Start"][2]);
+  glm::dvec3 end = glm::dvec3(input["End"][0], input["End"][1], input["End"][2]);
+  glm::dvec3 voxelSize = (end - start);
+  glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
+  voxelSize = glm::dvec3(voxelSize.x / resolution.x, voxelSize.y / resolution.y, voxelSize.z / resolution.z);
+  auto tri = MarchingCubes::polygonize(*database.volume[input["VoxelName"]], start, voxelSize, resolution,0.5);
+  database.models[input["ModelName"]] = std::make_unique<Model>(tri);
+  return "";
+}
+
+std::string VoxelAPI::triangulateDoubleDescription() {
+  return R"(
+triangulate double volume
+
+triangulateVolume({
+    'DoubleName': 'DoubleBenchy',
     'ModelName': 'Benchy',
     'Resolution' : [128,128,128], //divideable by 8
     'Start' : [3,3,3],
