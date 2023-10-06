@@ -33,6 +33,16 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> triangulateVolumeAPI = std::make_unique<PolyglotAPI::APIFunction>("triangulateVolume", [this](const nlohmann::json& input) { return triangulateVolume(input); });
   triangulateVolumeAPI->setDescription(triangulateVolumeDescription());
   api.addFunction(std::move(triangulateVolumeAPI));
+
+  //pack voxel volume
+  std::unique_ptr<PolyglotAPI::APIFunction> packVolumeAPI = std::make_unique<PolyglotAPI::APIFunction>("packVolume", [this](const nlohmann::json& input) { return packVolume(input); });
+  packVolumeAPI->setDescription(packVolumeDescription());
+  api.addFunction(std::move(packVolumeAPI));
+
+  //delete Double
+  std::unique_ptr<PolyglotAPI::APIFunction> deleteDoubleAPI = std::make_unique<PolyglotAPI::APIFunction>("deleteDouble", [this](const nlohmann::json& input) { return deleteDouble(input); });
+  deleteDoubleAPI->setDescription(packVolumeDescription());
+  api.addFunction(std::move(deleteDoubleAPI));
 }
 
 nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
@@ -92,6 +102,42 @@ triangulateVolume({
     'Resolution' : [128,128,128], //divideable by 8
     'Start' : [3,3,3],
     'End'   : [6,6,6]
+});
+)";
+}
+
+nlohmann::json VoxelAPI::packVolume(const nlohmann::json& input) {
+
+  glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
+  glm::ivec3 packageSize = glm::ivec3(input["PackageSize"][0], input["PackageSize"][1], input["PackageSize"][2]);
+  database.volume[input["DoubleName"]] = std::make_unique<std::vector<double>>(MarchingCubes::pack(*database.voxel[input["VoxelName"]], resolution, packageSize));
+  return "";
+}
+
+std::string VoxelAPI::packVolumeDescription() {
+  return R"(
+pack binary voxels to double volume
+
+triangulateVolume({
+    'VoxelName': 'VoxelBenchy',
+    'DoubleName': 'DoubleBenchy',
+    'Resolution' : [128,128,128], //divideable by 8
+    'PackageSize' : [2,2,2]
+});
+)";
+}
+
+nlohmann::json VoxelAPI::deleteDouble(const nlohmann::json& input) {
+  database.volume.erase(input["Name"]);
+  return "";
+}
+
+std::string VoxelAPI::deleteDoubleDescription() {
+  return R"(
+deletes a double/packed volume
+
+deleteDouble({
+    'Name': 'DoubleBenchy',
 });
 )";
 }

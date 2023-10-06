@@ -30,6 +30,10 @@ private:
   std::string deleteVolumeDescription();
   nlohmann::json triangulateVolume(const nlohmann::json& input);
   std::string triangulateVolumeDescription();
+  nlohmann::json packVolume(const nlohmann::json& input);
+  std::string packVolumeDescription();
+  nlohmann::json deleteDouble(const nlohmann::json& input);
+  std::string deleteDoubleDescription();
 
   apiDatabase& database;
 };

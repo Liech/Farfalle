@@ -25,6 +25,8 @@ public:
 private:
   nlohmann::json loadModel(const nlohmann::json& input);
   std::string loadModelDescription();
+  nlohmann::json deleteModel(const nlohmann::json& input);
+  std::string deleteModelDescription();
   nlohmann::json repairModel(const nlohmann::json& input);
   std::string repairModelDescription();
   nlohmann::json saveModel(const nlohmann::json& input);

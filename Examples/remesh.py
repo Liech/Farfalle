@@ -26,6 +26,7 @@ voxelizeModel({
   'Start'     : voxelizeMin,
   'End'       : voxelizeMax
 });
+deleteModel({'Name' : 'Main'});
 
 print('Triangulation')
 
@@ -36,8 +37,10 @@ triangulateVolume({
   'Start'     :voxelizeMin,
   'End'       :voxelizeMax
 });
+deleteVolume({'Name' : 'Main'})
 
 print('Save Model');
 saveModel({'Name':'Triangulation', 'Filename':'../dbg/main.stl'})
+deleteModel({'Name' : 'Triangulation'})
 
 print('Finished script')

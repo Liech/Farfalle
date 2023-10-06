@@ -25,6 +25,11 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   loadModelAPI->setDescription(loadModelDescription());
   api.addFunction(std::move(loadModelAPI));
 
+  //delete model
+  std::unique_ptr<PolyglotAPI::APIFunction> deleteModelAPI = std::make_unique<PolyglotAPI::APIFunction>("deleteModel", [this](const nlohmann::json& input) { return deleteModel(input); });
+  deleteModelAPI->setDescription(deleteModelDescription());
+  api.addFunction(std::move(deleteModelAPI));
+
   //repair model
   std::unique_ptr<PolyglotAPI::APIFunction> repairModelAPI = std::make_unique<PolyglotAPI::APIFunction>("repairModel", [this](const nlohmann::json& input) { return repairModel(input); });
   repairModelAPI->setDescription(repairModelDescription());
@@ -61,6 +66,22 @@ nlohmann::json ModelAPI::loadModel(const nlohmann::json& input) {
   database.models[input["Name"]] = std::make_unique<Model>(input["Filename"]);
   return "";
 }
+
+std::string ModelAPI::deleteModelDescription() {
+  return R"(
+delete model from memory
+
+deleteModel({
+    'Name' : 'Name'
+});
+)";
+}
+
+nlohmann::json ModelAPI::deleteModel(const nlohmann::json& input) {
+  database.models.erase(input["Name"]);
+  return "";
+}
+
 
 std::string ModelAPI::repairModelDescription() {
   return R"(
