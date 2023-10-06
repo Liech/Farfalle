@@ -100,6 +100,8 @@ set(API_Files
 	"Source/API/ModelAPI.h"
 	"Source/API/VoxelAPI.cpp"
 	"Source/API/VoxelAPI.h"
+	"Source/API/LineAPI.cpp"
+	"Source/API/LineAPI.h"
 	"Source/API/apiDatabase.cpp"
 	"Source/API/apiDatabase.h"
 )

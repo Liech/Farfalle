@@ -9,6 +9,7 @@
 
 #include "ModelAPI.h"
 #include "VoxelAPI.h"
+#include "LineAPI.h"
 
 #include "Geometry/Model.h"
 
@@ -25,6 +26,8 @@ void FarfalleAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) 
   voxel->add(api, relay);
   model = std::make_unique<ModelAPI>(db);
   model->add(api, relay);
+  line  = std::make_unique<LineAPI>(db);
+  line ->add(api, relay);
 }
 
 std::unique_ptr<PolyglotAPI::API> FarfalleAPI::getAPI(PolyglotAPI::FunctionRelay& relay) {
