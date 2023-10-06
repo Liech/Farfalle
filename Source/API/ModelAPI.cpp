@@ -8,6 +8,7 @@
 #include "PolyglotAPI/Source/PolyglotAPI/API/FunctionRelay.h"
 
 #include "Voxel/Voxelizer.h"
+#include "Geometry/Mesh2D.h"
 
 #include "Geometry/Model.h"
 
@@ -49,6 +50,11 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> modelBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("modelBoundary", [this](const nlohmann::json& input) { return modelBoundary(input); });
   modelBoundaryAPI->setDescription(modelBoundaryDescription());
   api.addFunction(std::move(modelBoundaryAPI));
+
+  //slice Model
+  std::unique_ptr<PolyglotAPI::APIFunction> sliceModelAPI = std::make_unique<PolyglotAPI::APIFunction>("sliceModel", [this](const nlohmann::json& input) { return sliceModel(input); });
+  sliceModelAPI->setDescription(modelBoundaryDescription());
+  api.addFunction(std::move(sliceModelAPI));
 }
 
 std::string ModelAPI::loadModelDescription() {
@@ -174,6 +180,52 @@ result = {
   'Max' : [6,6,6],
   'Size': [3,3,3]
 };
+
+)";
+}
+
+nlohmann::json ModelAPI::sliceModel(const nlohmann::json& input) {
+  auto& model = *database.models[input["ModelName"]];
+  auto& tool  = *database.models[input["ToolName"]];
+  std::string mode = input["Mode"];
+  if (mode == "Model") {
+    auto streaks = model.slice(tool);
+    auto uvMesh = Mesh2D(tool, streaks);
+    auto triangulation = uvMesh.getTriangulation(&tool);
+    auto vertecies3d = tool.uv2World(triangulation.first);
+    auto& indices = triangulation.second;
+    std::unique_ptr<Model> m = std::make_unique<Model>(vertecies3d, indices);
+    database.models[input["ResultName"]] = std::move(m);
+  }
+  else if (mode == "Line") {
+    auto noodle = model.slice2(tool);
+    database.lines[input["LineName"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(noodle);
+  }
+  else {
+    throw std::runtime_error("Unkown Mode");
+  }
+
+  return "";
+}
+
+std::string ModelAPI::sliceModelDescription() {
+  return R"(
+slice model with model
+
+sliceModel({
+    'ModelName'  : 'Benchy',
+    'ToolName'   : 'ModelPlane',
+    'Mode'       : 'Line',
+    'LineName'   : 'HalfBakedGCode'
+});
+
+sliceModel({
+    'ModelName'  : 'Benchy',
+    'ToolName'   : 'ModelPlane',
+    'Mode'       : 'Model',
+    'ResultName' : 'BenchySliceModel'
+});
+
 
 )";
 }

@@ -35,6 +35,8 @@ private:
   std::string voxelizeModelDescription();
   nlohmann::json modelBoundary(const nlohmann::json& input);
   std::string modelBoundaryDescription();
+  nlohmann::json sliceModel(const nlohmann::json& input);
+  std::string sliceModelDescription();
 
   apiDatabase& database;
 };
