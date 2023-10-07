@@ -31,6 +31,16 @@ void GCodeAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> linearPrintAPI = std::make_unique<PolyglotAPI::APIFunction>("linearPrint", [this](const nlohmann::json& input) { return linearPrint(input); });
   linearPrintAPI->setDescription(linearPrintDescription());
   api.addFunction(std::move(linearPrintAPI));
+
+  //set heat
+  std::unique_ptr<PolyglotAPI::APIFunction> seatHeatAPI = std::make_unique<PolyglotAPI::APIFunction>("setHeat", [this](const nlohmann::json& input) { return setHeat(input); });
+  seatHeatAPI->setDescription(setHeatDescription());
+  api.addFunction(std::move(seatHeatAPI));
+
+  //set heat
+  std::unique_ptr<PolyglotAPI::APIFunction> shutdownAPI = std::make_unique<PolyglotAPI::APIFunction>("shutdown", [this](const nlohmann::json& input) { return shutdown(input); });
+  shutdownAPI->setDescription(shutdownDescription());
+  api.addFunction(std::move(shutdownAPI));
 }
 
 std::string GCodeAPI::saveTextDescription() {
@@ -78,5 +88,43 @@ nlohmann::json GCodeAPI::linearPrint(const nlohmann::json& input) {
     gcode.toString(result);
     database.printer->extruder->retract(result);
   }
+  return result;
+}
+
+
+std::string GCodeAPI::setHeatDescription() {
+  return R"(
+returns text setting the printer heat level
+
+setHeat({
+    'Wait' : False,
+    'Nozzle' : 215,
+    'Bed': 60
+});
+)";
+}
+
+nlohmann::json GCodeAPI::setHeat(const nlohmann::json& input) {
+  database.printer->temperature->bed = input["Bed"];
+  database.printer->temperature->extruder = input["Nozzle"];
+  std::string result;
+  if (input["Wait"])
+    database.printer->temperature->waitForHeating(result);
+  else
+    database.printer->temperature->startHeating(result);
+  return result;
+}
+
+std::string GCodeAPI::shutdownDescription() {
+  return R"(
+returns gcode shutting down the printer to a save state
+
+shutdown({});
+)";
+}
+
+nlohmann::json GCodeAPI::shutdown(const nlohmann::json& input) {
+  std::string result;
+  database.printer->shutdown(result);
   return result;
 }

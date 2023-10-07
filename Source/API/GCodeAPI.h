@@ -27,6 +27,10 @@ private:
   std::string saveTextDescription();
   nlohmann::json linearPrint(const nlohmann::json& input);
   std::string linearPrintDescription();
+  nlohmann::json setHeat(const nlohmann::json& input);
+  std::string setHeatDescription();
+  nlohmann::json shutdown(const nlohmann::json& input);
+  std::string shutdownDescription();
 
   apiDatabase& database;
 };

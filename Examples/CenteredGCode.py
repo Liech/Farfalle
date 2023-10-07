@@ -3,7 +3,6 @@ slice = "C:\\Users\\nicol\\Documents\\GitHub\\Farfalle\\out\\dbg\\slice0.stl"
 
 BuildplateCenter = [100,100,0]
 
-gcode = ""
 
 print('Load Models')
 loadModel({'Name': 'Main', 'Filename':filename})
@@ -37,11 +36,21 @@ sliceModel({
 
 print('GCode Generation');
 
+gcode = ""
+
+gcode += setHeat({
+    'Wait' : True,
+    'Nozzle' : 215,
+    'Bed': 60
+});
 
 gcode += linearPrint({
   'Line':'Cut',
   'Feedrate': 0.03
 })
+
+
+gcode += shutdown({});
 
 saveText({
     'Text' : gcode,
