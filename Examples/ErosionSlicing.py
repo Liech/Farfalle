@@ -33,12 +33,12 @@ voxelizeMin[0] = voxelizeMin[0] - boundary['Size'][0]/10.0;
 voxelizeMin[1] = voxelizeMin[1] - boundary['Size'][1]/10.0;
 voxelizeMin[2] = voxelizeMin[2] - boundary['Size'][2]/10.0;
 
-voxelizeMax=boundary['Max']
-voxelizeMax[0] = voxelizeMax[0] + boundary['Size'][0]/10.0;
-voxelizeMax[1] = voxelizeMax[1] + boundary['Size'][1]/10.0;
-voxelizeMax[2] = voxelizeMax[2] + boundary['Size'][2]/10.0;
+voxelizeMax=boundary['UniformMax']
+voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0]/10.0;
+voxelizeMax[1] = voxelizeMax[1] + boundary['UniformSize'][1]/10.0;
+voxelizeMax[2] = voxelizeMax[2] + boundary['UniformSize'][2]/10.0;
 
-resolution = [256,256,256]
+resolution = [512,512,512]
 voxelizeModel({
   'ModelName' : 'Main',
   'VoxelName' : 'Main',
@@ -55,38 +55,62 @@ distanceMap({
     'Resolution' : resolution,
     'Mode' : 'XY' # XY / XYZ
 });
-transformDistanceMap({
-    'DistanceMapName' : 'Main',
-    'VoxelName'   : 'Erosion',
-    'SquaredDistance' : 2
-});
 
-print('Packing')
-packVolume({
-  'VoxelName':'Erosion',
-  'DoubleName':'Main',
-  'Resolution':resolution,
-  'PackageSize':[2,2,2]
-});
+voxelSize = boundary["UniformSize"][0] / resolution[0];
+print('Voxel Size: ' + str(voxelSize))
 
-print('Triangulation')
+nozzlediam = 0.4
+eroded = 0.0;
 
-triangulateDouble({
-  'DoubleName':'Main',
-  'ModelName' :'Triangulation',
-  'Resolution':[resolution[0]/2,resolution[1]/2,resolution[1]/2],
-  'Start'     :voxelizeMin,
-  'End'       :voxelizeMax
-});
+streaks = []
+streakCount = 0;
 
-saveModel({'Name':'Triangulation', 'Filename':'main.stl'})
-print('Slice Model')
-sliceModel({
-    'ModelName'  : 'Triangulation',
-    'ToolName'   : 'Slice',
-    'Mode'       : 'Line',
-    'LineName'   : 'Cut'
-});
+while(True):
+  distance = (eroded/voxelSize)
+  print('Erosion: ' + str(distance));
+  transformDistanceMap({
+      'DistanceMapName' : 'Main',
+      'VoxelName'   : 'Erosion',
+      'Distance' : distance
+  });
+  
+  print('Packing')
+  packVolume({
+    'VoxelName':'Erosion',
+    'DoubleName':'Main',
+    'Resolution':resolution,
+    'PackageSize':[2,2,2]
+  });
+  
+  print('Triangulation')
+  
+  triangulateDouble({
+    'DoubleName':'Main',
+    'ModelName' :'Triangulation',
+    'Resolution':[resolution[0]/2,resolution[1]/2,resolution[1]/2],
+    'Start'     :voxelizeMin,
+    'End'       :voxelizeMax
+  });
+  
+  hasTri = hasAnyTriangle({'Name':'Triangulation'});
+  if (not hasTri):
+    break;
+  
+  saveModel({'Name':'Triangulation', 'Filename':'main.stl'})
+  
+  streakname = "Streak" + str(streakCount);
+  streaks.append(streakname);
+  streakCount+=1;
+  
+  print('Slice Model')
+  sliceModel({
+      'ModelName'  : 'Triangulation',
+      'ToolName'   : 'Slice',
+      'Mode'       : 'Line',
+      'LineName'   : streakname
+  });
+  eroded+=nozzlediam
+ 
 
 print('GCode Generation');
 
@@ -99,16 +123,17 @@ gcode += setHeat({
 });
 
 gcode += startup({});
-#gcode += prime({});
+gcode += prime({});
 
 gcode += "\n; ;;;;;;;;;;;;;;;;;;";
 gcode += "\n; Printing:  ";
 gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
 
-gcode += linearPrint({
-  'Line':'Cut',
-  'Feedrate': 0.03
-})
+for streak in streaks:
+  gcode += linearPrint({
+    'Line':streak,
+    'Feedrate': 0.03
+  })
 
 gcode += shutdown({});
 

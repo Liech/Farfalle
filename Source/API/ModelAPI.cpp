@@ -175,6 +175,19 @@ nlohmann::json ModelAPI::modelBoundary(const nlohmann::json& input) {
   result["Size"].push_back(max[1] - min[1]);
   result["Size"].push_back(max[2] - min[2]);
 
+  auto span = max - min;
+  double biggest = glm::max(span.x, glm::max(span.y, span.z));
+
+  result["UniformMax"] = nlohmann::json::array();
+  result["UniformMax"].push_back(min[0] + biggest);
+  result["UniformMax"].push_back(min[1] + biggest);
+  result["UniformMax"].push_back(min[2] + biggest);
+
+  result["UniformSize"] = nlohmann::json::array();
+  result["UniformSize"].push_back(biggest);
+  result["UniformSize"].push_back(biggest);
+  result["UniformSize"].push_back(biggest);
+
   return result;
 }
 
@@ -188,8 +201,10 @@ modelBoundary({
 
 result = { 
   'Min' : [3,3,3],
-  'Max' : [6,6,6],
-  'Size': [3,3,3]
+  'Max' : [6,6,7],
+  'Size': [3,3,4],
+  'UniformSize' : [4,4,4]
+  'UniformMax' : [4,4,4]
 };
 
 )";

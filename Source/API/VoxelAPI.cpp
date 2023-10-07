@@ -213,7 +213,7 @@ distanceMap({
 }
 
 nlohmann::json VoxelAPI::transformDistanceMap(const nlohmann::json& input) {
-  double distance = input["SquaredDistance"];
+  double distance = input["Distance"];
   auto& distanceMap = *database.distanceMaps[input["DistanceMapName"]]; 
   database.voxel[input["VoxelName"]] = std::make_unique<std::vector<bool>>(DistanceMap<int>().map(distanceMap, [distance](int distanceSqrt) { return distance * distance < distanceSqrt; }));
   return "";
@@ -226,7 +226,7 @@ transforms a distance map back to a voxelfield
 transformDistanceMap({
     'DistanceMapName' : 'DistanceMapName',
     'VoxelName'   : 'Name',
-    'SquaredDistance' : 123
+    'Distance' : 123  # in voxel
 });
 )";
 }
