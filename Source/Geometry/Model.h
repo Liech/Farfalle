@@ -16,6 +16,7 @@ public:
   Model(const std::string& filename);
   Model(std::function<double(const glm::dvec3&)>&, const glm::dvec3& boundingSphereCenter, double boundingSphereRadius, double detail = 0.4);
   Model(const std::vector<glm::dvec3>& vertecies, const std::vector<int>& indices);
+  Model(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices);
   Model(const std::vector<glm::dvec3>& vertecies);
   Model(std::unique_ptr<ModelImplementation>);
   Model();

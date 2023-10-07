@@ -37,6 +37,8 @@ private:
   std::string modelBoundaryDescription();
   nlohmann::json sliceModel(const nlohmann::json& input);
   std::string sliceModelDescription();
+  nlohmann::json transformModel(const nlohmann::json& input);
+  std::string transformModelDescription();
 
   apiDatabase& database;
 };

@@ -56,6 +56,29 @@ Model::Model(const std::vector<glm::dvec3>& vertecies, const std::vector<int>& i
   init();
 }
 
+
+Model::Model(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices) {
+  p = std::make_unique<ModelImplementation>();
+  Surface_mesh mesh;
+  //https://doc.cgal.org/latest/Surface_mesh/Surface_mesh_2sm_iterators_8cpp-example.html
+  std::map<int, vertex_descriptor> vertexMap;
+  int counter = 0;
+  for (auto& x : vertecies) {
+    vertex_descriptor desc = mesh.add_vertex(Point(x.x, x.y, x.z));
+    vertexMap[counter] = desc;
+    counter++;
+  }
+  for (int i = 0; i < indices.size(); i += 3) {
+    vertex_descriptor a = vertexMap[indices[i + 0]];
+    vertex_descriptor b = vertexMap[indices[i + 1]];
+    vertex_descriptor c = vertexMap[indices[i + 2]];
+    mesh.add_face(a, b, c);
+  }
+
+  p->mesh = mesh;
+  init();
+}
+
 Model::Model(const std::vector<glm::dvec3>& input) {
   std::map<std::tuple<double,double,double>, size_t> indexMap;
   std::vector<glm::dvec3> vertecies;

@@ -66,7 +66,7 @@ deleteVolume({
 }
 
 nlohmann::json VoxelAPI::createVolume(const nlohmann::json& input) {
-  assert(input["Dimension"[2] % 8 == 0);
+  assert(input["Dimension"[2]] % 8 == 0);
   size_t x = input["Dimension"][0];
   size_t y = input["Dimension"][1];
   size_t z = input["Dimension"][2];

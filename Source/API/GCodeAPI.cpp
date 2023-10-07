@@ -10,6 +10,7 @@
 #include "Tools/String2File.h"
 #include "GCode/LinearPrint.h"
 #include "GCode/Printer.h"
+#include "GCode/Travel.h"
 
 GCodeAPI::GCodeAPI(apiDatabase& db) : database(db) {
   db.printer = std::make_unique<Printer>();
@@ -65,7 +66,17 @@ nlohmann::json GCodeAPI::linearPrint(const nlohmann::json& input) {
   for (auto& streak : *database.lines[input["Line"]]) {
     gcode.controlPoints = streak;
     gcode.feedrate = 0.03;
+
+    GCode::Travel travel(*database.printer);
+    travel.controlPoints = { database.printer->movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],database.printer->movement->currentPosition[2] + 1), streak[0] };
+
+    database.printer->extruder->retract(result);
+    database.printer->movement->travelMode(result);
+    travel.toString(result);
+    database.printer->extruder->unretract(result);
+    database.printer->movement->printMode(result);
     gcode.toString(result);
+    database.printer->extruder->retract(result);
   }
   return result;
 }

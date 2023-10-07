@@ -55,6 +55,11 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> sliceModelAPI = std::make_unique<PolyglotAPI::APIFunction>("sliceModel", [this](const nlohmann::json& input) { return sliceModel(input); });
   sliceModelAPI->setDescription(modelBoundaryDescription());
   api.addFunction(std::move(sliceModelAPI));
+
+  //transform Model
+  std::unique_ptr<PolyglotAPI::APIFunction> transformModelAPI = std::make_unique<PolyglotAPI::APIFunction>("transformModel", [this](const nlohmann::json& input) { return transformModel(input); });
+  transformModelAPI->setDescription(transformModelDescription());
+  api.addFunction(std::move(transformModelAPI));
 }
 
 std::string ModelAPI::loadModelDescription() {
@@ -225,7 +230,26 @@ sliceModel({
     'Mode'       : 'Model',
     'ResultName' : 'BenchySliceModel'
 });
+)";
+}
 
+nlohmann::json ModelAPI::transformModel(const nlohmann::json& input) {
+  auto& model = *database.models[input["Name"]];
+  auto soup = model.toSoup();
+  glm::dvec3 offset = glm::dvec3(input["Offset"][0], input["Offset"][1], input["Offset"][2]);
+  for (glm::dvec3& x : soup.first)
+    x += offset;
+  database.models[input["Name"]] = std::make_unique<Model>(soup.first, soup.second);
+  return "";
+}
 
+std::string ModelAPI::transformModelDescription() {
+  return R"(
+moves model around
+
+transformModel({
+    'Name'   : 'Name',
+    'Offset' : [1,1,1]
+});
 )";
 }
