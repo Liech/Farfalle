@@ -39,14 +39,17 @@ print('GCode Generation');
 gcode = ""
 
 gcode += setHeat({
-    'Wait' : True,
+    'Mode' : 'Set',
     'Nozzle' : 215,
     'Bed': 60
 });
 
+gcode += startup({});
+gcode += prime({});
+
 gcode += linearPrint({
   'Line':'Cut',
-  'Feedrate': 0.03
+  'Feedrate': 0.07
 })
 
 

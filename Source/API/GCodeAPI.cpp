@@ -37,10 +37,20 @@ void GCodeAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   seatHeatAPI->setDescription(setHeatDescription());
   api.addFunction(std::move(seatHeatAPI));
 
-  //set heat
+  //shutdown
   std::unique_ptr<PolyglotAPI::APIFunction> shutdownAPI = std::make_unique<PolyglotAPI::APIFunction>("shutdown", [this](const nlohmann::json& input) { return shutdown(input); });
   shutdownAPI->setDescription(shutdownDescription());
   api.addFunction(std::move(shutdownAPI));
+
+  //startup
+  std::unique_ptr<PolyglotAPI::APIFunction> startupAPI = std::make_unique<PolyglotAPI::APIFunction>("startup", [this](const nlohmann::json& input) { return startup(input); });
+  startupAPI->setDescription(shutdownDescription());
+  api.addFunction(std::move(startupAPI));
+
+  //prime
+  std::unique_ptr<PolyglotAPI::APIFunction> primeAPI = std::make_unique<PolyglotAPI::APIFunction>("prime", [this](const nlohmann::json& input) { return prime(input); });
+  primeAPI->setDescription(primeDescription());
+  api.addFunction(std::move(primeAPI));
 }
 
 std::string GCodeAPI::saveTextDescription() {
@@ -94,10 +104,13 @@ nlohmann::json GCodeAPI::linearPrint(const nlohmann::json& input) {
 
 std::string GCodeAPI::setHeatDescription() {
   return R"(
-returns text setting the printer heat level
+returns text setting the printer heat level.
+Mode Heat sets heats
+Mode WaitForHeat sets heat and waits
+Mode Set sets heat, but do not commuicate to the printer (e.g. before startup)
 
 setHeat({
-    'Wait' : False,
+    'Mode' : 'Wait', # Heat/WaitForHeat/Set
     'Nozzle' : 215,
     'Bed': 60
 });
@@ -105,13 +118,16 @@ setHeat({
 }
 
 nlohmann::json GCodeAPI::setHeat(const nlohmann::json& input) {
+  std::string mode = input["Mode"];
   database.printer->temperature->bed = input["Bed"];
   database.printer->temperature->extruder = input["Nozzle"];
   std::string result;
-  if (input["Wait"])
+  if (mode == "WaitForHeat")
     database.printer->temperature->waitForHeating(result);
-  else
+  else if (mode == "Heat")
     database.printer->temperature->startHeating(result);
+  else
+    result = "";
   return result;
 }
 
@@ -126,5 +142,33 @@ shutdown({});
 nlohmann::json GCodeAPI::shutdown(const nlohmann::json& input) {
   std::string result;
   database.printer->shutdown(result);
+  return result;
+}
+
+std::string GCodeAPI::startupDescription() {
+  return R"(
+returns gcode starting up the printer
+
+startup({});
+)";
+}
+
+nlohmann::json GCodeAPI::startup(const nlohmann::json& input) {
+  std::string result;
+  database.printer->startup(result);
+  return result;
+}
+
+std::string GCodeAPI::primeDescription() {
+  return R"(
+returns gcode priming the nozzle
+
+prime({});
+)";
+}
+
+nlohmann::json GCodeAPI::prime(const nlohmann::json& input) {
+  std::string result;
+  database.printer->extruder->prime(result);
   return result;
 }

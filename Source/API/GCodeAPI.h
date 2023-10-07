@@ -31,6 +31,10 @@ private:
   std::string setHeatDescription();
   nlohmann::json shutdown(const nlohmann::json& input);
   std::string shutdownDescription();
+  nlohmann::json startup(const nlohmann::json& input);
+  std::string startupDescription();
+  nlohmann::json prime(const nlohmann::json& input);
+  std::string primeDescription();
 
   apiDatabase& database;
 };
