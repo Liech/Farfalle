@@ -40,7 +40,7 @@ packVolume({
 print('Triangulation')
 
 triangulateDouble({
-  'VoxelName' :'Main',
+  'DoubleName' :'Main',
   'ModelName' :'Triangulation',
   'Resolution':[resolution[0]/2,resolution[1]/2,resolution[1]/2],
   'Start'     :voxelizeMin,

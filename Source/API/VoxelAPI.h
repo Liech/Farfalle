@@ -36,6 +36,10 @@ private:
   std::string packVolumeDescription();
   nlohmann::json deleteDouble(const nlohmann::json& input);
   std::string deleteDoubleDescription();
+  nlohmann::json distanceMap(const nlohmann::json& input);
+  std::string distanceMapDescription();
+  nlohmann::json transformDistanceMap(const nlohmann::json& input);
+  std::string transformDistanceMapDescription();
 
   apiDatabase& database;
 };

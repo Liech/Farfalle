@@ -39,6 +39,8 @@ private:
   std::string sliceModelDescription();
   nlohmann::json transformModel(const nlohmann::json& input);
   std::string transformModelDescription();
+  nlohmann::json hasAnyTriangle(const nlohmann::json& input);
+  std::string hasAnyTriangleDescription();
 
   apiDatabase& database;
 };

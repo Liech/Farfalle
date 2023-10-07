@@ -60,6 +60,12 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> transformModelAPI = std::make_unique<PolyglotAPI::APIFunction>("transformModel", [this](const nlohmann::json& input) { return transformModel(input); });
   transformModelAPI->setDescription(transformModelDescription());
   api.addFunction(std::move(transformModelAPI));
+
+  //transform Model
+  std::unique_ptr<PolyglotAPI::APIFunction> hasAnyTriangleAPI = std::make_unique<PolyglotAPI::APIFunction>("hasAnyTriangle", [this](const nlohmann::json& input) { return hasAnyTriangle(input); });
+  hasAnyTriangleAPI->setDescription(hasAnyTriangleDescription());
+  api.addFunction(std::move(hasAnyTriangleAPI));
+
 }
 
 std::string ModelAPI::loadModelDescription() {
@@ -250,6 +256,21 @@ moves model around
 transformModel({
     'Name'   : 'Name',
     'Offset' : [1,1,1]
+});
+)";
+}
+
+nlohmann::json ModelAPI::hasAnyTriangle(const nlohmann::json& input) {
+  auto& model = *database.models[input["Name"]];
+  return model.toSoup().first.size() != 0;
+}
+
+std::string ModelAPI::hasAnyTriangleDescription() {
+  return R"(
+returns True if the Model has any triangle
+
+hasAnyTriangle({
+    'Name'   : 'Name'
 });
 )";
 }

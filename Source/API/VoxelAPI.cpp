@@ -9,6 +9,7 @@
 
 #include "Geometry/Model.h"
 #include "Voxel/MarchingCubes.h"
+#include "Voxel/DistanceMap.h"
 
 VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
@@ -48,6 +49,16 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> deleteDoubleAPI = std::make_unique<PolyglotAPI::APIFunction>("deleteDouble", [this](const nlohmann::json& input) { return deleteDouble(input); });
   deleteDoubleAPI->setDescription(packVolumeDescription());
   api.addFunction(std::move(deleteDoubleAPI));
+
+  //distance map
+  std::unique_ptr<PolyglotAPI::APIFunction> distanceMapAPI = std::make_unique<PolyglotAPI::APIFunction>("distanceMap", [this](const nlohmann::json& input) { return distanceMap(input); });
+  distanceMapAPI->setDescription(distanceMapDescription());
+  api.addFunction(std::move(distanceMapAPI));
+
+  //transform distance map
+  std::unique_ptr<PolyglotAPI::APIFunction> transformDistanceMapAPI = std::make_unique<PolyglotAPI::APIFunction>("transformDistanceMap", [this](const nlohmann::json& input) { return transformDistanceMap(input); });
+  transformDistanceMapAPI->setDescription(transformDistanceMapDescription());
+  api.addFunction(std::move(transformDistanceMapAPI));
 }
 
 nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
@@ -118,7 +129,7 @@ nlohmann::json VoxelAPI::triangulateDouble(const nlohmann::json& input) {
   glm::dvec3 voxelSize = (end - start);
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
   voxelSize = glm::dvec3(voxelSize.x / resolution.x, voxelSize.y / resolution.y, voxelSize.z / resolution.z);
-  auto tri = MarchingCubes::polygonize(*database.volume[input["VoxelName"]], start, voxelSize, resolution,0.5);
+  auto tri = MarchingCubes::polygonize(*database.volume[input["DoubleName"]], start, voxelSize, resolution,0.5);
   database.models[input["ModelName"]] = std::make_unique<Model>(tri);
   return "";
 }
@@ -169,6 +180,53 @@ deletes a double/packed volume
 
 deleteDouble({
     'Name': 'DoubleBenchy',
+});
+)";
+}
+
+nlohmann::json VoxelAPI::distanceMap(const nlohmann::json& input) {
+  auto& voxel = *database.voxel[input["VoxelName"]];
+  glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
+  std::string mode = input["Mode"];
+
+  if (mode == "XYZ")
+    database.distanceMaps[input["DistanceMapName"]] = std::make_unique<std::vector<int>>(DistanceMap<int>().distanceMap(voxel, resolution));
+  else if (mode == "XY")
+    database.distanceMaps[input["DistanceMapName"]] = std::make_unique<std::vector<int>>(DistanceMap<int>().distanceMapXY(voxel, resolution));
+  else
+    throw std::runtime_error("Meh");
+
+  return "";
+}
+
+std::string VoxelAPI::distanceMapDescription() {
+  return R"(
+calculates a distance map of a voxelfield
+
+distanceMap({
+    'VoxelName'   : 'Name',
+    'DistanceMapName' : 'DistanceMapName',
+    'Resolution' : [128,128,128],
+    'Mode' : 'XY' # XY / XYZ
+});
+)";
+}
+
+nlohmann::json VoxelAPI::transformDistanceMap(const nlohmann::json& input) {
+  double distance = input["SquaredDistance"];
+  auto& distanceMap = *database.distanceMaps[input["DistanceMapName"]]; 
+  database.voxel[input["VoxelName"]] = std::make_unique<std::vector<bool>>(DistanceMap<int>().map(distanceMap, [distance](int distanceSqrt) { return distance * distance < distanceSqrt; }));
+  return "";
+}
+
+std::string VoxelAPI::transformDistanceMapDescription() {
+  return R"(
+transforms a distance map back to a voxelfield
+
+transformDistanceMap({
+    'DistanceMapName' : 'DistanceMapName',
+    'VoxelName'   : 'Name',
+    'SquaredDistance' : 123
 });
 )";
 }
