@@ -66,6 +66,10 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   hasAnyTriangleAPI->setDescription(hasAnyTriangleDescription());
   api.addFunction(std::move(hasAnyTriangleAPI));
 
+  //create plane
+  std::unique_ptr<PolyglotAPI::APIFunction> createPlaneAPI = std::make_unique<PolyglotAPI::APIFunction>("createPlane", [this](const nlohmann::json& input) { return createPlane(input); });
+  createPlaneAPI->setDescription(hasAnyTriangleDescription());
+  api.addFunction(std::move(createPlaneAPI));
 }
 
 std::string ModelAPI::loadModelDescription() {
@@ -286,6 +290,51 @@ returns True if the Model has any triangle
 
 hasAnyTriangle({
     'Name'   : 'Name'
+});
+)";
+}
+
+nlohmann::json ModelAPI::createPlane(const nlohmann::json& input) {
+  glm::dvec3 origin = glm::dvec3(input["Origin"][0], input["Origin"][1], input["Origin"][2]);
+  glm::dvec3 normal = glm::normalize(glm::dvec3(input["Normal"][0], input["Normal"][1], input["Normal"][2]));
+  double size = input["Size"];
+
+  std::vector<int> indices;
+  indices.resize(6);
+  std::vector<glm::dvec3> vertices;
+  vertices.resize(4);
+  glm::dvec3 someRay = glm::dvec3(1, 0, 0);
+  if (std::abs(glm::dot(someRay, normal)) < 0.3) //too samy
+    someRay = glm::dvec3(0, 1, 0);
+
+  glm::dvec3 beamA = glm::cross(normal, someRay);
+  glm::dvec3 beamB = glm::cross(normal, beamA);
+  vertices[0] = origin + beamA * size;
+  vertices[1] = origin + beamB * size;
+  vertices[2] = origin - beamA * size;
+  vertices[3] = origin - beamB * size;
+
+  indices[0] = 0;
+  indices[1] = 1;
+  indices[2] = 3;
+
+  indices[3] = 1;
+  indices[4] = 2;
+  indices[5] = 3;
+
+  database.models[input["Name"]] = std::make_unique<Model>(vertices,indices);
+  return "";
+}
+
+std::string ModelAPI::createPlaneDescription() {
+  return R"(
+creates a plane model consisting out of 2 triangles with the given size and orientation
+
+createPlane({
+    'Name' : 'FirstSlice',
+    'Origin' : [0,0,0.2],
+    'Normal' : [0,0,1],
+    'Size' : 5000
 });
 )";
 }
