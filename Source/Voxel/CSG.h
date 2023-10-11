@@ -3,6 +3,7 @@
 #include <vector>
 #include <functional>
 
+//Constructive Solid Geometry
 class CSG {
 public:
   static void andInplace(const std::vector<bool>& a, std::vector<bool>& b);

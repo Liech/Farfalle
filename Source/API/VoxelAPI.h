@@ -40,6 +40,10 @@ private:
   std::string distanceMapDescription();
   nlohmann::json transformDistanceMap(const nlohmann::json& input);
   std::string transformDistanceMapDescription();
+  nlohmann::json unionVoxel(const nlohmann::json& input);
+  std::string unionVoxelDescription();
+  nlohmann::json intersectVoxel(const nlohmann::json& input);
+  std::string intersectVoxelDescription();
 
   apiDatabase& database;
 };

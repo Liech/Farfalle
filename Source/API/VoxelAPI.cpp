@@ -10,6 +10,7 @@
 #include "Geometry/Model.h"
 #include "Voxel/MarchingCubes.h"
 #include "Voxel/DistanceMap.h"
+#include "Voxel/CSG.h"
 
 VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
@@ -59,6 +60,16 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> transformDistanceMapAPI = std::make_unique<PolyglotAPI::APIFunction>("transformDistanceMap", [this](const nlohmann::json& input) { return transformDistanceMap(input); });
   transformDistanceMapAPI->setDescription(transformDistanceMapDescription());
   api.addFunction(std::move(transformDistanceMapAPI));
+
+  //union two voxel volumes
+  std::unique_ptr<PolyglotAPI::APIFunction> unionVoxelAPI = std::make_unique<PolyglotAPI::APIFunction>("unionVoxel", [this](const nlohmann::json& input) { return unionVoxel(input); });
+  unionVoxelAPI->setDescription(unionVoxelDescription());
+  api.addFunction(std::move(unionVoxelAPI));
+
+  //intersect two voxel volumes
+  std::unique_ptr<PolyglotAPI::APIFunction> intersectVoxelAPI = std::make_unique<PolyglotAPI::APIFunction>("intersectVoxel", [this](const nlohmann::json& input) { return intersectVoxel(input); });
+  intersectVoxelAPI->setDescription(intersectVoxelDescription());
+  api.addFunction(std::move(intersectVoxelAPI));
 }
 
 nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
@@ -227,6 +238,42 @@ transformDistanceMap({
     'DistanceMapName' : 'DistanceMapName',
     'VoxelName'   : 'Name',
     'Distance' : 123  # in voxel
+});
+)";
+}
+
+nlohmann::json VoxelAPI::unionVoxel(const nlohmann::json& input) {
+  auto& source = database.voxel[input["Target"]];
+  auto& tool   = database.voxel[input["Tool"]];
+  CSG::orInplace(*tool, *source);
+  return "";
+}
+
+std::string VoxelAPI::unionVoxelDescription() {
+  return R"(
+combines a pair of voxel volumes with the OR operator. Tool is merged into Target
+
+unionVoxel({
+    'Target' : 'SourceAndResult',
+    'Tool'   : 'Tool'
+});
+)";
+}
+
+nlohmann::json VoxelAPI::intersectVoxel(const nlohmann::json& input) {
+  auto& source = database.voxel[input["Target"]];
+  auto& tool = database.voxel[input["Tool"]];
+  CSG::andInplace(*tool, *source);
+  return "";
+}
+
+std::string VoxelAPI::intersectVoxelDescription() {
+  return R"(
+subtracts a pair of voxel volumes with the AND operator. Tool is subtracted from Target
+
+unionVoxel({
+    'Target' : 'SourceAndResult',
+    'Tool'   : 'Tool'
 });
 )";
 }
