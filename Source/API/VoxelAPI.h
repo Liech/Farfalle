@@ -44,6 +44,10 @@ private:
   std::string unionVoxelDescription();
   nlohmann::json intersectVoxel(const nlohmann::json& input);
   std::string intersectVoxelDescription();
+  nlohmann::json subtractVoxel(const nlohmann::json& input);
+  std::string subtractVoxelDescription();
+  nlohmann::json copyVoxel(const nlohmann::json& input);
+  std::string copyVoxelDescription();
 
   apiDatabase& database;
 };

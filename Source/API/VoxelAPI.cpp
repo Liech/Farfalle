@@ -70,6 +70,16 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> intersectVoxelAPI = std::make_unique<PolyglotAPI::APIFunction>("intersectVoxel", [this](const nlohmann::json& input) { return intersectVoxel(input); });
   intersectVoxelAPI->setDescription(intersectVoxelDescription());
   api.addFunction(std::move(intersectVoxelAPI));
+
+  //subtract two voxel volumes
+  std::unique_ptr<PolyglotAPI::APIFunction> subtractVoxelAPI = std::make_unique<PolyglotAPI::APIFunction>("subtractVoxel", [this](const nlohmann::json& input) { return subtractVoxel(input); });
+  subtractVoxelAPI->setDescription(subtractVoxelDescription());
+  api.addFunction(std::move(subtractVoxelAPI));
+
+  //copy a voxel volume
+  std::unique_ptr<PolyglotAPI::APIFunction> copyVoxelAPI = std::make_unique<PolyglotAPI::APIFunction>("copyVoxel", [this](const nlohmann::json& input) { return copyVoxel(input); });
+  copyVoxelAPI->setDescription(copyVoxelDescription());
+  api.addFunction(std::move(copyVoxelAPI));
 }
 
 nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
@@ -269,11 +279,45 @@ nlohmann::json VoxelAPI::intersectVoxel(const nlohmann::json& input) {
 
 std::string VoxelAPI::intersectVoxelDescription() {
   return R"(
-subtracts a pair of voxel volumes with the AND operator. Tool is subtracted from Target
+merges a pair of voxel volumes with the AND operator. Tool is merged from Target
 
-unionVoxel({
+intersectVoxel({
     'Target' : 'SourceAndResult',
     'Tool'   : 'Tool'
+});
+)";
+}
+
+nlohmann::json VoxelAPI::subtractVoxel(const nlohmann::json& input) {
+  auto& source = database.voxel[input["Target"]];
+  auto& tool = database.voxel[input["Tool"]];
+  CSG::subtractInplace(*tool, *source);
+  return "";
+}
+
+std::string VoxelAPI::subtractVoxelDescription() {
+  return R"(
+subtracts a pair of voxel volumes. Tool is subtracted from Target
+
+intersectVoxel({
+    'Target' : 'SourceAndResult',
+    'Tool'   : 'Tool'
+});
+)";
+}
+
+nlohmann::json VoxelAPI::copyVoxel(const nlohmann::json& input) {
+  database.voxel[input["Target"]] = std::make_unique<std::vector<bool>>(*database.voxel[input["Source"]]);
+  return "";
+}
+
+std::string VoxelAPI::copyVoxelDescription() {
+  return R"(
+copies a voxel volume to another
+
+copyVoxel({
+    'Source' : 'Existing',
+    'Target'  : 'New'
 });
 )";
 }
