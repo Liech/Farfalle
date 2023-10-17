@@ -21,6 +21,10 @@ void LineAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> deleteLinesAPI = std::make_unique<PolyglotAPI::APIFunction>("deleteLines", [this](const nlohmann::json& input) { return deleteLines(input); });
   deleteLinesAPI->setDescription(deleteLinesDescription());
   api.addFunction(std::move(deleteLinesAPI));
+  //merge lines
+  std::unique_ptr<PolyglotAPI::APIFunction> mergeLinesAPI = std::make_unique<PolyglotAPI::APIFunction>("mergeLines", [this](const nlohmann::json& input) { return mergeLines(input); });
+  mergeLinesAPI->setDescription(mergeLinesDescription());
+  api.addFunction(std::move(mergeLinesAPI));
 }
 
 std::string LineAPI::deleteLinesDescription() {
@@ -35,5 +39,30 @@ deleteLines({
 
 nlohmann::json LineAPI::deleteLines(const nlohmann::json& input) {
   database.lines.erase(input["Name"]);
+  return "";
+}
+
+std::string LineAPI::mergeLinesDescription() {
+  return R"(
+merge lines to prohibit too much extruder hopping
+
+mergeLines({
+    'Target':'Name',
+    'Radius' : 0.6,
+    'Input' : ['Name1','Name2',...]
+});
+)";
+}
+
+nlohmann::json LineAPI::mergeLines(const nlohmann::json& input) {
+  std::vector<std::vector<glm::dvec3>> target;
+  for (auto& x : input["Input"]) {
+    for (auto& p : *database.lines[x])
+      target.push_back(p);
+  }
+
+  throw std::runtime_error("Not yet implemented");
+
+  database.lines[input["Target"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(target);
   return "";
 }
