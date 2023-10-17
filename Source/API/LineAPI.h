@@ -25,6 +25,8 @@ public:
 private:
   nlohmann::json deleteLines(const nlohmann::json& input);
   std::string deleteLinesDescription();
+  nlohmann::json mergeLines(const nlohmann::json& input);
+  std::string mergeLinesDescription();
 
   apiDatabase& database;
 };
