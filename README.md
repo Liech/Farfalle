@@ -24,6 +24,13 @@ It is not finished yet.
 
 https://www.gnu.org/licenses/lgpl-3.0.html
 
+# Use
+
+* build with VCPKG + CMAKE
+* create main.py at the same folder as the executeable
+* fill main.py and get inspirations in example folder
+* documentation.py dumps a script reference
+
 # Dependencies
 
 * CMAKE - Build Tool
