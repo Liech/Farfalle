@@ -51,10 +51,6 @@ sliceModel({
     'Mode'         : 'Model',
     'ResultName'   : 'SliceY'
 });
-saveModel({
-    'Name' : 'SliceY',
-    'Filename': 'sliceY.stl'
-});
 
 print('Slice X')
 streaks = []
@@ -65,7 +61,6 @@ nozzleDiameter = 0.4;
 X = sliceMin[0];
 counter = 0;
 while(X < sliceMax[0]):
-  print(counter);
   createPlane({
       'Name' : 'SliceX',
       'Origin' : [X,0,0.2],
@@ -81,14 +76,18 @@ while(X < sliceMax[0]):
   });
 
   streaks.append(streakName);
-  saveModel({
-    'Name' : 'SliceX',
-    'Filename': streakName + '.stl'
-  });
 
   X = X + nozzleDiameter;
   counter = counter+1;
   
+  
+print('Merge Lines');
+
+mergeLines({
+    'Result':'Merged',
+    'Radius' : 0.5,
+    'Input' : streaks
+});
 
 print('GCode Generation');
 
@@ -107,11 +106,10 @@ gcode += "\n; ;;;;;;;;;;;;;;;;;;";
 gcode += "\n; Printing:  ";
 gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
 
-for streak in streaks:
-  gcode += linearPrint({
-    'Line':streak,
-    'Feedrate': 0.03
-  })
+gcode += linearPrint({
+  'Line': 'Merged',
+  'Feedrate': 0.03
+})
 
 gcode += shutdown({});
 

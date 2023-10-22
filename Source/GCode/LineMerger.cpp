@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <set>
 #include <map>
+#include <algorithm>
 #include "Geometry/KDTree.h"
 
 
@@ -10,9 +11,19 @@ LineMerger::LineMerger() {
 
 }
 
+double LineMerger::getLength(const std::vector<glm::dvec3>& streak) {
+  double result = 0;
+  for (size_t i = 1; i < streak.size(); i++) {
+    auto& prev = streak[i - 1];
+    auto& current = streak[i];
+    result += glm::distance(prev, current);
+  }
+  return result;
+}
+
 std::vector<std::vector<glm::dvec3>> LineMerger::merge(const std::vector<std::vector<glm::dvec3>>& input, double mergeDistance) {
   std::vector<glm::dvec3> startPoints;
-  std::vector<glm::dvec3> endPoints  ;
+  std::vector<glm::dvec3> endPoints;
 
   for (auto& x : input) {
     if (x.size() > 0) {
@@ -22,98 +33,76 @@ std::vector<std::vector<glm::dvec3>> LineMerger::merge(const std::vector<std::ve
   }
 
   std::vector<glm::dvec3> allPoints;
-  allPoints.insert(allPoints.begin(),startPoints.begin(), startPoints.end());
-  allPoints.insert(allPoints.begin(),  endPoints.begin(),   endPoints.end());
+  allPoints.insert(allPoints.begin(), startPoints.begin(), startPoints.end());
+  allPoints.insert(allPoints.begin(), endPoints.begin(), endPoints.end());
   KDTree tree(allPoints);
-
-  std::set<size_t> todo;
-  for (size_t i = 0; i < allPoints.size(); i++)
-    todo.insert(i);
 
   size_t splitPoint = startPoints.size();
   auto isLineEnd = [splitPoint](size_t index) { return splitPoint >= index; };
   auto getLineIndex = [splitPoint](size_t index) { if (index >= splitPoint) return index - splitPoint; else return index; };
 
-  struct merge {
-    size_t lineA;
-    size_t lineB;
-    bool   endA; //which end of the line is merged with which? false: Start; end: True
-    bool   endB; //which end of the line is merged with which? false: Start; end: True
-  };
-
-  std::vector<merge> merges;
-  while (todo.size() > 0) {
-    size_t current = *todo.begin();
-    todo.erase(current);
-    tree.remove(current);
-
-    auto neighbours = tree.find(allPoints[current], mergeDistance); //sorted by distance
-    if (neighbours.size() > 0) {
-      size_t mergeWith = neighbours[0];
-      merge sub;
-      sub.endA  = isLineEnd(current);
-      sub.endB  = isLineEnd(mergeWith);
-      sub.lineA = getLineIndex(current);
-      sub.lineB = getLineIndex(mergeWith);
-      if (sub.lineA != sub.lineB) {
-        merges.push_back(sub);
-        todo.erase(mergeWith);
-        tree.remove(mergeWith);
-      }
-    }
-  }
+  std::set<size_t> todo;
+  for (size_t i = 0; i < input.size(); i++)
+    todo.insert(i);
 
   std::vector<std::vector<glm::dvec3>> result = input;
-  std::map<size_t, size_t> forwarding;
+  while (todo.size() > 0) {
+    std::vector<size_t> longest(todo.begin(),todo.end());
+    std::sort(longest.begin(), longest.end(), [&](const size_t& a, const size_t& b)
+      {
+        double lenA = getLength(input[a]);
+        double lenB = getLength(input[b]);
+        return lenA > lenB;
+      });
+    size_t current = longest[0];
+    todo.erase(current);
 
-  for (merge& m : merges) {
-    size_t iA = m.lineA;
-    size_t iB = m.lineB;
-    std::vector<glm::dvec3>* a;
-    std::vector<glm::dvec3>* b;
-
-    while (forwarding.count(iA) != 0) {
-      iA = forwarding[iA];
-    }
-    while (forwarding.count(iB) != 0) {
-      iB = forwarding[iB];
-    }
-    a = &result[iA];
-    b = &result[iB];
-    if (iA == iB)
+    auto& currentList = result[current];
+    if (currentList.size() == 0)
       continue;
+    bool workDone = true;
+    while (workDone) {
+      workDone = false;
+      glm::dvec3 start = currentList[0];
+      glm::dvec3 end = currentList[currentList.size() - 1];
 
-    assert(a->size() != 0);
-    assert(b->size() != 0);
+      auto candidatesStart = tree.find(start, mergeDistance);
+      for (auto candidate : candidatesStart) {
+        size_t index = getLineIndex(candidate);
+        bool atEnd = isLineEnd(candidate);
+        auto& candidateList = result[index];
+        if (todo.count(index) == 0)
+          continue;
+        todo.erase(index);
+        if (!atEnd)
+          std::reverse(candidateList.begin(), candidateList.end());
+        currentList.insert(currentList.begin(), candidateList.begin(), candidateList.end());
+        candidateList.clear();
+        workDone = true;
+        break;
+      }
 
-    //S: Start, E: End;
-    double SS = glm::distance(a->at(0)            , b->at(0            ));
-    double SE = glm::distance(a->at(0)            , b->at(b->size() - 1));
-    double ES = glm::distance(a->at(a->size() - 1), b->at(0            ));
-    double EE = glm::distance(a->at(a->size() - 1), b->at(b->size() - 1));
+      //auto candidatesEnd = tree.find(end, mergeDistance);
+      //for (auto candidate : candidatesEnd) {
+      //  size_t index = getLineIndex(candidate);
+      //  bool atEnd = isLineEnd(candidate);
+      //  auto& candidateList = result[index];
+      //  if (todo.count(index) == 0)
+      //    continue;
+      //  todo.erase(index);        
+      //  if (atEnd)
+      //    std::reverse(candidateList.begin(), candidateList.end());
+      //  currentList.insert(currentList.end(), candidateList.begin(), candidateList.end());
+      //  candidateList.clear();
+      //  workDone = true;
+      //  break;
+      //}
+    }
 
-    if (SS < SE && SS < ES && SS < EE) { //SS smallest
-      std::reverse(b->begin(), b->end());
-      a->insert(a->begin(), b->begin(), b->end());
-    }
-    else if (SE < ES && SE < EE) { //SE smallest
-      a->insert(a->begin(), b->begin(), b->end());
-    }
-    else if (ES < EE) { //ES smallest
-      a->insert(a->end(), b->begin(), b->end());
-    }
-    else { //if (EE smallest)
-      std::reverse(b->begin(), b->end());
-      a->insert(a->end(), b->begin(), b->end());
-    }
-    forwarding[iB] = iA;
-    
-    b->clear();
   }
 
-  for (int i = result.size(); i >= 0; i--)
+  for (int i = result.size()-1; i >= 0; i--)
     if (result[i].size() == 0)
       result.erase(result.begin() + i);
-
   return result;
 }
