@@ -35,7 +35,7 @@ KDTree::KDTree(const std::vector<glm::dvec3>& points) {
     pointsCgal.push_back(Point_d(x.x, x.y, x.z));
   std::vector<size_t> indices;
   indices.reserve(points.size());
-  for (size_t i = 0; i < indices.size(); i++)
+  for (size_t i = 0; i < pointsCgal.size(); i++)
     indices.push_back(i);
   p->input = std::vector<Point_and_Index>(boost::make_zip_iterator(boost::make_tuple(pointsCgal.begin(), indices.begin())),
     boost::make_zip_iterator(boost::make_tuple(pointsCgal.end(), indices.end())));
@@ -61,8 +61,13 @@ std::vector<size_t> KDTree::find(const glm::dvec3& position, double radius) {
     });
 
   std::vector<size_t> result;
-  for (auto& x : queryResult)
-    result.push_back(boost::get<1>(x));
+  for (auto& x : queryResult) {
+    auto i = boost::get<1>(x);
+    Point_d point = boost::get<0>(p->input[i]);
+    glm::dvec3 gPoint = glm::dvec3(point.x(), point.y(), point.z());
+    if (glm::distance(position,gPoint) < radius)
+      result.push_back(i);
+  }
   return result;
 }
 

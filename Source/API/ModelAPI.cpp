@@ -304,7 +304,8 @@ nlohmann::json ModelAPI::createPlane(const nlohmann::json& input) {
   std::vector<glm::dvec3> vertices;
   vertices.resize(4);
   glm::dvec3 someRay = glm::dvec3(1, 0, 0);
-  if (std::abs(glm::dot(someRay, normal)) < 0.3) //too samy
+  double similarity = glm::dot(someRay, normal);
+  if (std::abs(similarity) > 0.9) //too samy
     someRay = glm::dvec3(0, 1, 0);
 
   glm::dvec3 beamA = glm::cross(normal, someRay);

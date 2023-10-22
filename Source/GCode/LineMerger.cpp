@@ -1,5 +1,6 @@
 #include "LineMerger.h"
 
+#include <stdexcept>
 #include <set>
 #include <map>
 #include "Geometry/KDTree.h"
@@ -68,19 +69,20 @@ std::vector<std::vector<glm::dvec3>> LineMerger::merge(const std::vector<std::ve
   for (merge& m : merges) {
     size_t iA = m.lineA;
     size_t iB = m.lineB;
-    std::vector<glm::dvec3>* a = &result[iA];
-    std::vector<glm::dvec3>* b = &result[iB];
+    std::vector<glm::dvec3>* a;
+    std::vector<glm::dvec3>* b;
 
-    if (forwarding.count(m.lineA) != 0) {
-      a  = &result[forwarding[m.lineA]];
-      iA = forwarding[m.lineA];
+    while (forwarding.count(iA) != 0) {
+      iA = forwarding[iA];
     }
-    if (forwarding.count(m.lineB) != 0) {
-      b  = &result[forwarding[m.lineB]];
-      iB = forwarding[m.lineB];
+    while (forwarding.count(iB) != 0) {
+      iB = forwarding[iB];
     }
+    a = &result[iA];
+    b = &result[iB];
     if (iA == iB)
       continue;
+
     assert(a->size() != 0);
     assert(b->size() != 0);
 
@@ -104,7 +106,7 @@ std::vector<std::vector<glm::dvec3>> LineMerger::merge(const std::vector<std::ve
       std::reverse(b->begin(), b->end());
       a->insert(a->end(), b->begin(), b->end());
     }
-    forwarding[m.lineB] = m.lineA;
+    forwarding[iB] = iA;
     
     b->clear();
   }
