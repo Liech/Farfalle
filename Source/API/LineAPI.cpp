@@ -7,6 +7,8 @@
 #include "PolyglotAPI/Source/PolyglotAPI/API/APIFunction.h"
 #include "PolyglotAPI/Source/PolyglotAPI/API/FunctionRelay.h"
 
+#include "GCode/LineMerger.h"
+
 
 LineAPI::LineAPI(apiDatabase& db) : database(db) {
 
@@ -47,7 +49,7 @@ std::string LineAPI::mergeLinesDescription() {
 merge lines to prohibit too much extruder hopping
 
 mergeLines({
-    'Target':'Name',
+    'Result':'Name',
     'Radius' : 0.6,
     'Input' : ['Name1','Name2',...]
 });
@@ -61,8 +63,8 @@ nlohmann::json LineAPI::mergeLines(const nlohmann::json& input) {
       target.push_back(p);
   }
 
-  throw std::runtime_error("Not yet implemented");
+  std::vector<std::vector<glm::dvec3>> result = LineMerger::merge(target, input["Radius"]);
 
-  database.lines[input["Target"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(target);
+  database.lines[input["Result"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(result);
   return "";
 }
