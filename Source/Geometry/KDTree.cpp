@@ -49,8 +49,17 @@ KDTree::~KDTree() {
 std::vector<size_t> KDTree::find(const glm::dvec3& position, double radius) {
   Point_d center(position.x,position.y,position.z);
   Fuzzy_circle default_range(center, radius);
-  std::list<Point_and_Index> queryResult;
+  std::vector<Point_and_Index> queryResult;
   p->tree.search(std::back_inserter(queryResult), default_range);
+  std::sort(queryResult.begin(), queryResult.end(), [position](const Point_and_Index& a, const Point_and_Index& b)
+    {
+      Point_d pA = boost::get<0>(a);
+      Point_d pB = boost::get<0>(b);
+      glm::dvec3 gA = glm::dvec3(pA.x(), pA.y(), pA.z());
+      glm::dvec3 gB = glm::dvec3(pB.x(), pB.y(), pB.z());
+      return glm::distance(gA, position) < glm::distance(gB, position);
+    });
+
   std::vector<size_t> result;
   for (auto& x : queryResult)
     result.push_back(boost::get<1>(x));

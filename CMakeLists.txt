@@ -53,6 +53,8 @@ set(GCode_Files
     "Source/GCode/Movement.cpp"
     "Source/GCode/Extruder.h"
     "Source/GCode/Extruder.cpp"
+    "Source/GCode/LineMerger.h"
+    "Source/GCode/LineMerger.cpp"
 )
 source_group("Source/GCode" FILES ${GCode_Files})
 
