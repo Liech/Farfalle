@@ -1,3 +1,13 @@
+# Farfalle
+
+This is an experimental Slicer in a very rough state.
+
+Orchestrated by a Python Script the executable produces gcode.
+
+It uses Mesh based Models instead of Axis aligned Planes to cut.
+
+It is not finished yet.
+
 # Single Border cut and a Sphere as Slice Surface:
 ![image](https://github.com/Liech/Farfalle/assets/16963076/ee5b53db-d740-4cae-b1f6-14f932f8427a)
 
@@ -9,16 +19,6 @@
 # X Plane Slicing of Z Plane Sliced Model
 ![image](https://github.com/Liech/Farfalle/assets/16963076/ef65e40f-aeb2-402b-a6e6-e2b9f377ca49)
 ![image](https://github.com/Liech/Farfalle/assets/16963076/65dfe39b-06e8-44b0-b824-0f57ff15acee)
-
-# Farfalle
-
-This is an experimental Slicer in a very rough state.
-
-Orchestrated by a Python Script the executable produces gcode.
-
-It uses Mesh based Models instead of Axis aligned Planes to cut.
-
-It is not finished yet.
 
 # License
 
