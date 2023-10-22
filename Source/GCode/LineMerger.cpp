@@ -66,13 +66,21 @@ std::vector<std::vector<glm::dvec3>> LineMerger::merge(const std::vector<std::ve
   std::map<size_t, size_t> forwarding;
 
   for (merge& m : merges) {
-    std::vector<glm::dvec3>* a = &result[m.lineA];
-    std::vector<glm::dvec3>* b = &result[m.lineB];
+    size_t iA = m.lineA;
+    size_t iB = m.lineB;
+    std::vector<glm::dvec3>* a = &result[iA];
+    std::vector<glm::dvec3>* b = &result[iB];
 
-    if (forwarding.count(m.lineA) != 0)
-      a = &result[forwarding[m.lineA]];
-    if (forwarding.count(m.lineB) != 0)
-      b = &result[forwarding[m.lineB]];
+    if (forwarding.count(m.lineA) != 0) {
+      a  = &result[forwarding[m.lineA]];
+      iA = forwarding[m.lineA];
+    }
+    if (forwarding.count(m.lineB) != 0) {
+      b  = &result[forwarding[m.lineB]];
+      iB = forwarding[m.lineB];
+    }
+    if (iA == iB)
+      continue;
     assert(a->size() != 0);
     assert(b->size() != 0);
 
