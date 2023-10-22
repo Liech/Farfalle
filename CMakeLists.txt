@@ -78,6 +78,8 @@ set(Geometry_Files
     "Source/Geometry/Volume.cpp"	
     "Source/Geometry/VolumeImplementation.h"
     "Source/Geometry/VolumeImplementation.cpp"	
+    "Source/Geometry/KDTree.h"
+    "Source/Geometry/KDTree.cpp"
 )
 source_group("Source/Geometry" FILES ${Geometry_Files})
 
