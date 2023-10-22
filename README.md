@@ -9,6 +9,8 @@
 
 This is an experimental Slicer in a very rough state.
 
+Orchestrated by a Python Script the executable produces gcode.
+
 # Current Form
 
 * Slice with implicit surfaces for infill and plane
