@@ -11,6 +11,7 @@ class VoxelAPI;
 class ModelAPI;
 class LineAPI;
 class GCodeAPI;
+class ScriptAPI;
 
 namespace PolyglotAPI {
   class API;
@@ -26,9 +27,10 @@ public:
 
   std::unique_ptr<PolyglotAPI::API> getAPI(PolyglotAPI::FunctionRelay&);
 private:
-  std::unique_ptr<VoxelAPI> voxel;
-  std::unique_ptr<ModelAPI> model;
-  std::unique_ptr<LineAPI>  line;
-  std::unique_ptr<GCodeAPI> gcode;
+  std::unique_ptr<VoxelAPI>  voxel;
+  std::unique_ptr<ModelAPI>  model;
+  std::unique_ptr<LineAPI>   line;
+  std::unique_ptr<GCodeAPI>  gcode;
+  std::unique_ptr<ScriptAPI> script;
   apiDatabase db;
 };

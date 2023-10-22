@@ -13,9 +13,13 @@
 
 class Model;
 class Printer;
+class FarfalleAPI;
 
 class apiDatabase {
 public:
+  apiDatabase(FarfalleAPI*);
+  virtual ~apiDatabase();
+
   std::map<std::string, std::unique_ptr<std::vector<bool>>>                    voxel;
   std::map<std::string, std::unique_ptr<std::vector<double>>>                  volume;
   std::map<std::string, std::unique_ptr<std::vector<int   >>>                  distanceMaps;
@@ -23,4 +27,5 @@ public:
   std::map<std::string, std::unique_ptr<std::vector<std::vector<glm::dvec3>>>> lines;
   
   std::unique_ptr<Printer> printer;
+  FarfalleAPI* api;
 };

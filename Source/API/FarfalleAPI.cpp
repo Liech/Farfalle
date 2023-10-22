@@ -11,10 +11,11 @@
 #include "VoxelAPI.h"
 #include "LineAPI.h"
 #include "GCodeAPI.h"
+#include "ScriptAPI.h"
 
 #include "Geometry/Model.h"
 
-FarfalleAPI::FarfalleAPI() {
+FarfalleAPI::FarfalleAPI() : db(this){
 
 }
 
@@ -31,6 +32,8 @@ void FarfalleAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) 
   line ->add(api, relay);
   gcode = std::make_unique<GCodeAPI>(db);
   gcode->add(api, relay);
+  script = std::make_unique<ScriptAPI>(db);
+  script->add(api, relay);
 }
 
 std::unique_ptr<PolyglotAPI::API> FarfalleAPI::getAPI(PolyglotAPI::FunctionRelay& relay) {

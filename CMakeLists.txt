@@ -108,6 +108,8 @@ set(API_Files
 	"Source/API/LineAPI.h"
 	"Source/API/GCodeAPI.cpp"
 	"Source/API/GCodeAPI.h"
+	"Source/API/ScriptAPI.cpp"
+	"Source/API/ScriptAPI.h"
 	"Source/API/apiDatabase.cpp"
 	"Source/API/apiDatabase.h"
 )
