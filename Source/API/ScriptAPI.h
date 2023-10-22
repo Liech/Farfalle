@@ -27,6 +27,10 @@ private:
   std::string executePythonDescription();
   nlohmann::json getDocumentation(const nlohmann::json& input);
   std::string getDocumentationDescription();
+  nlohmann::json getData(const nlohmann::json& input);
+  std::string getDataDescription();
+  nlohmann::json setData(const nlohmann::json& input);
+  std::string setDataDescription();
 
   apiDatabase& database;
 };

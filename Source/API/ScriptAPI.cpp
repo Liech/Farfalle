@@ -27,6 +27,14 @@ void ScriptAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> documentationAPI = std::make_unique<PolyglotAPI::APIFunction>("getDocumentation", [this](const nlohmann::json& input) { return getDocumentation(input); });
   documentationAPI->setDescription(getDocumentationDescription());
   api.addFunction(std::move(documentationAPI));
+  //gets custom data
+  std::unique_ptr<PolyglotAPI::APIFunction> getDataAPI = std::make_unique<PolyglotAPI::APIFunction>("getData", [this](const nlohmann::json& input) { return getData(input); });
+  getDataAPI->setDescription(getDataDescription());
+  api.addFunction(std::move(getDataAPI));
+  //rsets custom data
+  std::unique_ptr<PolyglotAPI::APIFunction> setDataAPI = std::make_unique<PolyglotAPI::APIFunction>("setData", [this](const nlohmann::json& input) { return setData(input); });
+  setDataAPI->setDescription(setDataDescription());
+  api.addFunction(std::move(setDataAPI));
 }
 
 std::string ScriptAPI::executePythonDescription() {
@@ -70,4 +78,32 @@ nlohmann::json ScriptAPI::getDocumentation(const nlohmann::json& input) {
   }
 
   return result;
+}
+
+std::string ScriptAPI::setDataDescription() {
+  return R"(
+sets custom data accessible by different files (e.g. executed with executePythonFile)
+setData({
+    'Name' : 'Config',
+    'Data' : {'wub' : 'wub'}
+});
+)";
+}
+
+nlohmann::json ScriptAPI::setData(const nlohmann::json& input) {
+  database.data[input["Name"]] = input["Data"];
+  return "";
+}
+
+std::string ScriptAPI::getDataDescription() {
+  return R"(
+gets custom data set with setData
+getData({
+    'Name' : 'Config'
+});
+)";
+}
+
+nlohmann::json ScriptAPI::getData(const nlohmann::json& input) {
+  return database.data[input["Name"]];
 }
