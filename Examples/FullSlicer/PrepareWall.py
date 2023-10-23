@@ -26,7 +26,7 @@ distanceMap({
 
 voxelSize = boundary["UniformSize"][0] / VoxelResolution[0];
 
-eroded = 0.0;
+eroded = NozzleDiameter/2;
 
 streaks = []
 streakCount = 0;

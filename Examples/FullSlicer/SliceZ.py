@@ -21,7 +21,7 @@ counter = 0;
 
 setData({'Name':'ZCounter', 'Data' : 0});
 
-while(Z < sliceMax[2] and counter < 3):
+while(Z < sliceMax[2]):
   print('Z Layer ' + str(counter));
   createPlane({
     'Name' : 'Slice',
