@@ -12,7 +12,7 @@
 template<typename T>
 class DistanceMap {
 public:
-  std::vector<T> distanceMap(const std::vector<bool>& data, const glm::ivec3& resolution) {
+  std::vector<T> distanceMap(const std::vector<bool>& data, const glm::u64vec3& resolution) {
     std::vector<T> sdt_x;
     sdt_x.resize(data.size());
     std::vector<T> sdt_xy;
@@ -32,13 +32,13 @@ public:
 
 #pragma omp parallel for
     for (long long i = 0; i < data.size(); i += 8) { //std::vector<bool> is special and partially not thread safe
-      for (int j = 0; j < 8; j++)
+      for (int64_t j = 0; j < 8; j++)
         result[i + j] = condition(data[i + j]);
     }
     return result;
   }
 
-  std::vector<T> distanceMapXY(const std::vector<bool>& data, const glm::ivec3& resolution) {
+  std::vector<T> distanceMapXY(const std::vector<bool>& data, const glm::u64vec3& resolution) {
     std::vector<T> sdt_x;
     sdt_x.resize(data.size());
     std::vector<T> sdt_xy;
@@ -82,44 +82,44 @@ private:
     else
       return  divid / divis;
   }
-  T F(int x, int i, T gi2)
+  T F(int64_t x, int64_t i, T gi2)
   {
     return sum((x - i) * (x - i), gi2);
   }
-  T Sep(int i, int u, T gi2, T gu2) {
+  T Sep(int64_t i, int64_t u, T gi2, T gu2) {
     return intdivint(sum(sum((T)(u * u - i * i), gu2), opp(gi2)), 2 * (u - i));
   }
-  size_t getAddress(int x, int y, int z, const glm::ivec3& resolution) const {
+  int64_t getAddress(int64_t x, int64_t y, int64_t z, const glm::u64vec3& resolution) const {
     return z + resolution.z * y + resolution.z * resolution.y * x;
   }
-  void phaseSaitoX(const std::vector<bool>& V, std::vector<T>& sdt_x, const glm::ivec3& resolution)
+  void phaseSaitoX(const std::vector<bool>& V, std::vector<T>& sdt_x, const glm::u64vec3& resolution)
   {
 #pragma omp parallel for
-    for (int z = 0; z < resolution.z; z++) {
-      for (int y = 0; y < resolution.y; y++)
+    for (long long z = 0; z < resolution.z; z++) {
+      for (int64_t y = 0; y < resolution.y; y++)
       {
-        size_t addressA = getAddress(0, y, z, resolution);
+        int64_t addressA = getAddress(0, y, z, resolution);
         if (V[addressA] == 0)
           sdt_x[addressA] = 0;
         else
           sdt_x[addressA] = INFTY;
 
         // Forward scan
-        for (int x = 1; x < resolution.x; x++) {
-          size_t addressB = getAddress(x, y, z, resolution);
+        for (int64_t x = 1; x < resolution.x; x++) {
+          int64_t addressB = getAddress(x, y, z, resolution);
           if (V[addressB] == 0)
             sdt_x[addressB] = 0;
           else {
-            size_t prev = getAddress(x - 1, y, z, resolution);
+            int64_t prev = getAddress(x - 1, y, z, resolution);
             T vv = sum(1, sdt_x[prev]);
             sdt_x[addressB] = vv;
           }
         }
 
         //Backward scan
-        for (int x = resolution.x - 2; x >= 0; x--) {
-          size_t backward = getAddress(x + 1, y, z, resolution);
-          size_t current = getAddress(x, y, z, resolution);
+        for (int64_t x = resolution.x - 2; x >= 0; x--) {
+          int64_t backward = getAddress(x + 1, y, z, resolution);
+          int64_t current = getAddress(x, y, z, resolution);
           if (sdt_x[backward] < sdt_x[current]) {
             T vv = sum(1, sdt_x[backward]);
             sdt_x[current] = vv;
@@ -128,24 +128,24 @@ private:
       }
     }
   }
-  void phaseSaitoY(const std::vector<T>& sdt_x, std::vector<T>& sdt_xy, const glm::ivec3& resolution)
+  void phaseSaitoY(const std::vector<T>& sdt_x, std::vector<T>& sdt_xy, const glm::u64vec3& resolution)
   {
-    std::vector<int> s;
+    std::vector<int64_t> s;
     s.resize(resolution.y); //Center of the upper envelope parabolas
-    std::vector<int> t;
+    std::vector<int64_t> t;
     t.resize(resolution.y); //Separating index between 2 upper envelope parabolas 
 
 
 //#pragma omp parallel for
-    for (int z = 0; z < resolution.z; z++) {
-      for (int x = 0; x < resolution.x; x++)
+    for (int64_t z = 0; z < resolution.z; z++) {
+      for (int64_t x = 0; x < resolution.x; x++)
       {
-        int q = 0;
+        int64_t q = 0;
         s[0] = 0;
         t[0] = 0;
 
         //Forward Scan
-        for (int u = 1; u < resolution.y; u++)
+        for (int64_t u = 1; u < resolution.y; u++)
         {
           while ((q >= 0) &&
             (F(t[q], s[q], prod(sdt_x[getAddress(x, s[q], z, resolution)], sdt_x[getAddress(x, s[q], z, resolution)])) >
@@ -160,7 +160,7 @@ private:
           }
           else
           {
-            int w = 1 + Sep(s[q],
+            int64_t w = 1 + Sep(s[q],
               u,
               prod(sdt_x[getAddress(x, s[q], z, resolution)], sdt_x[getAddress(x, s[q], z, resolution)]),
               prod(sdt_x[getAddress(x, u, z, resolution)], sdt_x[getAddress(x, u, z, resolution)]));
@@ -175,7 +175,7 @@ private:
         }
 
         //Backward Scan
-        for (int u = resolution.y - 1; u >= 0; --u)
+        for (int64_t u = resolution.y - 1; u >= 0; --u)
         {
           sdt_xy[getAddress(x, u, z, resolution)] = F(u, s[q], prod(sdt_x[getAddress(x, s[q], z, resolution)], sdt_x[getAddress(x, s[q], z, resolution)]));
           if (u == t[q])
@@ -184,23 +184,23 @@ private:
       }
     }
   }
-  void phaseSaitoZ(const std::vector<T>& sdt_xy, std::vector<T>& sdt_xyz, const glm::ivec3& resolution)
+  void phaseSaitoZ(const std::vector<T>& sdt_xy, std::vector<T>& sdt_xyz, const glm::u64vec3& resolution)
   {
-    std::vector<int> s;
+    std::vector<int64_t> s;
     s.resize(resolution.z); //Center of the upper envelope parabolas
-    std::vector<int> t;
+    std::vector<int64_t> t;
     t.resize(resolution.z); //Separating index between 2 upper envelope parabolas 
 
 //#pragma omp parallel for
-    for (int y = 0; y < resolution.y; y++) {
-      for (int x = 0; x < resolution.x; x++)
+    for (int64_t y = 0; y < resolution.y; y++) {
+      for (int64_t x = 0; x < resolution.x; x++)
       {
-        int q = 0;
+        int64_t q = 0;
         s[0] = 0;
         t[0] = 0;
 
         //Forward Scan
-        for (int u = 1; u < resolution.z; u++)
+        for (int64_t u = 1; u < resolution.z; u++)
         {
           while ((q >= 0) &&
             (F(t[q], s[q], sdt_xy[getAddress(x, y, s[q], resolution)]) >
@@ -215,7 +215,7 @@ private:
           }
           else
           {
-            int w = 1 + Sep(s[q],
+            int64_t w = 1 + Sep(s[q],
               u,
               sdt_xy[getAddress(x, y, s[q], resolution)],
               sdt_xy[getAddress(x, y, u, resolution)]);
@@ -230,7 +230,7 @@ private:
         }
 
         //Backward Scan
-        for (int u = resolution.z - 1; u >= 0; --u)
+        for (int64_t u = resolution.z - 1; u >= 0; --u)
         {
           sdt_xyz[getAddress(x, y, u, resolution)] = F(u, s[q], sdt_xy[getAddress(x, y, s[q], resolution)]);
           if (u == t[q])

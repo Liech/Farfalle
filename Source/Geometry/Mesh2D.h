@@ -24,10 +24,10 @@ public:
 
   std::vector<glm::dvec2> intersectLine(const glm::dvec2& start, const glm::dvec2& end) const;
   //glm::dvec2 getPolePoint(const glm::dvec2& north) const;
-  std::pair<std::vector<glm::dvec2>,std::vector<int>> getTriangulation(Model* representaion3D = nullptr);
+  std::pair<std::vector<glm::dvec2>,std::vector<size_t>> getTriangulation(Model* representaion3D = nullptr);
 private:
-  std::vector<glm::dvec2> fill(double distance, int index);
-  glm::dvec2 raycast(const glm::dvec2& start, const glm::dvec2& dir, int index, bool& doesIntersect);
+  std::vector<glm::dvec2> fill(double distance, size_t index);
+  glm::dvec2 raycast(const glm::dvec2& start, const glm::dvec2& dir, size_t index, bool& doesIntersect);
 
   void init(const std::vector<std::vector<glm::dvec2>>&);
 

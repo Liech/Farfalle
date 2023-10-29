@@ -299,7 +299,7 @@ nlohmann::json ModelAPI::createPlane(const nlohmann::json& input) {
   glm::dvec3 normal = glm::normalize(glm::dvec3(input["Normal"][0], input["Normal"][1], input["Normal"][2]));
   double size = input["Size"];
 
-  std::vector<int> indices;
+  std::vector<size_t> indices;
   indices.resize(6);
   std::vector<glm::dvec3> vertices;
   vertices.resize(4);

@@ -151,8 +151,8 @@ std::vector<Polygon_with_holes_2> Mesh2DPIMPL::loopSoup2Polys(const std::vector<
   Cost cost;
 
   //identify loops by loop orientation
-  std::vector<int> holeIndex;
-  std::vector<int> polyIndex;
+  std::vector<size_t> holeIndex;
+  std::vector<size_t> polyIndex;
   for (size_t i = 0; i < loops.size(); i++) {
     auto& loop = loops[i];
     bool isHole = CGAL::Orientation::NEGATIVE == CGAL::orientation_2(loop.begin(), loop.end());
@@ -245,7 +245,7 @@ std::vector<std::shared_ptr<Mesh2D>> Mesh2D::decompose() {
 std::vector<std::vector<glm::dvec2>> Mesh2D::fill(double distance) {
   std::vector<std::vector<glm::dvec2>> result;
 
-  for (int i = 0; i < p->poly.size();i++) {
+  for (size_t i = 0; i < p->poly.size();i++) {
     if (p->poly[i].has_holes())
       throw std::runtime_error("Does not work with holes!");
     auto sub = fill(distance, i);
@@ -282,7 +282,7 @@ std::vector<glm::dvec2> Mesh2D::intersectLine(const glm::dvec2& start, const glm
       }
     };
 
-    for (int i = 1; i < vertecies.size(); i++) {
+    for (size_t i = 1; i < vertecies.size(); i++) {
       Segment2 seg = Segment2(vertecies[i - 1], vertecies[i]);
       lineIntersect(l, seg);
     }
@@ -308,7 +308,7 @@ std::vector<glm::dvec2> Mesh2D::intersectLine(const glm::dvec2& start, const glm
   return result;
 }
 
-glm::dvec2 Mesh2D::raycast(const glm::dvec2& start, const glm::dvec2& dir, int index, bool& doesIntersect) {
+glm::dvec2 Mesh2D::raycast(const glm::dvec2& start, const glm::dvec2& dir, size_t index, bool& doesIntersect) {
   doesIntersect = true;
   auto bound = p->poly[index].outer_boundary();
   Ray2 l = Ray2(Point_2(start.x, start.y), Point_2(start.x + dir.x, start.y + dir.y));
@@ -341,17 +341,17 @@ glm::dvec2 Mesh2D::raycast(const glm::dvec2& start, const glm::dvec2& dir, int i
   return bestIntersection;
 }
 
-std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
+std::vector<glm::dvec2> Mesh2D::fill(double distance, size_t index) {
   std::vector<glm::dvec2> result;
-  auto get = [this, index](int vertex) {
+  auto get = [this, index](size_t vertex) {
     auto result = p->poly[index].outer_boundary().vertex(vertex);
     return glm::dvec2(result.x(), result.y());
     };
 
   //find leftmost
   glm::dvec2 start = get(0);
-  int numberVertex = p->poly[index].outer_boundary().vertices().size();
-  for (int i = 0; i < numberVertex; i++) {
+  size_t numberVertex = p->poly[index].outer_boundary().vertices().size();
+  for (size_t i = 0; i < numberVertex; i++) {
     auto glmVertex = get(i);
     if (start.x > glmVertex.x)
       start = glmVertex;
@@ -402,7 +402,7 @@ std::vector<glm::dvec2> Mesh2D::fill(double distance, int index) {
 //  return bestPoint;
 //}
 
-std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Model* representaion3D) {
+std::pair<std::vector<glm::dvec2>, std::vector<size_t>> Mesh2D::getTriangulation(Model* representaion3D) {
   CDT cdt;
 
 
@@ -431,10 +431,10 @@ std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Mo
   };
 
   for (auto& poly : p->poly) {
-    int outerSize = poly.outer_boundary().size();
-    for (int i = 0; i < outerSize; i++) {
-      int current = i;
-      int previous = (i == 0) ? (outerSize-1) : (i - 1);
+    size_t outerSize = poly.outer_boundary().size();
+    for (size_t i = 0; i < outerSize; i++) {
+      size_t current = i;
+      size_t previous = (i == 0) ? (outerSize-1) : (i - 1);
       Point_2 currentP = poly.outer_boundary().vertex(current);
       Point_2 previousP= poly.outer_boundary().vertex(previous);
       cdt.insert_constraint(currentP, previousP);
@@ -442,10 +442,10 @@ std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Mo
       allPoints.insert(std::array<double, 2>{previousP.x(), previousP.y()});
     }
     for (auto& hole : poly.holes()) {
-      int holeSize = hole.size();
-      for (int i = 0; i < holeSize; i++) {
-        int current = i;
-        int previous = (i == 0) ? (holeSize - 1) : (i - 1);
+      size_t holeSize = hole.size();
+      for (size_t i = 0; i < holeSize; i++) {
+        size_t current = i;
+        size_t previous = (i == 0) ? (holeSize - 1) : (i - 1);
         Point_2 currentP  = hole.vertex(current);
         Point_2 previousP = hole.vertex(previous);
         cdt.insert_constraint(currentP, previousP);
@@ -467,18 +467,18 @@ std::pair<std::vector<glm::dvec2>, std::vector<int>> Mesh2D::getTriangulation(Mo
   CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
 
   typedef CGAL::internal::CC_iterator<CGAL::Compact_container<CGAL::Triangulation_vertex_base_2<CGAL::Exact_predicates_inexact_constructions_kernel, CGAL::Triangulation_ds_vertex_base_2<Tds>>>, false> vertexPointer;
-  std::map< vertexPointer, int> indexMap;
+  std::map< vertexPointer, size_t> indexMap;
   
-  std::pair<std::vector<glm::dvec2>, std::vector<int>> result = std::make_pair(std::vector<glm::dvec2>{}, std::vector<int>{});
+  std::pair<std::vector<glm::dvec2>, std::vector<size_t>> result = std::make_pair(std::vector<glm::dvec2>{}, std::vector<size_t>{});
   std::vector<glm::dvec2>& resultPoints = result.first;
-  std::vector<int>&        resultIndices = result.second;
+  std::vector<size_t>&        resultIndices = result.second;
 
-  int counter = 0;
+  size_t counter = 0;
   for (CDT::Finite_faces_iterator it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); ++it) {
     if (!it->is_in_domain())
       continue;    
        
-    for (int i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3; i++) {
       vertexPointer v = it->vertex(i);
       if (indexMap.count(v) == 0) {
         indexMap[v] = counter;

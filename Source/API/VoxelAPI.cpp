@@ -209,6 +209,7 @@ nlohmann::json VoxelAPI::distanceMap(const nlohmann::json& input) {
   auto& voxel = *database.voxel[input["VoxelName"]];
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
   std::string mode = input["Mode"];
+  std::cout << "distanceMap::resolution: " << resolution[0] << " / " << resolution[1] << " / " << resolution[2] << std::endl;
 
   if (mode == "XYZ")
     database.distanceMaps[input["DistanceMapName"]] = std::make_unique<std::vector<int>>(DistanceMap<int>().distanceMap(voxel, resolution));

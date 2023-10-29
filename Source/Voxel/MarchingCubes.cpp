@@ -293,8 +293,8 @@ const int MarchingCubes::triTable[256][16] =
 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1} };
 
 std::vector<glm::dvec3> MarchingCubes::polygonize(const std::array<glm::dvec3, 8>& p, const std::array<double, 8>& val, double isolevel) {
-  int i, ntriang;
-  int cubeindex;
+  size_t i, ntriang;
+  size_t cubeindex;
   glm::dvec3 vertlist[12];
 
   /*
@@ -386,14 +386,14 @@ glm::dvec3 MarchingCubes::VertexInterp(double isolevel, const glm::dvec3& p1, co
   return(p);
 }
 
-std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<bool>& data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::ivec3& resolution) {
+std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<bool>& data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::u64vec3& resolution) {
   std::vector<glm::dvec3> result;
 
   std::vector<std::vector<glm::dvec3>> subResult;
   subResult.resize(resolution.x);
 
 #pragma omp parallel for
-  for (int x = 0; x < resolution.x - 1; x++) {
+  for (long long x = 0; x < resolution.x - 1; x++) {
     for (size_t y = 0; y < resolution.y - 1; y++) {
       for (size_t z = 0; z < resolution.z - 1; z++) {
         std::array<double, 8> values = {
@@ -428,14 +428,14 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<bool>& data,
   return result;
 }
 
-std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::ivec3& resolution, double isovalue) {
+std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::u64vec3& resolution, double isovalue) {
   std::vector<glm::dvec3> result;
 
   std::vector<std::vector<glm::dvec3>> subResult;
   subResult.resize(resolution.x);
 
 #pragma omp parallel for
-  for (int x = 0; x < resolution.x - 1; x++) {
+  for (long long x = 0; x < resolution.x - 1; x++) {
     for (size_t y = 0; y < resolution.y - 1; y++) {
       for (size_t z = 0; z < resolution.z - 1; z++) {
         std::array<double, 8> values = {
@@ -470,20 +470,20 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& dat
   return result;
 }
 
-std::vector<double> MarchingCubes::pack(const std::vector<bool>& data, const glm::ivec3& resolution, const glm::ivec3& oneVoxelSize) {
+std::vector<double> MarchingCubes::pack(const std::vector<bool>& data, const glm::u64vec3& resolution, const glm::u64vec3& oneVoxelSize) {
   std::vector<double> result;
   size_t packSize = oneVoxelSize.x * oneVoxelSize.y * oneVoxelSize.z;
   result.resize(data.size() / packSize);
-  glm::ivec3 resultResolution = glm::ivec3(resolution.x / oneVoxelSize.x, resolution.y / oneVoxelSize.y, resolution.z / oneVoxelSize.z);
+  glm::u64vec3 resultResolution = glm::u64vec3(resolution.x / oneVoxelSize.x, resolution.y / oneVoxelSize.y, resolution.z / oneVoxelSize.z);
 
 //#pragma omp parallel for
   for (long long i = 0; i < result.size(); i++) {
-    glm::ivec3 coord = glm::ivec3(i / (resultResolution.y* resultResolution.z), (i / resultResolution.z) % resultResolution.y, i % resultResolution.z);
+    glm::u64vec3 coord = glm::u64vec3(i / (resultResolution.y* resultResolution.z), (i / resultResolution.z) % resultResolution.y, i % resultResolution.z);
     size_t val = 0;
     size_t offset = oneVoxelSize.z * coord.z + coord.y * oneVoxelSize.y * resolution.z + coord.x * oneVoxelSize.y * resolution.z * resolution.y;
-    for (int x = 0; x < oneVoxelSize.x; x++)
-      for (int y = 0; y < oneVoxelSize.y; y++)
-        for (int z = 0; z < oneVoxelSize.z; z++) {
+    for (size_t x = 0; x < oneVoxelSize.x; x++)
+      for (size_t y = 0; y < oneVoxelSize.y; y++)
+        for (size_t z = 0; z < oneVoxelSize.z; z++) {
           size_t address = z + y * resolution.z + x * resolution.z * resolution.y + offset;
           if (data[address])
             val++;

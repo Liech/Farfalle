@@ -12,7 +12,7 @@ struct EpsilonEqualityPredicate {
   }
 };
 
-std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::ivec3& resolution) {
+std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution) {
   assert(resolution.z % 8 == 0);
   size_t amountTriangles = indices.size() / 3;
   size_t memorySize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
@@ -49,7 +49,7 @@ std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dv
   auto& data = *result;
   glm::dvec3 rayDirection = glm::dvec3(0, 0, 1);
 #pragma omp parallel for
-  for (int x = 0; x < resolution.x; x++) {
+  for (long long x = 0; x < resolution.x; x++) {
     for (size_t y = 0; y < resolution.y; y++) {
       size_t stackAddress = x + resolution.x * y;
       size_t resultOffset = resolution.z * resolution.y * x + resolution.z * y;
@@ -127,7 +127,7 @@ bool Voxelizer::intersectRayTriangle(const glm::dvec3& rayOrigin, const glm::dve
     return false;
 }
 
-void Voxelizer::boxelize(const std::vector<bool>& data, const glm::dvec3& start, const glm::dvec3& end, const glm::ivec3& resolution, std::vector<glm::dvec3>& out_triangles) {
+void Voxelizer::boxelize(const std::vector<bool>& data, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution, std::vector<glm::dvec3>& out_triangles) {
   glm::dvec3 span = end - start;
   glm::dvec3 voxelSize = glm::dvec3(span.x / (double)resolution.x, span.y / (double)resolution.y, span.z / (double)resolution.z);
   for (size_t i = 0; i < data.size(); i++) {
