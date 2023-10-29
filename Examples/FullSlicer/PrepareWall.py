@@ -59,12 +59,16 @@ while(True):
     'Start'     :voxelizeMin,
     'End'       :voxelizeMax
   });
+  #saveModel({
+  #    'Name' : name,
+  #    'Filename': 'dbg/' + name + '.stl'
+  #});
   
   hasTri = hasAnyTriangle({'Name':name});
   if (not hasTri):
     break;
     
-  eroded+=NozzleDiameter
+  eroded+=NozzleDiameter/2
   counter = counter+1;
 
 setData({'Name':'OuterAreaWallAmount', 'Data':counter});

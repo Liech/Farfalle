@@ -68,3 +68,11 @@ triangulateVolume({
     'Start' : voxelizeMin,
     'End'   : voxelizeMax
 }); 
+saveModel({
+    'Name' : 'InnerArea',
+    'Filename': 'dbg/InnerArea.stl'
+});
+saveModel({
+    'Name' : 'OuterArea',
+    'Filename': 'dbg/OuterArea.stl'
+});

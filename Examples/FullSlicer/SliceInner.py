@@ -33,7 +33,7 @@ while(X < sliceMax[0]):
       'Name' : 'SliceX',
       'Origin' : [X,0,0.2],
       'Normal' : [1,0,0],
-      'Size' : 5000
+      'Size' : 30
   });
   streakName = 'Streak' + str(counter);
   sliceModel({

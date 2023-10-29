@@ -6,7 +6,7 @@ config = {
   'BuildplateCenter' : [100,100,0],
   'LayerHeight' : 0.2,
   'NozzleDiameter' : 0.4,
-  'VoxelResolution':[512,512,512],
+  'VoxelResolution': [512,512,512], #[1024,1024,1024],
   'WallThickness' : 0.4,
   
 };

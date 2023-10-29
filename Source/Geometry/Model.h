@@ -9,7 +9,6 @@
 
 class ModelImplementation;
 class Mesh2D;
-class Volume; 
 
 class Model {
 public:
@@ -40,7 +39,6 @@ public:
 
   void save(const std::string& filename) const;
   std::unique_ptr<Model> from2D(const Mesh2D&) const;
-  std::unique_ptr<Volume> getVolume() const;
   std::pair<std::vector<glm::dvec3>, std::vector<size_t>> toSoup();
 
   size_t                getNumberFaces() const;

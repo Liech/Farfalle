@@ -7,8 +7,6 @@
 #include "CGALDefs.h"
 #include "Mesh2D.h"
 #include <CGAL/IO/polygon_soup_io.h>
-#include "VolumeImplementation.h"
-#include "Volume.h"
 #include "ModelImplementation.h"
 
 
@@ -423,12 +421,6 @@ std::unique_ptr<Model> Model::from2D(const Mesh2D& mesh2d) const {
     auto& face = faces[i];
     mesh.add_face(indices[face[0]], indices[face[1]], indices[face[2]]);
   }
-  return std::move(result);
-}
-
-std::unique_ptr<Volume> Model::getVolume() const {
-  std::unique_ptr<VolumeImplementation> volCore = std::make_unique<VolumeImplementation>(p->mesh);
-  auto result = std::make_unique<Volume>(std::move(volCore));
   return std::move(result);
 }
 
