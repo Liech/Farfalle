@@ -13,6 +13,8 @@ Therefore it might be a little bit slower than what you are used too. But it is 
  * Function Defined Infill
  * Nonplanar Build Plate
 
+Also the script code is pretty small and therefor hopefully inviting for experimentation and learning how slicers work.
+
 It is not finished yet though.
 
 # First Layer of a Benchy:
