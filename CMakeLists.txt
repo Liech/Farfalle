@@ -31,10 +31,6 @@ set(Tools_Files
     "Source/Tools/MovementType.h"
     "Source/Tools/glm2svg.h"
     "Source/Tools/glm2svg.cpp"
-	"Source/Tools/LineSimplification.h"
-	"Source/Tools/LineSimplification.cpp"
-	"Source/Tools/MeshSurfaceOffsetting.cpp"
-	"Source/Tools/MeshSurfaceOffsetting.h"
 	"Source/Tools/STLWriter.cpp"
 	"Source/Tools/STLWriter.h"
 )
@@ -68,10 +64,6 @@ set(Geometry_Files
     "Source/Geometry/Mesh2D.cpp"
     "Source/Geometry/Primitives.h"
     "Source/Geometry/Primitives.cpp"
-    "Source/Geometry/SliceMesh.h"
-    "Source/Geometry/SliceMesh.cpp"
-    "Source/Geometry/LineSoup.h"
-    "Source/Geometry/LineSoup.cpp"
     "Source/Geometry/KDTree.h"
     "Source/Geometry/KDTree.cpp"
 )
@@ -107,11 +99,6 @@ set(API_Files
 )
 source_group("Source/API" FILES ${API_Files})
 
-set(Lib_Files
-	"Lib/psimpl/psimpl.h"
-)
-source_group("Lib" FILES ${Lib_Files})
-
 set(ALL_FILES
     ${Source_Files}
     ${Tools_Files}
@@ -119,7 +106,6 @@ set(ALL_FILES
     ${GCode_Files}
 	${API_Files}
     ${Geometry_Files}
-    ${Lib_Files}
 )
 
 ############################################################################
