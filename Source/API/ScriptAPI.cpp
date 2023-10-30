@@ -8,6 +8,7 @@
 #include "PolyglotAPI/Source/PolyglotAPI/API/APIFunction.h"
 #include "PolyglotAPI/Source/PolyglotAPI/API/FunctionRelay.h"
 #include "PolyglotAPI/Source/PolyglotAPI/Python/PythonEngine.h"
+#include "PolyglotAPI/Source/PolyglotAPI/Lua/LuaEngine.h"
 #include "API/FarfalleAPI.h"
 
 ScriptAPI::ScriptAPI(apiDatabase& db) : database(db) {
@@ -23,6 +24,10 @@ void ScriptAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> pythonCallAPI = std::make_unique<PolyglotAPI::APIFunction>("executePythonFile", [this](const nlohmann::json& input) { return executePythonFile(input); });
   pythonCallAPI->setDescription(executePythonDescription());
   api.addFunction(std::move(pythonCallAPI));
+  //executes script
+  std::unique_ptr<PolyglotAPI::APIFunction> luaCallAPI = std::make_unique<PolyglotAPI::APIFunction>("executeLuaFile", [this](const nlohmann::json& input) { return executeLuaFile(input); });
+  luaCallAPI->setDescription(executePythonDescription());
+  api.addFunction(std::move(luaCallAPI));
   //returns api documentation
   std::unique_ptr<PolyglotAPI::APIFunction> documentationAPI = std::make_unique<PolyglotAPI::APIFunction>("getDocumentation", [this](const nlohmann::json& input) { return getDocumentation(input); });
   documentationAPI->setDescription(getDocumentationDescription());
@@ -31,7 +36,7 @@ void ScriptAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> getDataAPI = std::make_unique<PolyglotAPI::APIFunction>("getData", [this](const nlohmann::json& input) { return getData(input); });
   getDataAPI->setDescription(getDataDescription());
   api.addFunction(std::move(getDataAPI));
-  //rsets custom data
+  //resets custom data
   std::unique_ptr<PolyglotAPI::APIFunction> setDataAPI = std::make_unique<PolyglotAPI::APIFunction>("setData", [this](const nlohmann::json& input) { return setData(input); });
   setDataAPI->setDescription(setDataDescription());
   api.addFunction(std::move(setDataAPI));
@@ -53,6 +58,21 @@ nlohmann::json ScriptAPI::executePythonFile(const nlohmann::json& input) {
   return "";
 }
 
+std::string ScriptAPI::executeLuaDescription() {
+  return R"(
+calls a lua file
+
+executePythonFile({
+    'Filename' : 'main.lua'
+});
+)";
+}
+
+nlohmann::json ScriptAPI::executeLuaFile(const nlohmann::json& input) {
+  auto lua = PolyglotAPI::Lua::LuaEngine();
+  lua.executeFile(input["Filename"]);
+  return "";
+}
 
 std::string ScriptAPI::getDocumentationDescription() {
   return R"(

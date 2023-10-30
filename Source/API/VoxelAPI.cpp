@@ -6,6 +6,8 @@
 #include "PolyglotAPI/Source/PolyglotAPI/API/API.h"
 #include "PolyglotAPI/Source/PolyglotAPI/API/APIFunction.h"
 #include "PolyglotAPI/Source/PolyglotAPI/API/FunctionRelay.h"
+#include "PolyglotAPI/Source/PolyglotAPI/Python/PythonEngine.h"
+#include "PolyglotAPI/Source/PolyglotAPI/Lua/LuaEngine.h"
 
 #include "Geometry/Model.h"
 #include "Voxel/MarchingCubes.h"
@@ -80,6 +82,11 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> copyVoxelAPI = std::make_unique<PolyglotAPI::APIFunction>("copyVoxel", [this](const nlohmann::json& input) { return copyVoxel(input); });
   copyVoxelAPI->setDescription(copyVoxelDescription());
   api.addFunction(std::move(copyVoxelAPI));
+
+  //copy a voxel volume
+  std::unique_ptr<PolyglotAPI::APIFunction> densityAPI = std::make_unique<PolyglotAPI::APIFunction>("createDensityField", [this](const nlohmann::json& input) { return createDensityField(input); });
+  densityAPI->setDescription(copyVoxelDescription());
+  api.addFunction(std::move(densityAPI));
 }
 
 nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
@@ -98,10 +105,10 @@ deleteVolume({
 }
 
 nlohmann::json VoxelAPI::createVolume(const nlohmann::json& input) {
-  assert(input["Dimension"[2]] % 8 == 0);
-  size_t x = input["Dimension"][0];
-  size_t y = input["Dimension"][1];
-  size_t z = input["Dimension"][2];
+  assert(input["Resolution"[2]] % 8 == 0);
+  size_t x = input["Resolution"][0];
+  size_t y = input["Resolution"][1];
+  size_t z = input["Resolution"][2];
   database.voxel[input["Name"]] = std::make_unique<std::vector<bool>>(std::vector<bool>(x * y * z, false));
   return "";
 }
@@ -112,7 +119,7 @@ create a named voxel volume
 
 createVolume({
     'Name': 'Name',
-    'Dimension': [128,128,128], //dividable by 8
+    'Resolution': [128,128,128], //dividable by 8
 });
 )";
 }
@@ -319,6 +326,56 @@ copies a voxel volume to another
 copyVoxel({
     'Source' : 'Existing',
     'Target'  : 'New'
+});
+)";
+}
+
+nlohmann::json VoxelAPI::createDensityField(const nlohmann::json& input) {
+  glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
+  size_t functionID = input["Function"];
+  std::unique_ptr<std::vector<double>> result = std::make_unique<std::vector<double>>();
+  result->resize(resolution.x * resolution.y * resolution.z);
+  bool threaded = input["Language"] == "Python";
+
+
+  PolyglotAPI::FunctionRelay* relay;
+  if (input["Language"] == "Python") {
+    auto& py = PolyglotAPI::Python::PythonEngine::instance();
+    relay = &PolyglotAPI::Python::PythonEngine::instance().getRelay();
+  }
+  else if (input["Language"] == "Lua")
+    relay = &database.lua->getRelay();
+
+  auto fun = [relay, functionID](int x, int y, int z) {  
+    return relay->call(functionID, std::array<int,3>{x, y, z});
+  };
+
+  if (threaded)
+    CSG::apply(*result, fun, resolution);
+  else
+    CSG::applySingleCore(*result, fun, resolution);
+
+
+  database.volume[input["Name"]] = std::move(result);
+  return "";
+}
+
+std::string VoxelAPI::createDensityFieldDescription() {
+  return R"(
+creates a double field with the given function evaluated at each position
+
+voxelSize = 0.2;
+def linearGradient(input):
+  return voxelSize * (input[2] / 128);
+
+createDensityField({
+    'Name' : 'DoubleField', # Saved as Double field
+    'Resolution': [128,128,128], //dividable by 8
+    'Function' : linearGradient,
+
+    # Python GIL may prevent things, lua propably can parallel. untested
+    # Necessary where the function is located. A little silly *shrug*
+    'Language' : 'Python'  # Python / Lua
 });
 )";
 }

@@ -25,6 +25,8 @@ public:
 private:
   nlohmann::json executePythonFile(const nlohmann::json& input);
   std::string executePythonDescription();
+  nlohmann::json executeLuaFile(const nlohmann::json& input);
+  std::string executeLuaDescription();
   nlohmann::json getDocumentation(const nlohmann::json& input);
   std::string getDocumentationDescription();
   nlohmann::json getData(const nlohmann::json& input);

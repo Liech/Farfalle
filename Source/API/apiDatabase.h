@@ -16,6 +16,12 @@ class Model;
 class Printer;
 class FarfalleAPI;
 
+namespace PolyglotAPI {
+  namespace Lua {
+    class LuaEngine;
+  }
+}
+
 class apiDatabase {
 public:
   apiDatabase(FarfalleAPI*);
@@ -28,6 +34,7 @@ public:
   std::map<std::string, std::unique_ptr<std::vector<std::vector<glm::dvec3>>>> lines;
   std::map<std::string, nlohmann::json>                                        data;
   
+  std::unique_ptr<PolyglotAPI::Lua::LuaEngine> lua;
   std::unique_ptr<Printer> printer;
   FarfalleAPI* api;
 };

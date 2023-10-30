@@ -48,6 +48,8 @@ private:
   std::string subtractVoxelDescription();
   nlohmann::json copyVoxel(const nlohmann::json& input);
   std::string copyVoxelDescription();
+  nlohmann::json createDensityField(const nlohmann::json& input);
+  std::string createDensityFieldDescription();
 
   apiDatabase& database;
 };

@@ -29,6 +29,8 @@ int main(int argc, char** argv) {
 
   std::string current = argv[0];
   std::string fullpath ="main.py"; 
+  if (!std::filesystem::exists(fullpath))
+    fullpath = "main.lua";
   std::cout << fullpath << std::endl;
   std::ifstream t(fullpath);
   std::string s((std::istreambuf_iterator<char>(t)),
