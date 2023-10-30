@@ -15,8 +15,14 @@
 
 #include "Geometry/Model.h"
 
-FarfalleAPI::FarfalleAPI() : db(this){
-
+FarfalleAPI::FarfalleAPI() {
+  db     = std::make_unique<apiDatabase>(this);
+  voxel  = std::make_unique<VoxelAPI>   (*db);
+  model  = std::make_unique<ModelAPI>   (*db);
+  line   = std::make_unique<LineAPI>    (*db);
+  gcode  = std::make_unique<GCodeAPI>   (*db);
+  script = std::make_unique<ScriptAPI>  (*db);  
+  db->initLua();
 }
 
 FarfalleAPI::~FarfalleAPI() {
@@ -24,15 +30,10 @@ FarfalleAPI::~FarfalleAPI() {
 }
 
 void FarfalleAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
-  voxel = std::make_unique<VoxelAPI>(db);
   voxel->add(api, relay);
-  model = std::make_unique<ModelAPI>(db);
   model->add(api, relay);
-  line  = std::make_unique<LineAPI>(db);
   line ->add(api, relay);
-  gcode = std::make_unique<GCodeAPI>(db);
   gcode->add(api, relay);
-  script = std::make_unique<ScriptAPI>(db);
   script->add(api, relay);
 }
 
@@ -42,4 +43,8 @@ std::unique_ptr<PolyglotAPI::API> FarfalleAPI::getAPI(PolyglotAPI::FunctionRelay
   add(*result, relay);
 
   return std::move(result);
+}
+
+apiDatabase& FarfalleAPI::getDB() {
+  return *db;
 }

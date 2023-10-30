@@ -8,11 +8,14 @@
 
 apiDatabase::apiDatabase(FarfalleAPI* a) {
   api = a;
-  lua = std::make_unique<PolyglotAPI::Lua::LuaEngine>();
-  PolyglotAPI::FunctionRelay& relay = lua->getRelay();
-  lua->addApi(api->getAPI(relay));
 }
 
 apiDatabase::~apiDatabase() {
 
+}
+
+void apiDatabase::initLua() {
+  lua = std::make_unique<PolyglotAPI::Lua::LuaEngine>();
+  PolyglotAPI::FunctionRelay& relay = lua->getRelay();
+  lua->addApi(api->getAPI(relay));
 }

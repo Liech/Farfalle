@@ -335,7 +335,7 @@ nlohmann::json VoxelAPI::createDensityField(const nlohmann::json& input) {
   size_t functionID = input["Function"];
   std::unique_ptr<std::vector<double>> result = std::make_unique<std::vector<double>>();
   result->resize(resolution.x * resolution.y * resolution.z);
-  bool threaded = input["Language"] == "Python";
+  bool threaded = false;//input["Language"] != "Python";
 
 
   PolyglotAPI::FunctionRelay* relay;
@@ -347,7 +347,9 @@ nlohmann::json VoxelAPI::createDensityField(const nlohmann::json& input) {
     relay = &database.lua->getRelay();
 
   auto fun = [relay, functionID](int x, int y, int z) {  
-    return relay->call(functionID, std::array<int,3>{x, y, z});
+    auto arr = nlohmann::json::array({ x, y, z });
+    auto result = relay->call(functionID, arr);
+    return result;
   };
 
   if (threaded)

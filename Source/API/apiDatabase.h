@@ -27,6 +27,8 @@ public:
   apiDatabase(FarfalleAPI*);
   virtual ~apiDatabase();
 
+  void initLua();
+
   std::map<std::string, std::unique_ptr<std::vector<bool>>>                    voxel;
   std::map<std::string, std::unique_ptr<std::vector<double>>>                  volume;
   std::map<std::string, std::unique_ptr<std::vector<int   >>>                  distanceMaps;

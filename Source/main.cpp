@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "PolyglotAPI/Python/PythonEngine.h"
+#include "PolyglotAPI/Lua/LuaEngine.h"
 #include "PolyglotAPI/API/API.h"
 #include "API/FarfalleAPI.h"
 #include <fstream>
@@ -21,23 +22,31 @@ void enforceWorkingDir(std::string exeDir) {
 int main(int argc, char** argv) {
   //slice();
   enforceWorkingDir(std::string(argv[0]));
+  
 
-  auto& py = PolyglotAPI::Python::PythonEngine::instance();
   FarfalleAPI farfalle;
-  py.addAPI(farfalle.getAPI(py.getRelay()));
+  auto& py = PolyglotAPI::Python::PythonEngine::instance();
+  std::shared_ptr<PolyglotAPI::API> api = farfalle.getAPI(py.getRelay());
+  py.addAPI(api);
   py.initialize();
 
   std::string current = argv[0];
   std::string fullpath ="main.py"; 
-  if (!std::filesystem::exists(fullpath))
+  bool lua = false;
+  if (!std::filesystem::exists(fullpath)) {
     fullpath = "main.lua";
+    lua = true;
+  }
   std::cout << fullpath << std::endl;
   std::ifstream t(fullpath);
   std::string s((std::istreambuf_iterator<char>(t)),
     std::istreambuf_iterator<char>());
   std::cout << s << std::endl;
   std::cout << " --------execution start------- " << std::endl;
-  py.execute(s);
+  if (lua)
+    farfalle.getDB().lua->executeString(s);
+  else
+    py.execute(s);
   std::cout << " --------execution end--------- " << std::endl;
 
 
