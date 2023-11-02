@@ -157,7 +157,10 @@ nlohmann::json VoxelAPI::triangulateDouble(const nlohmann::json& input) {
   glm::dvec3 voxelSize = (end - start);
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
   voxelSize = glm::dvec3(voxelSize.x / resolution.x, voxelSize.y / resolution.y, voxelSize.z / resolution.z);
-  auto tri = MarchingCubes::polygonize(*database.volume[input["DoubleName"]], start, voxelSize, resolution,0.5);
+  double isovalue = 0.5;
+  if (input.contains("Isovalue"))
+    isovalue = input["Isovalue"];
+  auto tri = MarchingCubes::polygonize(*database.volume[input["DoubleName"]], start, voxelSize, resolution, isovalue);
   database.models[input["ModelName"]] = std::make_unique<Model>(tri);
   return "";
 }
@@ -166,12 +169,13 @@ std::string VoxelAPI::triangulateDoubleDescription() {
   return R"(
 triangulate double volume
 
-triangulateVolume({
+triangulateDouble({
     'DoubleName': 'DoubleBenchy',
     'ModelName': 'Benchy',
-    'Resolution' : [128,128,128], //divideable by 8
+    'Resolution' : [128,128,128], # divideable by 8
     'Start' : [3,3,3],
-    'End'   : [6,6,6]
+    'End'   : [6,6,6],
+    'Isovalue' : 0.5  # Optional
 });
 )";
 }
