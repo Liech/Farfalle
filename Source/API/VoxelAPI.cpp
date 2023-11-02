@@ -339,8 +339,6 @@ nlohmann::json VoxelAPI::createDensityField(const nlohmann::json& input) {
   size_t functionID = input["Function"];
   std::unique_ptr<std::vector<double>> result = std::make_unique<std::vector<double>>();
   result->resize(resolution.x * resolution.y * resolution.z);
-  bool threaded = false;//input["Language"] != "Python";
-
 
   PolyglotAPI::FunctionRelay* relay;
   if (input["Language"] == "Python") {
@@ -356,11 +354,7 @@ nlohmann::json VoxelAPI::createDensityField(const nlohmann::json& input) {
     return result;
   };
 
-  if (threaded)
-    CSG::apply(*result, fun, resolution);
-  else
-    CSG::applySingleCore(*result, fun, resolution);
-
+  CSG::applySingleCore(*result, fun, resolution);
 
   database.volume[input["Name"]] = std::move(result);
   return "";
@@ -376,12 +370,9 @@ def linearGradient(input):
 
 createDensityField({
     'Name' : 'DoubleField', # Saved as Double field
-    'Resolution': [128,128,128], //dividable by 8
+    'Resolution': [128,128,128], # dividable by 8
     'Function' : linearGradient,
-
-    # Python GIL may prevent things, lua propably can parallel. untested
-    # Necessary where the function is located. A little silly *shrug*
-    'Language' : 'Python'  # Python / Lua
+    'Language' : 'Python'  # Python / Lua . Currently Necessary to help searching the function. A little silly *shrug*
 });
 )";
 }
