@@ -23,6 +23,10 @@ It is not finished yet though.
 
 There are Gaps between the lines, because the extrusion is not yet tuned. Im currently concentrating on the correct toolpath.
 
+# Future
+
+It is currently pretty slow. Slicing a Benchy can take some minutes. This is due to the heavy use of unoptimized giant marching cubes meshes. Most of the times this is not needed and a polygon offsetting algortihm would be the better choice. But i was not able to find one tailored to the needs of beeing 2d but working on a 3d mesh plane. Maybe i'll just write a custom one later.
+
 # License
 
 https://www.gnu.org/licenses/lgpl-3.0.html
