@@ -23,6 +23,12 @@ It is not finished yet though.
 
 There are Gaps between the lines, because the extrusion is not yet tuned. Im currently concentrating on the correct toolpath.
 
+# Benchy
+
+![image](https://github.com/Liech/Farfalle/assets/16963076/6337a47b-58b6-4a4e-a550-5f6661f16f7e)![image](https://github.com/Liech/Farfalle/assets/16963076/db76803d-3b40-4448-b80d-fe03578fd4b3)
+
+Currently there is a tiny infill error connecting things that should not be connected.
+
 # Future
 
 It is currently pretty slow. Slicing a Benchy can take some minutes. This is due to the heavy use of unoptimized giant marching cubes meshes. Most of the times this is not needed and a polygon offsetting algortihm would be the better choice. But i was not able to find one tailored to the needs of beeing 2d but working on a 3d mesh plane. Maybe i'll just write a custom one later.
