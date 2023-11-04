@@ -448,7 +448,7 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& dat
           data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)],
           data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)]
         };
-        glm::dvec3 o = origin + glm::dvec3(x*voxelSize.x,y*voxelSize.y,z*voxelSize.z+ voxelSize.z) + glm::dvec3(0.5*voxelSize.x,0,0);
+        glm::dvec3 o = origin + glm::dvec3(x*voxelSize.x,y*voxelSize.y,z*voxelSize.z);
         std::array<glm::dvec3, 8> positions = {
          o
         ,o + glm::dvec3(voxelSize.x,           0, 0)
