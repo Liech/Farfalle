@@ -68,6 +68,8 @@ std::vector<std::vector<glm::dvec3>> LineMerger::merge(const std::vector<std::ve
 
       auto candidatesStart = tree.find(start, mergeDistance);
       for (auto candidate : candidatesStart) {
+        if (glm::distance(allPoints[candidate], start) > mergeDistance)
+          continue;          
         size_t index = getLineIndex(candidate);
         bool atEnd = isLineEnd(candidate);
         auto& candidateList = result[index];
@@ -75,7 +77,7 @@ std::vector<std::vector<glm::dvec3>> LineMerger::merge(const std::vector<std::ve
           continue;
         todo.erase(index);
         if (!atEnd)
-          std::reverse(candidateList.begin(), candidateList.end());
+          std::reverse(candidateList.begin(), candidateList.end());        
         currentList.insert(currentList.begin(), candidateList.begin(), candidateList.end());
         candidateList.clear();
         workDone = true;
