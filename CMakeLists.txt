@@ -62,8 +62,6 @@ set(Geometry_Files
     "Source/Geometry/ModelImplementation.cpp"
     "Source/Geometry/Mesh2D.h"
     "Source/Geometry/Mesh2D.cpp"
-    "Source/Geometry/Primitives.h"
-    "Source/Geometry/Primitives.cpp"
     "Source/Geometry/KDTree.h"
     "Source/Geometry/KDTree.cpp"
 )

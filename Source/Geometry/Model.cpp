@@ -3,12 +3,34 @@
 #include <iostream>
 #include <map>
 
-#include "Primitives.h"
 #include "CGALDefs.h"
 #include "Mesh2D.h"
 #include <CGAL/IO/polygon_soup_io.h>
 #include "ModelImplementation.h"
 
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/AABB_traits.h>
+
+typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> AABB_face_graph_primitive;
+typedef CGAL::AABB_traits<Kernel, AABB_face_graph_primitive> AABB_face_graph_traits;
+class ModelImplementation {
+public:
+  ModelImplementation();
+  virtual ~ModelImplementation();
+
+  Surface_mesh mesh;
+  AABB_tree    tree;
+  UV_pmap      uvmap;
+  CGAL::AABB_tree<AABB_face_graph_traits> uvTree;
+};
+ModelImplementation::ModelImplementation() {
+
+}
+
+ModelImplementation::~ModelImplementation() {
+
+}
 
 typedef PMP::Face_location<Surface_mesh, FT> Face_location;
 namespace CP = CGAL::parameters;
@@ -24,8 +46,8 @@ Model::Model(const std::string& filename) {
   Surface_mesh mesh;
   if (!PMP::IO::read_polygon_mesh(filename, mesh))
   {
-    std::cerr << "Invalid input." << std::endl;
-    throw std::runtime_error("Invalid Input");
+    std::cerr << "Model file loading error: " << filename << std::endl;
+    throw std::runtime_error("Model file loading error: " + filename);
     return;
   }
   p->mesh = mesh;
@@ -287,6 +309,7 @@ void Model::init() {
 
   //std::cout << "Build Tree..." << std::endl;
   p->tree = AABB_tree(edges(p->mesh).first, edges(p->mesh).second, p->mesh);
+  PMP::build_AABB_tree(p->mesh, p->uvTree);
 }
 
 void Model::save(const std::string& filename) const {
@@ -314,7 +337,9 @@ double Model::getUVLayerWidth() {
 glm::dvec2 Model::world2UV(const glm::dvec3& pos) const {
   assert(hasUVMap);
 
-  auto onSurface = CGAL::Polygon_mesh_processing::locate(Point(pos.x, pos.y, pos.z), p->mesh);
+
+  auto onSurface = CGAL::Polygon_mesh_processing::locate_with_AABB_tree(Point(pos.x, pos.y, pos.z), p->uvTree, p->mesh);
+  //auto onSurface = CGAL::Polygon_mesh_processing::locate(Point(pos.x, pos.y, pos.z), p->mesh);
   auto h1 = p->mesh.halfedge(onSurface.first);
   auto h2 = p->mesh.next(h1);
   auto h3 = p->mesh.next(h2);

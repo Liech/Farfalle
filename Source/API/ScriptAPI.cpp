@@ -70,6 +70,8 @@ executePythonFile({
 
 nlohmann::json ScriptAPI::executeLuaFile(const nlohmann::json& input) {
   auto lua = PolyglotAPI::Lua::LuaEngine();
+  PolyglotAPI::FunctionRelay& relay = lua.getRelay();
+  lua.addApi(database.api->getAPI(relay));
   lua.executeFile(input["Filename"]);
   return "";
 }
