@@ -348,9 +348,12 @@ nlohmann::json VoxelAPI::createDensityField(const nlohmann::json& input) {
   else if (input["Language"] == "Lua")
     relay = &database.lua->getRelay();
 
-  auto fun = [relay, functionID](int x, int y, int z) {  
-    auto arr = nlohmann::json::array({ x, y, z });
-    auto result = relay->call(functionID, arr);
+  nlohmann::json inputData;
+  inputData["Data"] = input["Data"];
+  auto fun = [&inputData, relay, functionID](int x, int y, int z) {  
+    nlohmann::json pos = nlohmann::json::array({ x, y, z });
+    inputData["Pos"] = pos;
+    auto result = relay->call(functionID, inputData);
     return result;
   };
 
@@ -366,13 +369,16 @@ creates a double field with the given function evaluated at each position
 
 voxelSize = 0.2;
 def linearGradient(input):
-  return voxelSize * (input[2] / 128);
+  coordinate = input["Pos"];
+  data = input["Data"];
+  return voxelSize * (input[2] / data["Resolution"]);
 
 createDensityField({
     'Name' : 'DoubleField', # Saved as Double field
     'Resolution': [128,128,128], # dividable by 8
     'Function' : linearGradient,
     'Language' : 'Python'  # Python / Lua . Currently Necessary to help searching the function. A little silly *shrug*
+    'Data' : { "Resolution" : 128 }, # python has an issue with scope of functions that are invoked this way. As intermediate solution just give them a scope this way. Todo: Fix this issue
 });
 )";
 }

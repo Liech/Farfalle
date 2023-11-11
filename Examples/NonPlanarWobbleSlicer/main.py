@@ -15,9 +15,9 @@ config = {
 setData({'Name':'config', 'Data' : config });
 
 executePythonFile({'Filename' : 'LoadModel.py'}); # Defines Model 'Main'
+executePythonFile({'Filename' : 'BuildZSliceField.py'});
 executePythonFile({'Filename' : 'Categorize.py'}); # Defines Model 'InnerArea' and 'OuterArea'
 executePythonFile({'Filename' : 'PrepareWall.py'});
-executePythonFile({'Filename' : 'BuildZSliceField.py'});
 executePythonFile({'Filename' : 'SliceZ.py'}); # Defines Lines 'Result0'...'ResultN' [N = getData({'ZCounter'})
 executePythonFile({'Filename' : 'WriteGCode.py'});
 
