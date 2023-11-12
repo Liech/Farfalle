@@ -171,6 +171,9 @@ std::vector<Polygon_with_holes_2> Mesh2DPIMPL::loopSoup2Polys(const std::vector<
     }
   }
   
+  if (polyIndex.size() == 0)
+    return {};
+
   //prep outer polys
   //to find the smallest loop containing the hole -> save radius
   std::vector<Polygon_2> outer;

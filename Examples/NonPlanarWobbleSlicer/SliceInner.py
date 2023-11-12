@@ -5,13 +5,18 @@ config      = getData({'Name':'config'});
 NozzleDiameter = config['NozzleDiameter'];
 
 
+zCounter = getData({'Name':'ZCounter'});
+saveModel({"Name":"Slice","Filename":"slice/ToolSlice" + str(zCounter) + ".stl"});
+saveModel({"Name":"InnerArea","Filename":"slice/SliceInner" + str(zCounter) + ".stl"});
+
+print("  slicing");
 sliceModel({
     'ModelName'    : 'InnerArea',
     'ToolName'     : 'Slice',
     'Mode'         : 'Model',
     'ResultName'   : 'SliceZ'
 });
-zCounter = getData({'Name':'ZCounter'});
+print("  sliced");
 saveModel({"Name":"SliceZ","Filename":"slice/SliceZ" + str(zCounter) + ".stl"});
 
 boundary = modelBoundary({'Name':'SliceZ'})
