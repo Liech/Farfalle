@@ -4,6 +4,7 @@ config      = getData({'Name':'config'});
 SliceResolution = config['SliceResolution'];
 
 Z = getData({'Name':'Z'});
+counter = getData({'Name':'ZCounter'});
 
 boundary = modelBoundary({'Name':'Main'})
 voxelizeMin=boundary['Min']
@@ -24,7 +25,16 @@ isovalue = Z
 
 print("  Isovalue: " + str(isovalue))
 
-print("  Triangulate Slice...");
+print("  Triangulate Slice..."); 
+if (counter == 0 and False):
+  createPlane({
+      'Name' : 'Slice',
+      'Origin' : [0,0,isovalue],
+      'Normal' : [0,0,1],
+      'Size' : 400
+  });
+else:
+  triangulateDouble({"DoubleName":"Slice","ModelName":"Slice","Resolution":SliceResolution,"Start":voxelizeMin,"End":voxelizeMax,"Isovalue":isovalue})
 triangulateDouble({"DoubleName":"Slice","ModelName":"Slice","Resolution":SliceResolution,"Start":voxelizeMin,"End":voxelizeMax,"Isovalue":isovalue})
 
 saveModel({"Name":"Slice","Filename":"slice/Slice" + "{:.2f}".format(Z) + ".stl"});

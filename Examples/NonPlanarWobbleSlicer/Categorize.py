@@ -71,4 +71,4 @@ triangulateVolume({
 simplifyModel({'Name':'InnerArea', "Ratio":0.3})
 simplifyModel({'Name':'OuterArea', "Ratio":0.3})
 saveModel({"Name":"InnerArea","Filename":"slice/InnerArea.stl"});
-saveModel({"Name":"OuterArea","Filename":"slice/OuterArea"});
+saveModel({"Name":"OuterArea","Filename":"slice/OuterArea.stl"});

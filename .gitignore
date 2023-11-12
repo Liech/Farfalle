@@ -2,3 +2,6 @@ out/
 /Examples/NonPlanarWobbleSlicer/3DBenchy.stl
 Examples/NonPlanarWobbleSlicer/starter_3DBenchy.gcode
 /Examples/NonPlanarWobbleSlicer/slice
+Examples/NonPlanarWobbleSlicer/3DBenchy.gcode
+Examples/NonPlanarWobbleSlicer/Main.stl
+Examples/NonPlanarWobbleSlicer/w3DBenchy.gcode
