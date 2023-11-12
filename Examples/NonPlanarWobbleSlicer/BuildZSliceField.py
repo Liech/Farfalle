@@ -20,18 +20,26 @@ print("  Generate Double Field...");
 minZ = voxelizeMin[2]
 maxZ = voxelizeMax[2]
 
-xWobble = 1.5
-zWobble = 0.5
+data = {};
+data["minZ"] = minZ;
+data["maxZ"] = maxZ;
+data["SliceResolution"] = SliceResolution;
+
 print("minZ "+str(minZ))
-def density(coord): 
+def density(input): 
+  import math
+  coord = input["Pos"]
+  data = input["Data"]
+  xWobble = 1.5
+  zWobble = 0.5
   distortion = (math.sin(coord[1]/xWobble)*zWobble + math.cos(coord[0]/xWobble)*zWobble);
-  perc = (coord[2] / SliceResolution[2])
+  perc = (coord[2] / data["SliceResolution"][2])
   distance = abs(perc-0.1)
   distortionInfluence = 0
   R = 0.1
   if (distance < R):
     distortionInfluence = ((R-distance)/R)
-  return (maxZ-minZ)*perc + distortion * distortionInfluence
+  return (data["maxZ"]-data["minZ"])*perc + distortion * distortionInfluence
   
 print("  createDensityField...");
-createDensityField({"Name":"Slice", "Resolution":SliceResolution, "Language":"Python","Function":density})
+createDensityField({"Name":"Slice", "Resolution":SliceResolution, "Language":"Python","Function":density, "Data":data})

@@ -40,6 +40,10 @@ void ScriptAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> setDataAPI = std::make_unique<PolyglotAPI::APIFunction>("setData", [this](const nlohmann::json& input) { return setData(input); });
   setDataAPI->setDescription(setDataDescription());
   api.addFunction(std::move(setDataAPI));
+  //sets current directory
+  std::unique_ptr<PolyglotAPI::APIFunction> setDirectoryAPI = std::make_unique<PolyglotAPI::APIFunction>("setDirectory", [this](const nlohmann::json& input) { return setDirectory(input); });
+  setDirectoryAPI->setDescription(setDirectoryDescription());
+  api.addFunction(std::move(setDirectoryAPI));
 }
 
 std::string ScriptAPI::executePythonDescription() {
@@ -128,4 +132,20 @@ getData({
 
 nlohmann::json ScriptAPI::getData(const nlohmann::json& input) {
   return database.data[input["Name"]];
+}
+
+
+std::string ScriptAPI::setDirectoryDescription() {
+  return R"(
+sets the current directory for saving stuff and executing scripts
+
+setDirectory({
+    'Directory' : 'C:\\Hallo'
+});
+)";
+}
+
+nlohmann::json ScriptAPI::setDirectory(const nlohmann::json& input) {
+  std::filesystem::current_path(input["Directory"]);
+  return "";
 }

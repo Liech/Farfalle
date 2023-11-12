@@ -33,6 +33,8 @@ private:
   std::string getDataDescription();
   nlohmann::json setData(const nlohmann::json& input);
   std::string setDataDescription();
+  nlohmann::json setDirectory(const nlohmann::json& input);
+  std::string setDirectoryDescription();
 
   apiDatabase& database;
 };

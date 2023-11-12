@@ -70,6 +70,11 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> createPlaneAPI = std::make_unique<PolyglotAPI::APIFunction>("createPlane", [this](const nlohmann::json& input) { return createPlane(input); });
   createPlaneAPI->setDescription(hasAnyTriangleDescription());
   api.addFunction(std::move(createPlaneAPI));
+
+  //simplify Model
+  std::unique_ptr<PolyglotAPI::APIFunction> simplifyModelAPI = std::make_unique<PolyglotAPI::APIFunction>("simplifyModel", [this](const nlohmann::json& input) { return simplifyModel(input); });
+  simplifyModelAPI->setDescription(simplifyModelDescription());
+  api.addFunction(std::move(simplifyModelAPI));
 }
 
 std::string ModelAPI::loadModelDescription() {
@@ -336,6 +341,23 @@ createPlane({
     'Origin' : [0,0,0.2],
     'Normal' : [0,0,1],
     'Size' : 5000
+});
+)";
+}
+
+nlohmann::json ModelAPI::simplifyModel(const nlohmann::json& input) {
+  auto& model = *database.models[input["Name"]];
+  model.simplify(input["Ratio"]);
+  return "";
+}
+
+std::string ModelAPI::simplifyModelDescription() {
+  return R"(
+simplifiy model
+
+simplifyModel({
+    'Name'   : 'Name',
+    'Ratio'   : 0.5
 });
 )";
 }

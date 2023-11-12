@@ -11,6 +11,8 @@ sliceModel({
     'Mode'         : 'Model',
     'ResultName'   : 'SliceZ'
 });
+zCounter = getData({'Name':'ZCounter'});
+saveModel({"Name":"SliceZ","Filename":"slice/SliceZ" + str(zCounter) + ".stl"});
 
 boundary = modelBoundary({'Name':'SliceZ'})
 sliceMin=boundary['Min']

@@ -27,4 +27,6 @@ print("  Isovalue: " + str(isovalue))
 print("  Triangulate Slice...");
 triangulateDouble({"DoubleName":"Slice","ModelName":"Slice","Resolution":SliceResolution,"Start":voxelizeMin,"End":voxelizeMax,"Isovalue":isovalue})
 
-#saveModel({"Name":"Slice","Filename":"slice/Slice" + "{:.2f}".format(Z) + ".stl"});
+saveModel({"Name":"Slice","Filename":"slice/Slice" + "{:.2f}".format(Z) + ".stl"});
+#simplifyModel({'Name':'Slice', "Ratio":0.6})
+#saveModel({"Name":"Slice","Filename":"slice/SliceR" + "{:.2f}".format(Z) + ".stl"});

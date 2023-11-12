@@ -43,6 +43,8 @@ private:
   std::string hasAnyTriangleDescription();
   nlohmann::json createPlane(const nlohmann::json& input);
   std::string createPlaneDescription();
+  nlohmann::json simplifyModel(const nlohmann::json& input);
+  std::string simplifyModelDescription();
 
   apiDatabase& database;
 };

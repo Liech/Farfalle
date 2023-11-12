@@ -12,6 +12,15 @@
 #include <CGAL/AABB_tree.h>
 #include <CGAL/AABB_traits.h>
 
+// Simplification function
+#include <CGAL/Surface_mesh_simplification/edge_collapse.h>
+// Stop-condition policy
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_length_cost.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_length_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
+#include <boost/variant/get.hpp>
+
+
 typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> AABB_face_graph_primitive;
 typedef CGAL::AABB_traits<Kernel, AABB_face_graph_primitive> AABB_face_graph_traits;
 class ModelImplementation {
@@ -477,4 +486,25 @@ std::pair<std::vector<glm::dvec3>, std::vector<size_t>> Model::toSoup() {
   }
 
   return std::make_pair(result_vertices, result_indices);
+}
+
+
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/Surface_mesh_simplification/edge_collapse.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
+
+
+
+namespace SMS = CGAL::Surface_mesh_simplification;
+
+void Model::simplify(double ratio) {
+  //https://doc.cgal.org/latest/Surface_mesh_simplification/Surface_mesh_simplification_2edge_collapse_all_short_edges_8cpp-example.html
+
+  Surface_mesh& surface_mesh = p->mesh;
+  double stop_ratio = 0.01;
+  SMS::Count_stop_predicate<Surface_mesh> countStop(stop_ratio);
+  SMS::Count_ratio_stop_predicate <Surface_mesh> ratioStop(ratio);
+
+  int r = SMS::edge_collapse(p->mesh, ratioStop);
 }

@@ -21,7 +21,7 @@ counter = 0;
 
 setData({'Name':'ZCounter', 'Data' : 0});
 
-while(Z < sliceMax[2]):
+while(Z < sliceMax[2] and Z < 4):
   print('Z Layer ' + str(counter));
   setData({'Name':'Z', 'Data' : Z });
   executePythonFile({'Filename' : 'createSlice.py'});

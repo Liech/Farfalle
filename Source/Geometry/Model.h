@@ -26,6 +26,7 @@ public:
   std::vector<std::vector<glm::dvec3>> getBorder() const;
   std::vector<glm::dvec3> projectLine(const glm::dvec3& start, const glm::dvec3& end);
   void repair();
+  void simplify(double ratio = 0.5);
 
   void generateUVMap();
   double getUVLayerWidth();
