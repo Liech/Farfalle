@@ -5,7 +5,7 @@ find_package(Catch2 REQUIRED)
 
 
 set(Test_Files
-	"slice.cpp"
+	"BasicLineSlice.cpp"
 )
 source_group("Main" FILES ${Main_Files})
 set(Main_Files
