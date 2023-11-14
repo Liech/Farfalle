@@ -127,11 +127,7 @@ target_link_libraries(Farfalle
 FarfalleLib
 )
 
-target_include_directories(FarfalleLib PRIVATE 
-./Source/
-./Lib/
-)
-target_include_directories(Farfalle PRIVATE 
+target_include_directories(FarfalleLib PUBLIC 
 ./Source/
 ./Lib/
 )

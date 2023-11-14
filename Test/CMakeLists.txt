@@ -18,10 +18,15 @@ set(ALL_FILES
     ${Test_Files}
 )
 
+
 add_executable(FarfalleTests ${ALL_FILES})
+
 target_link_libraries(FarfalleTests PRIVATE 
 Catch2::Catch2
 FarfalleLib
+)
+target_include_directories(FarfalleTests SYSTEM PUBLIC 
+"${CMAKE_CURRENT_LIST_DIR}/../Source/"
 )
 
 #include(CTest)
