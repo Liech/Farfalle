@@ -4,17 +4,6 @@
 #include "PolyglotAPI/API/TestFunctionRelay.h"
 #include "PolyglotAPI/API/API.h"
 
-unsigned int Factorial( unsigned int number ) {
-    return number <= 1 ? number : Factorial(number-1)*number;
-}
-
-TEST_CASE( "Factorials are computed", "[factorial]" ) {
-    REQUIRE( Factorial(1) == 1 );
-    REQUIRE( Factorial(2) == 2 );
-    REQUIRE( Factorial(3) == 6 );
-    REQUIRE( Factorial(10) == 3628800 );
-}
-
 TEST_CASE("FarfalleAPI Access", "[api]") {
   FarfalleAPI a;
   PolyglotAPI::TestFunctionRelay relay([](size_t id, const nlohmann::json&) { return nlohmann::json(); });
@@ -24,9 +13,34 @@ TEST_CASE("FarfalleAPI Access", "[api]") {
     {"Name"  , "Slice"},
     {"Origin", {0,0,1}},
     {"Normal", {0,0,1}},
-    {"Size"  , 400}
+    {"Size"  , 1}
   });
   api->getFunction("createPlane").call(createPlaneParams);
 
-  REQUIRE(true);
+  auto createToolParams = nlohmann::json::object({
+    {"Name"  , "Tool"},
+    {"Origin", {0,0,1}},
+    {"Normal", {1,0,0}},
+    {"Size"  , 2}
+    });
+  api->getFunction("createPlane").call(createToolParams);
+
+  auto sliceModelParams = nlohmann::json::object({
+    {"ModelName"  , "Slice" },
+    {"ToolName"   , "Tool"  },
+    {"Mode"       , "Line"  },
+    {"LineName"   , "Result"},
+    });
+  api->getFunction("sliceModel").call(sliceModelParams);
+
+  auto getLineParams = nlohmann::json::object({
+    {"Name"  , "Result"},
+    });
+  auto result = api->getFunction("getLines").call(getLineParams);
+
+  REQUIRE(result.size() == 1);
+  REQUIRE(result[0].size() == 3);
+  REQUIRE(result[0][0].size() == 3);
+  REQUIRE(result[0][1].size() == 3);
+  REQUIRE(result[0][2].size() == 3);
 }

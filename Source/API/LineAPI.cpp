@@ -27,6 +27,10 @@ void LineAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> mergeLinesAPI = std::make_unique<PolyglotAPI::APIFunction>("mergeLines", [this](const nlohmann::json& input) { return mergeLines(input); });
   mergeLinesAPI->setDescription(mergeLinesDescription());
   api.addFunction(std::move(mergeLinesAPI));
+  //get lines
+  std::unique_ptr<PolyglotAPI::APIFunction> getLinesAPI = std::make_unique<PolyglotAPI::APIFunction>("getLines", [this](const nlohmann::json& input) { return getLines(input); });
+  getLinesAPI->setDescription(getLinesDescription());
+  api.addFunction(std::move(getLinesAPI));
 }
 
 std::string LineAPI::deleteLinesDescription() {
@@ -67,4 +71,31 @@ nlohmann::json LineAPI::mergeLines(const nlohmann::json& input) {
 
   database.lines[input["Result"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(result);
   return "";
+}
+
+std::string LineAPI::getLinesDescription() {
+  return R"(
+returns lines
+
+result = getLines({
+    'Name' : 'Name'
+});
+result = [[{0,0,0},{0,0,1},{0,0,2},...],[],[]]
+)";
+}
+
+nlohmann::json LineAPI::getLines(const nlohmann::json& input) {
+  auto& l = *database.lines[input["Name"]];
+  nlohmann::json result = nlohmann::json::array();
+
+  for (auto& streak : l) {
+    nlohmann::json sub = nlohmann::json::array();
+
+    for (auto& point : streak)
+      sub.push_back({ point[0],point[1],point[2] });
+
+    result.push_back(sub);
+  }
+
+  return result;
 }
