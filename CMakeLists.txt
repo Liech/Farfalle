@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8...3.20)
+project(FarfalleLib)
 project(Farfalle)
 
 ############################################################################
@@ -17,7 +18,6 @@ add_subdirectory(Lib)
 ############################################################################
 
 set(Source_Files
-    "Source/main.cpp"
     "Source/SliceConfig.h"
     "Source/SliceConfig.cpp"
     "Source/Geometry.h"
@@ -110,18 +110,27 @@ set(ALL_FILES
 ############################################################################
 ############################################################################
 
-add_executable(Farfalle ${ALL_FILES})
+add_library(FarfalleLib ${ALL_FILES})
+add_executable(Farfalle "Source/main.cpp")
 set_property(TARGET Farfalle PROPERTY CXX_STANDARD 20)
+set_property(TARGET FarfalleLib PROPERTY CXX_STANDARD 20)
 
 
-target_link_libraries(Farfalle 
+target_link_libraries(FarfalleLib
 glm::glm
 Eigen3::Eigen
 CGAL::CGAL
 OpenMP::OpenMP_CXX
 PolyglotAPI
 )
+target_link_libraries(Farfalle
+FarfalleLib
+)
 
+target_include_directories(FarfalleLib PRIVATE 
+./Source/
+./Lib/
+)
 target_include_directories(Farfalle PRIVATE 
 ./Source/
 ./Lib/
@@ -138,3 +147,5 @@ add_custom_command(TARGET Farfalle POST_BUILD
 	
 
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Farfalle)
+
+add_subdirectory(Test)
