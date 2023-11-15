@@ -9,13 +9,15 @@ config = {
   'VoxelResolution':[512,512,512],
   'SliceResolution':[32,32,32],
   'WallThickness' : 0.4,
-  
+  'PlanarSlicing' : True,
+  'LayerLimit' : 6
 };
 
 setData({'Name':'config', 'Data' : config });
 
 executePythonFile({'Filename' : 'LoadModel.py'}); # Defines Model 'Main'
-executePythonFile({'Filename' : 'BuildZSliceField.py'});
+if (config["PlanarSlicing"] == False):
+  executePythonFile({'Filename' : 'BuildZSliceField.py'});
 executePythonFile({'Filename' : 'Categorize.py'}); # Defines Model 'InnerArea' and 'OuterArea'
 executePythonFile({'Filename' : 'PrepareWall.py'});
 executePythonFile({'Filename' : 'SliceZ.py'}); # Defines Lines 'Result0'...'ResultN' [N = getData({'ZCounter'})

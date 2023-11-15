@@ -4,7 +4,7 @@
 #include "PolyglotAPI/API/TestFunctionRelay.h"
 #include "PolyglotAPI/API/API.h"
 
-TEST_CASE("FarfalleAPI Access", "[api]") {
+TEST_CASE("BasicLineSlice", "[BasicLineSlice]") {
   FarfalleAPI a;
   PolyglotAPI::TestFunctionRelay relay([](size_t id, const nlohmann::json&) { return nlohmann::json(); });
   auto api = a.getAPI(relay);

@@ -2,6 +2,7 @@ print("Slice Z");
 
 config      = getData({'Name':'config'});
 layerHeight = config['LayerHeight'];
+layerLimit = config['LayerLimit']
 
 print('Prepare Slice Region')
 boundary = modelBoundary({'Name':'Main'})
@@ -30,5 +31,6 @@ while(Z < sliceMax[2] and Z < 1):
 
   Z = Z+layerHeight;
   counter = counter+1;
-  setData({'Name':'ZCounter', 'Data' : counter});
+  if (counter == layerLimit):
+    break;
  

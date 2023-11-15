@@ -19,6 +19,7 @@ voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0]/10.0;
 voxelizeMax[1] = voxelizeMax[1] + boundary['UniformSize'][1]/10.0;
 voxelizeMax[2] = voxelizeMax[2] + boundary['UniformSize'][2]/10.0;
 
+zCounter = getData({'Name':'ZCounter'});
 streaks = [];
 for i in range(0,amountErosion):
   print(i);
@@ -30,9 +31,17 @@ for i in range(0,amountErosion):
       'LineName'   : streakname 
   });
   streaks.append(streakname);
-  
+  saveText({
+    'Text' : linearPrint({'Line': streakname,'Feedrate': 0.03}),
+    'Filename' : "dbg/SliceOuter/layer" + str(zCounter) + "ero" + str(i) + ".gcode"});
+  sliceModel({
+      'ModelName'    : 'OuterAreaWall' + str(i),
+      'ToolName'     : 'Slice',
+      'Mode'         : 'Model',
+      'ResultName'   : 'dbg'
+  });
+  saveModel({"Name":"dbg","Filename":"dbg/SliceOuter/layer" + str(zCounter) + "ero" + str(i) + ".stl"});
 
-zCounter = getData({'Name':'ZCounter'});
 mergeLines({
     'Result':'Result' + str(zCounter),
     'Radius' : 0.5,

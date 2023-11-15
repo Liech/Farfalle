@@ -2,6 +2,7 @@ print("Create Z Slice");
 
 config      = getData({'Name':'config'});
 SliceResolution = config['SliceResolution'];
+PlanarSlicing = config["PlanarSlicing"];
 
 Z = getData({'Name':'Z'});
 counter = getData({'Name':'ZCounter'});
@@ -26,7 +27,7 @@ isovalue = Z
 print("  Isovalue: " + str(isovalue))
 
 print("  Triangulate Slice..."); 
-if (counter == 0 and False):
+if (counter == 0 or PlanarSlicing):
   createPlane({
       'Name' : 'Slice',
       'Origin' : [0,0,isovalue],
@@ -35,8 +36,7 @@ if (counter == 0 and False):
   });
 else:
   triangulateDouble({"DoubleName":"Slice","ModelName":"Slice","Resolution":SliceResolution,"Start":voxelizeMin,"End":voxelizeMax,"Isovalue":isovalue})
-triangulateDouble({"DoubleName":"Slice","ModelName":"Slice","Resolution":SliceResolution,"Start":voxelizeMin,"End":voxelizeMax,"Isovalue":isovalue})
 
-saveModel({"Name":"Slice","Filename":"slice/Slice" + "{:.2f}".format(Z) + ".stl"});
+saveModel({"Name":"Slice","Filename":"dbg/createSlice/Slice" + "{:.2f}".format(Z) + ".stl"});
 #simplifyModel({'Name':'Slice', "Ratio":0.6})
 #saveModel({"Name":"Slice","Filename":"slice/SliceR" + "{:.2f}".format(Z) + ".stl"});

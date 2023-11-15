@@ -21,4 +21,4 @@ offset[2] = BuildplateCenter[2]-BottomCenter[2];
 
 transformModel({'Name':'Main','Offset':offset})
 simplifyModel({'Name':'Main', "Ratio":0.1})
-saveModel({"Name":"Main","Filename":"Main.stl"});
+saveModel({"Name":"Main","Filename":"dbg/Main.stl"});

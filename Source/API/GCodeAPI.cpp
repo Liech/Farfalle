@@ -83,6 +83,8 @@ linearPrint({
 nlohmann::json GCodeAPI::linearPrint(const nlohmann::json& input) {
   std::string result;
   GCode::LinearPrint gcode = GCode::LinearPrint(*database.printer);
+  if (!database.lines.contains(input["Line"]))
+    throw std::runtime_error("Line with name " + (std::string)input["Line"] + " not found!");
   for (auto& streak : *database.lines[input["Line"]]) {
     gcode.controlPoints = streak;
     gcode.feedrate = 0.03;

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <functional>
+#include <stdexcept>
 
 #include <nlohmann/json.hpp>
 #include <glm/glm.hpp>
@@ -43,10 +44,17 @@ int main(int argc, char** argv) {
     std::istreambuf_iterator<char>());
   std::cout << s << std::endl;
   std::cout << " --------execution start------- " << std::endl;
-  if (lua)
-    farfalle.getDB().lua->executeString(s);
-  else
-    py.execute(s);
+  try {
+    if (lua)
+      farfalle.getDB().lua->executeString(s);
+    else
+      py.execute(s);
+  }
+  catch (std::exception& e){
+    std::cout << " --------error message ------- " << std::endl;
+    std::cout << e.what() << std::endl;
+    std::cout << " --------error message end ---------- " << std::endl;
+  }
   std::cout << " --------execution end--------- " << std::endl;
 
 
