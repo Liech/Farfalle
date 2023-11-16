@@ -14,46 +14,29 @@ struct EpsilonEqualityPredicate {
 
 std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution) {
   assert(resolution.z % 8 == 0);
-  size_t amountTriangles = indices.size() / 3;
   size_t memorySize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
   glm::dvec3 span = end - start;
   std::unique_ptr<std::vector<bool>> result = std::make_unique<std::vector<bool>>(memorySize, false);
   std::vector<std::vector<size_t>> triangleStack;
   triangleStack.resize(resolution.x * resolution.y);
+
+  spatialHashTriangles(vertecies,indices,start,end,resolution, triangleStack);
+  applyTrianglesToVolume(*result, triangleStack, vertecies, indices, start, end, resolution);
+
+  return std::move(result);
+}
+
+void Voxelizer::applyTrianglesToVolume(std::vector<bool>& data, const std::vector<std::vector<size_t>>& triangleStack, const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution) {
+  glm::dvec3 span = end - start;
+  glm::dvec3 rayDirection = glm::dvec3(0, 0, 1);
   EpsilonEqualityPredicate predicate(1e-6);
 
-  for (size_t i = 0; i < amountTriangles; i++) {
-    size_t address = i * 3;
-    const glm::dvec3& a = vertecies[indices[address]];
-    const glm::dvec3& b = vertecies[indices[address + 1]];
-    const glm::dvec3& c = vertecies[indices[address + 2]];
-    double planarity = glm::cross(glm::normalize(a - b), glm::normalize(c - b)).z;
-    if (std::abs(planarity) < 1e-6)
-      continue;
-    glm::dvec2 out_start;
-    glm::dvec2 out_end;
-    box(vertecies[indices[address + 0]], vertecies[indices[address + 1]], vertecies[indices[address + 2]],out_start,out_end);
-    size_t xStart = std::floor(((out_start.x -start.x) / span.x) * resolution.x);
-    size_t yStart = std::ceil(((out_start.y -start.y) / span.y) * resolution.y);
-    size_t xEnd   = std::floor(((out_end  .x -start.x) / span.x) * resolution.x);
-    size_t yEnd   = std::ceil(((out_end  .y -start.y) / span.y) * resolution.y);
-    if (xEnd >= resolution.x) xEnd = resolution.x-1;
-    if (yEnd >= resolution.y) yEnd = resolution.y-1;
-
-    for (size_t x = xStart; x <= xEnd; x++)
-      for (size_t y = yStart; y <= yEnd; y++) {
-        triangleStack[y*resolution.x+x].push_back(address);
-      }
-  }
-
-  auto& data = *result;
-  glm::dvec3 rayDirection = glm::dvec3(0, 0, 1);
 #pragma omp parallel for
   for (long long x = 0; x < resolution.x; x++) {
     for (size_t y = 0; y < resolution.y; y++) {
       size_t stackAddress = x + resolution.x * y;
       size_t resultOffset = resolution.z * resolution.y * x + resolution.z * y;
-      glm::dvec3 rayStart = start+glm::dvec3(span.x * ((double)x / (double)resolution.x), span.y * ((double)y / (double)resolution.y), 0) - rayDirection;
+      glm::dvec3 rayStart = start + glm::dvec3(span.x * ((double)x / (double)resolution.x), span.y * ((double)y / (double)resolution.y), 0) - rayDirection;
       std::vector<double> intersections;
       for (auto& tri : triangleStack[stackAddress]) {
         const glm::dvec3& a = vertecies[indices[tri]];
@@ -76,8 +59,35 @@ std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dv
       }
     }
   }
+}
 
-  return std::move(result);
+void Voxelizer::spatialHashTriangles(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution, std::vector<std::vector<size_t>>& triangleStack) {
+  size_t amountTriangles = indices.size() / 3;  
+  glm::dvec3 span = end - start;
+
+  for (size_t i = 0; i < amountTriangles; i++) {
+    size_t address = i * 3;
+    const glm::dvec3& a = vertecies[indices[address]];
+    const glm::dvec3& b = vertecies[indices[address + 1]];
+    const glm::dvec3& c = vertecies[indices[address + 2]];
+    double planarity = glm::cross(glm::normalize(a - b), glm::normalize(c - b)).z;
+    if (std::abs(planarity) < 1e-6)
+      continue;
+    glm::dvec2 out_start;
+    glm::dvec2 out_end;
+    box(vertecies[indices[address + 0]], vertecies[indices[address + 1]], vertecies[indices[address + 2]], out_start, out_end);
+    size_t xStart = std::floor(((out_start.x - start.x) / span.x) * resolution.x);
+    size_t yStart = std::ceil(((out_start.y - start.y) / span.y) * resolution.y);
+    size_t xEnd = std::floor(((out_end.x - start.x) / span.x) * resolution.x);
+    size_t yEnd = std::ceil(((out_end.y - start.y) / span.y) * resolution.y);
+    if (xEnd >= resolution.x) xEnd = resolution.x - 1;
+    if (yEnd >= resolution.y) yEnd = resolution.y - 1;
+
+    for (size_t x = xStart; x <= xEnd; x++)
+      for (size_t y = yStart; y <= yEnd; y++) {
+        triangleStack[y * resolution.x + x].push_back(address);
+      }
+  }
 }
 
 void Voxelizer::box(const glm::dvec3& a, const glm::dvec3& b, const glm::dvec3& c, glm::dvec2& start, glm::dvec2& end) {
