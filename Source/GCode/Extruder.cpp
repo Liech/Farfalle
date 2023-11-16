@@ -57,10 +57,10 @@ void Extruder::move(std::string& result, double offset) {
 
 void Extruder::retract(std::string& result) {
   printer.movement->retractMode(result);
-  move(result, -0.4);
+  move(result, -2);
 }
 
 void Extruder::unretract(std::string& result) {
   printer.movement->retractMode(result);
-  move(result, 0.4);
+  move(result, 2);
 }

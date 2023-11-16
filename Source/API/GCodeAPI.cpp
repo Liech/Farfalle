@@ -87,7 +87,7 @@ nlohmann::json GCodeAPI::linearPrint(const nlohmann::json& input) {
     throw std::runtime_error("Line with name " + (std::string)input["Line"] + " not found!");
   for (auto& streak : *database.lines[input["Line"]]) {
     gcode.controlPoints = streak;
-    gcode.feedrate = 0.03;
+    gcode.feedrate = input["Feedrate"];
 
     GCode::Travel travel(*database.printer);
     travel.controlPoints = { database.printer->movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],database.printer->movement->currentPosition[2] + 1), streak[0] };
