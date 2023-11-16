@@ -26,6 +26,7 @@ void Movement::home(std::string& result)
   result += "G28 ; Home\n";
   if (hasMeshBedLeveling)
     result += "G29 ; Mesh bed Level\n";
+  currentPosition = glm::dvec3(printer.dimensions[0] / 2, printer.dimensions[1] / 2, 15);
   moveTo(result, currentPosition);
 }
 

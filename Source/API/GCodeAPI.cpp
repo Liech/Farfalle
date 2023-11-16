@@ -92,7 +92,7 @@ nlohmann::json GCodeAPI::linearPrint(const nlohmann::json& input) {
     GCode::Travel travel(*database.printer);
     travel.controlPoints = { database.printer->movement->currentPosition + glm::dvec3(0,0,1) ,glm::dvec3(streak[0][0], streak[0][1],database.printer->movement->currentPosition[2] + 1), streak[0] };
 
-    database.printer->extruder->retract(result);
+    //database.printer->extruder->retract(result);
     database.printer->movement->travelMode(result);
     travel.toString(result);
     database.printer->extruder->unretract(result);

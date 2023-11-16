@@ -6,14 +6,31 @@ config = {
   'BuildplateCenter' : [100,100,0],
   'LayerHeight' : 0.2,
   'NozzleDiameter' : 0.4,
-  'VoxelResolution':[1024,1024,1024],
+  'VoxelResolution':[512,512,512],
   'SliceResolution':[32,32,32],
   'WallThickness' : 0.4,
   'PlanarSlicing' : True,
-  'LayerLimit' : 6
+  'LayerLimit' : 3
 };
 
+#createPlane({
+#    'Name' : 'ground',
+#    'Origin' : config["BuildplateCenter"],
+#    'Normal' : [0,0,1],
+#    'Size' : 100
+#});
+#saveModel({"Name":"ground","Filename":"ground.stl"});
+#createPlane({
+#    'Name' : 'firstLayer',
+#    'Origin' : [config["BuildplateCenter"][0],config["BuildplateCenter"][1],0.2],
+#    'Normal' : [0,0,1],
+#    'Size' : 100
+#});
+#saveModel({"Name":"firstLayer","Filename":"firstLayer.stl"});
+
 setData({'Name':'config', 'Data' : config });
+
+setData({'Name':'ZCounter', 'Data' : 0});
 
 executePythonFile({'Filename' : 'LoadModel.py'}); # Defines Model 'Main'
 if (config["PlanarSlicing"] == False):

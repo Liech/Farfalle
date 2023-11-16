@@ -22,3 +22,4 @@ offset[2] = BuildplateCenter[2]-BottomCenter[2];
 
 transformModel({'Name':'Main','Offset':offset})
 saveModel({"Name":"Main","Filename":"dbg/Main.stl"});
+print('Load finished')

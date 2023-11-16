@@ -50,6 +50,8 @@ private:
   std::string copyVoxelDescription();
   nlohmann::json createDensityField(const nlohmann::json& input);
   std::string createDensityFieldDescription();
+  nlohmann::json voxelizationBoundary(const nlohmann::json& input);
+  std::string voxelizationBoundaryDescription();
 
   apiDatabase& database;
 };

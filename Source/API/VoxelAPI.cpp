@@ -87,6 +87,11 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> densityAPI = std::make_unique<PolyglotAPI::APIFunction>("createDensityField", [this](const nlohmann::json& input) { return createDensityField(input); });
   densityAPI->setDescription(copyVoxelDescription());
   api.addFunction(std::move(densityAPI));
+
+  //voxelization boundary
+  std::unique_ptr<PolyglotAPI::APIFunction> voxelizationBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizationBoundary", [this](const nlohmann::json& input) { return voxelizationBoundary(input); });
+  voxelizationBoundaryAPI->setDescription(voxelizationBoundaryDescription());
+  api.addFunction(std::move(voxelizationBoundaryAPI));
 }
 
 nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
@@ -379,6 +384,44 @@ createDensityField({
     'Function' : linearGradient,
     'Language' : 'Python'  # Python / Lua . Currently Necessary to help searching the function. A little silly *shrug*
     'Data' : { "Resolution" : 128 }, # python has an issue with scope of functions that are invoked this way. As intermediate solution just give them a scope this way. Todo: Fix this issue
+});
+)";
+}
+
+nlohmann::json VoxelAPI::voxelizationBoundary(const nlohmann::json& input) {
+  nlohmann::json result;
+  auto& model = *database.models[input["Name"]];
+  size_t resolution = input["Resolution"];
+  size_t outerVoxels = input["OuterVoxels"];
+  auto min = model.getMin();
+  auto max = model.getMax();
+
+  auto span = max - min;
+  double biggest = glm::max(span.x, glm::max(span.y, span.z));
+
+  double vlBefore = biggest / (double)resolution;
+  double vlNew = vlBefore * (((double)resolution + outerVoxels) / (double)resolution);
+
+  double offset = vlNew * (outerVoxels / 2);
+  result["Min"] = nlohmann::json::array();
+  result["Min"].push_back(min[0] - offset);
+  result["Min"].push_back(min[1] - offset);
+  result["Min"].push_back(min[2] - offset);
+
+  result["Max"] = nlohmann::json::array();
+  result["Max"].push_back(min[0] + biggest + offset);
+  result["Max"].push_back(min[1] + biggest + offset);
+  result["Max"].push_back(min[2] + biggest + offset);
+  return result;
+}
+
+std::string VoxelAPI::voxelizationBoundaryDescription() {
+  return R"(
+returns an boundary for a resolution and a model that does minimizes error. Outer Voxels are the number of voxels outside of the min/max are of the model
+voxelizationBoundary({
+    'Name'  : 'Benchy' # Model Name
+    'Resolution' : 128,  # must be uniform
+    'OuterVoxels' : 2 # even number, should be higher when pack is used
 });
 )";
 }

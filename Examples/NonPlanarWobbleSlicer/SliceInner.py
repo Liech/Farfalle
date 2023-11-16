@@ -6,8 +6,8 @@ NozzleDiameter = config['NozzleDiameter'];
 
 
 zCounter = getData({'Name':'ZCounter'});
-saveModel({"Name":"Slice","Filename":"slice/ToolSlice" + str(zCounter) + ".stl"});
-saveModel({"Name":"InnerArea","Filename":"slice/SliceInner" + str(zCounter) + ".stl"});
+#saveModel({"Name":"Slice","Filename":"slice/ToolSlice" + str(zCounter) + ".stl"});
+#saveModel({"Name":"InnerArea","Filename":"slice/SliceInner" + str(zCounter) + ".stl"});
 
 print("  slicing");
 sliceModel({

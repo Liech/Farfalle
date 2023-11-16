@@ -9,6 +9,7 @@ Extruder::Extruder(Printer& p ) : printer(p){
 }
 
 void Extruder::startup(std::string& result) {
+  position = 0;
   result += "\n; Extruder Startup: \n";
   result += "M201 E" + std::to_string(accelerationLimits) + " ; sets maximum accelerations\n";
   result += "M203 E" + std::to_string(maxFeedrate) + " ; sets maximum feedrates\n";

@@ -1,3 +1,4 @@
+print('Categorize')
 
 config          = getData({'Name':'config'});
 VoxelResolution = config['VoxelResolution'];
@@ -6,17 +7,12 @@ NozzleDiameter   = config['NozzleDiameter'];
 
 
 print('Voxelize Model')
-boundary = modelBoundary({'Name':'Main'})
+boundary = voxelizationBoundary({'Name':'Main', 'Resolution':VoxelResolution[0], 'OuterVoxels' : 2})
 voxelizeMin=boundary['Min']
-voxelizeMin[0] = voxelizeMin[0] - boundary['UniformSize'][0]/10.0;
-voxelizeMin[1] = voxelizeMin[1] - boundary['UniformSize'][1]/10.0;
-voxelizeMin[2] = voxelizeMin[2] - boundary['UniformSize'][2]/10.0;
+voxelizeMax=boundary['Max']
+print('  ' + str(boundary))
 
-voxelizeMax=boundary['UniformMax']
-voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0]/10.0;
-voxelizeMax[1] = voxelizeMax[1] + boundary['UniformSize'][1]/10.0;
-voxelizeMax[2] = voxelizeMax[2] + boundary['UniformSize'][2]/10.0;
-
+print('  Voxelize Model')
 voxelizeModel({
   'ModelName' : 'Main',
   'VoxelName' : 'Main',
@@ -24,9 +20,16 @@ voxelizeModel({
   'Start'     : voxelizeMin,
   'End'       : voxelizeMax
 });
-
-voxelizeMin[2] = 0;
-voxelizeMax[2] = boundary['UniformSize'][2] + 2*boundary['UniformSize'][2]/10.0;
+print('  Remesh Model')
+triangulateVolume({
+    'VoxelName': 'Main',
+    'ModelName': 'Remeshed',
+    'Resolution' : VoxelResolution,
+    'Start' : voxelizeMin,
+    'End'   : voxelizeMax
+}); 
+print('  Save Model')
+#saveModel({"Name":"Remeshed","Filename":"remeshed.stl"});
 
 
 print('Distance Map')
@@ -38,7 +41,26 @@ distanceMap({
     'Mode' : 'XY' # XY / XYZ
 });
 
-voxelSize = boundary["UniformSize"][0] / VoxelResolution[0];
+
+
+print('  transform for remesh');
+transformDistanceMap({
+    'DistanceMapName' : 'Main',
+    'VoxelName'   : 'Remeshed',
+    'Distance' : 1e-7
+});
+print('  remesh distancemap');
+triangulateVolume({
+    'VoxelName': 'Main',
+    'ModelName': 'Remeshed',
+    'Resolution' : VoxelResolution,
+    'Start' : voxelizeMin,
+    'End'   : voxelizeMax
+}); 
+#saveModel({"Name":"Remeshed","Filename":"dist_remeshed.stl"});
+
+
+voxelSize = (voxelizeMax[0]-voxelizeMin[0]) / VoxelResolution[0];
 print('Voxel Size: ' + str(voxelSize))
 
 eroded = 0.0;
@@ -74,5 +96,5 @@ triangulateVolume({
 }); 
 #simplifyModel({'Name':'InnerArea', "Ratio":0.3})
 #simplifyModel({'Name':'OuterArea', "Ratio":0.3})
-saveModel({"Name":"InnerArea","Filename":"dbg/InnerArea.stl"});
-saveModel({"Name":"OuterArea","Filename":"dbg/OuterArea.stl"});
+#saveModel({"Name":"InnerArea","Filename":"dbg/InnerArea.stl"});
+#saveModel({"Name":"OuterArea","Filename":"dbg/OuterArea.stl"});
