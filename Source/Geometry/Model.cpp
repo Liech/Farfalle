@@ -179,6 +179,8 @@ std::vector<std::vector<glm::dvec3>> Model::slice2(Model& sliceTool) const {
 
   Surface_mesh meshCopy = p->mesh;
   Surface_mesh sliceToolMeshCopy = sliceTool.p->mesh;
+  save("slice2model.stl");
+  sliceTool.save("slice2tool.stl");
 
   CGAL::Polygon_mesh_processing::surface_intersection(meshCopy, sliceToolMeshCopy,std::back_inserter(polylines));
   

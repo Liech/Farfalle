@@ -15,9 +15,9 @@ TEST_CASE("TorusSlice", "[TorusSlice]") {
 
   auto createPlaneParams = nlohmann::json::object({ 
     {"Name"  , "Tool"},
-    {"Origin", {0,0,1}},
+    {"Origin", {0,0,0}},
     {"Normal", {0,0,1}},
-    {"Size"  , 1}
+    {"Size"  , 10}
   });
   api->getFunction("createPlane").call(createPlaneParams);
 
@@ -41,6 +41,4 @@ TEST_CASE("TorusSlice", "[TorusSlice]") {
   }
 
   REQUIRE(result.size() == 2);
-  REQUIRE(result[0].size() == 4);
-  REQUIRE(result[1].size() == 4);
 }

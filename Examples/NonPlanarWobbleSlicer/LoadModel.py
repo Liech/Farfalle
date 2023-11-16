@@ -6,6 +6,7 @@ BuildplateCenter = config['BuildplateCenter'];
 
 loadModel({'Name': 'Main', 'Filename':Filename})
 repairModel({'Name':'Main'})
+simplifyModel({'Name':'Main', "Ratio":0.1})
 
 print('Center Model')
 
@@ -20,5 +21,4 @@ offset[1] = BuildplateCenter[1]-BottomCenter[1];
 offset[2] = BuildplateCenter[2]-BottomCenter[2];
 
 transformModel({'Name':'Main','Offset':offset})
-simplifyModel({'Name':'Main', "Ratio":0.1})
 saveModel({"Name":"Main","Filename":"dbg/Main.stl"});

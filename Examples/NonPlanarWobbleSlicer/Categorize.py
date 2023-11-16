@@ -8,9 +8,9 @@ NozzleDiameter   = config['NozzleDiameter'];
 print('Voxelize Model')
 boundary = modelBoundary({'Name':'Main'})
 voxelizeMin=boundary['Min']
-voxelizeMin[0] = voxelizeMin[0] - boundary['Size'][0]/10.0;
-voxelizeMin[1] = voxelizeMin[1] - boundary['Size'][1]/10.0;
-voxelizeMin[2] = voxelizeMin[2] - boundary['Size'][2]/10.0;
+voxelizeMin[0] = voxelizeMin[0] - boundary['UniformSize'][0]/10.0;
+voxelizeMin[1] = voxelizeMin[1] - boundary['UniformSize'][1]/10.0;
+voxelizeMin[2] = voxelizeMin[2] - boundary['UniformSize'][2]/10.0;
 
 voxelizeMax=boundary['UniformMax']
 voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0]/10.0;
@@ -24,6 +24,10 @@ voxelizeModel({
   'Start'     : voxelizeMin,
   'End'       : voxelizeMax
 });
+
+voxelizeMin[2] = 0;
+voxelizeMax[2] = boundary['UniformSize'][2] + 2*boundary['UniformSize'][2]/10.0;
+
 
 print('Distance Map')
 
