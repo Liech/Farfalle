@@ -3,6 +3,7 @@ print('Slice Inner');
 
 config      = getData({'Name':'config'});
 NozzleDiameter = config['NozzleDiameter'];
+IO              = config['IntermediateFiles'];
 
 
 zCounter = getData({'Name':'ZCounter'});
@@ -17,7 +18,8 @@ sliceModel({
     'ResultName'   : 'SliceZ'
 });
 print("  sliced");
-saveModel({"Name":"SliceZ","Filename":"slice/SliceZ" + str(zCounter) + ".stl"});
+if (IO):
+  saveModel({"Name":"SliceZ","Filename":"dbg/SliceZ" + str(zCounter) + ".stl"});
 
 boundary = modelBoundary({'Name':'SliceZ'})
 sliceMin=boundary['Min']
@@ -42,6 +44,8 @@ while(X < sliceMax[0]):
       'Normal' : [1,0,0],
       'Size' : 5000
   });
+  if (IO):
+    saveModel({"Name":"SliceX","Filename":"dbg/SliceX" + str(X) + ".stl"});
   streakName = 'Streak' + str(counter);
   sliceModel({
       'ModelName'  : 'SliceZ',
@@ -49,7 +53,10 @@ while(X < sliceMax[0]):
       'Mode'       : 'Line',
       'LineName'   : streakName
   });
-
+  if (IO):
+    saveText({
+      'Text' : linearPrint({'Line': streakName,'Feedrate': 0.03}),
+      'Filename' : "dbg/slice/layer" + str(zCounter) + "_inner" + str(X) + ".gcode"});
   streaks.append(streakName);
 
   X = X + NozzleDiameter;

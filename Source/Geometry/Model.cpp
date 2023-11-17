@@ -179,8 +179,8 @@ std::vector<std::vector<glm::dvec3>> Model::slice2(Model& sliceTool) const {
 
   Surface_mesh meshCopy = p->mesh;
   Surface_mesh sliceToolMeshCopy = sliceTool.p->mesh;
-  save("slice2model.stl");
-  sliceTool.save("slice2tool.stl");
+  //save("slice2model.stl");
+  //sliceTool.save("slice2tool.stl");
 
   CGAL::Polygon_mesh_processing::surface_intersection(meshCopy, sliceToolMeshCopy,std::back_inserter(polylines));
   
@@ -202,8 +202,8 @@ std::vector<std::vector<glm::dvec3>> Model::slice(Model& sliceTool) const {
   Surface_mesh sliceToolMeshCopy = sliceTool.p->mesh;
   //split
   //sliceTool.save("dbg/sliceTool.stl");
-  save("dbg/meshCopy.stl");
-  sliceTool.save("dbg/sliceToolMeshCopy.stl");
+  //save("dbg/meshCopy.stl");
+  //sliceTool.save("dbg/sliceToolMeshCopy.stl");
   CGAL::Polygon_mesh_processing::clip(meshCopy, sliceToolMeshCopy);
   //visit all holes https://doc.cgal.org/latest/Polygon_mesh_processing/Polygon_mesh_processing_2hole_filling_visitor_example_8cpp-example.html
   std::vector<halfedge_descriptor> border_cycles;

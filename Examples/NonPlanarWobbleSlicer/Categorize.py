@@ -3,9 +3,10 @@ print('Categorize')
 config          = getData({'Name':'config'});
 VoxelResolution = config['VoxelResolution'];
 WallThickness   = config['WallThickness'];
-NozzleDiameter   = config['NozzleDiameter'];
-Detail   = config['Detail'];
-
+NozzleDiameter  = config['NozzleDiameter'];
+Detail          = config['Detail'];
+WallAmount      = config['WallAmount'];
+IO              = config['IntermediateFiles'];
 
 print('Voxelize Model')
 boundary = voxelizationBoundary({'Name':'Main', 'Resolution':VoxelResolution[0], 'OuterVoxels' : 2})
@@ -21,16 +22,17 @@ voxelizeModel({
   'Start'     : voxelizeMin,
   'End'       : voxelizeMax
 });
-print('  Remesh Model')
-triangulateVolume({
-    'VoxelName': 'Main',
-    'ModelName': 'Remeshed',
-    'Resolution' : VoxelResolution,
-    'Start' : voxelizeMin,
-    'End'   : voxelizeMax
-}); 
-print('  Save Model')
-#saveModel({"Name":"Remeshed","Filename":"remeshed.stl"});
+if (IO):
+  print('  Remesh Model')
+  triangulateVolume({
+      'VoxelName': 'Main',
+      'ModelName': 'Remeshed',
+      'Resolution' : VoxelResolution,
+      'Start' : voxelizeMin,
+      'End'   : voxelizeMax
+  }); 
+  print('  Save Model')
+  saveModel({"Name":"Remeshed","Filename":"dbg/remeshed.stl"});
 
 
 print('Distance Map')
@@ -42,25 +44,6 @@ distanceMap({
     'Mode' : 'XY' # XY / XYZ
 });
 
-
-
-print('  transform for remesh');
-transformDistanceMap({
-    'DistanceMapName' : 'Main',
-    'VoxelName'   : 'Remeshed',
-    'Distance' : 1e-7
-});
-print('  remesh distancemap');
-triangulateVolume({
-    'VoxelName': 'Main',
-    'ModelName': 'Remeshed',
-    'Resolution' : VoxelResolution,
-    'Start' : voxelizeMin,
-    'End'   : voxelizeMax
-}); 
-#saveModel({"Name":"Remeshed","Filename":"dist_remeshed.stl"});
-
-
 voxelSize = (voxelizeMax[0]-voxelizeMin[0]) / VoxelResolution[0];
 print('Voxel Size: ' + str(voxelSize))
 
@@ -68,35 +51,30 @@ eroded = 0.0;
 
 print('Mapping Areas');
 
-transformDistanceMap({
+
+
+for i in range(0,WallAmount+1):
+  print('Wall Number: ' + str(i) + "/" + str(WallAmount));
+  name= 'OuterAreaWall' + str(i)
+  transformDistanceMap({
     'DistanceMapName' : 'Main',
-    'VoxelName'   : 'InnerArea',
-    'Distance' : (NozzleDiameter*2/voxelSize)
-});
-copyVoxel({
-    'Source' : 'Main',
-    'Target'   : 'OuterArea'
-});
-subtractVoxel({
-    'Target' : 'OuterArea',
-    'Tool'   : 'InnerArea'
-});
-triangulateVolume({
-    'VoxelName': 'OuterArea',
-    'ModelName': 'OuterArea',
+    'VoxelName'   : 'Erosion',
+    'Distance' : (i+0.5)*(NozzleDiameter/voxelSize)
+  });
+  if (i==WallAmount):
+    name = "InnerArea";  
+  triangulateVolume({
+    'VoxelName': 'Erosion',
+    'ModelName': name,
     'Resolution' : VoxelResolution,
     'Start' : voxelizeMin,
     'End'   : voxelizeMax
-}); 
-triangulateVolume({
-    'VoxelName': 'InnerArea',
-    'ModelName': 'InnerArea',
-    'Resolution' : VoxelResolution,
-    'Start' : voxelizeMin,
-    'End'   : voxelizeMax
-}); 
-if (Detail < 1):
-  simplifyModel({'Name':'InnerArea', "Ratio":Detail})
-  simplifyModel({'Name':'OuterArea', "Ratio":Detail})
-#saveModel({"Name":"InnerArea","Filename":"dbg/InnerArea.stl"});
-#saveModel({"Name":"OuterArea","Filename":"dbg/OuterArea.stl"});
+  });
+  if (IO):
+    saveModel({"Name":name,"Filename":"dbg/" + name + ".stl"});
+  if (Detail < 1):
+    simplifyModel({'Name':name, "Ratio":Detail})
+    if (IO):
+      saveModel({"Name":name,"Filename":"dbg/" + name + "_simplified.stl"});
+    
+setData({'Name':'OuterAreaWallAmount', 'Data':WallAmount});
