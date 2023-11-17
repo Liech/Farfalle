@@ -5,12 +5,13 @@ config = {
   'ResultFilename' : '3DBenchy.gcode',
   'BuildplateCenter' : [100,100,0],
   'LayerHeight' : 0.2,
-  'NozzleDiameter' : 0.4,
+  'NozzleDiameter' : 0.43,
   'VoxelResolution':[1024,1024,1024],
   'SliceResolution':[32,32,32],
   'WallThickness' : 0.4,
-  'PlanarSlicing' : True,
-  'LayerLimit' : 3
+  'PlanarSlicing' : False,
+  'LayerLimit' : -1,
+  'Detail' : 0.1 #0.0-1.0
 };
 
 #createPlane({

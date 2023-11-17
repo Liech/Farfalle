@@ -4,6 +4,7 @@ config          = getData({'Name':'config'});
 VoxelResolution = config['VoxelResolution'];
 WallThickness   = config['WallThickness'];
 NozzleDiameter  = config['NozzleDiameter'];
+Detail  = config['Detail'];
 
 # for packed variant
 boundary = voxelizationBoundary({'Name':'Main', 'Resolution':VoxelResolution[0], 'OuterVoxels' : 2})
@@ -60,6 +61,9 @@ while(True):
     'Start' : voxelizeMin,
     'End'   : voxelizeMax
   });
+  if (Detail < 1):
+    simplifyModel({'Name':name, "Ratio":Detail})
+    
   #saveModel({"Name":name,"Filename":name + ".stl"});
   
   hasTri = hasAnyTriangle({'Name':name});

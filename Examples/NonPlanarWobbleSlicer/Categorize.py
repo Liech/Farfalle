@@ -4,6 +4,7 @@ config          = getData({'Name':'config'});
 VoxelResolution = config['VoxelResolution'];
 WallThickness   = config['WallThickness'];
 NozzleDiameter   = config['NozzleDiameter'];
+Detail   = config['Detail'];
 
 
 print('Voxelize Model')
@@ -94,7 +95,8 @@ triangulateVolume({
     'Start' : voxelizeMin,
     'End'   : voxelizeMax
 }); 
-#simplifyModel({'Name':'InnerArea', "Ratio":0.3})
-#simplifyModel({'Name':'OuterArea', "Ratio":0.3})
+if (Detail < 1):
+  simplifyModel({'Name':'InnerArea', "Ratio":Detail})
+  simplifyModel({'Name':'OuterArea', "Ratio":Detail})
 #saveModel({"Name":"InnerArea","Filename":"dbg/InnerArea.stl"});
 #saveModel({"Name":"OuterArea","Filename":"dbg/OuterArea.stl"});

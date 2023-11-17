@@ -3,10 +3,12 @@ print("Load Model");
 config = getData({'Name':'config'});
 Filename         = config['Filename'];
 BuildplateCenter = config['BuildplateCenter'];
+Detail = config['Detail'];
 
 loadModel({'Name': 'Main', 'Filename':Filename})
 repairModel({'Name':'Main'})
-simplifyModel({'Name':'Main', "Ratio":0.1})
+if (Detail < 1):
+  simplifyModel({'Name':'Main', "Ratio":Detail})
 
 print('Center Model')
 
