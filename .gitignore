@@ -6,3 +6,5 @@ Examples/NonPlanarWobbleSlicer/3DBenchy.gcode
 Examples/NonPlanarWobbleSlicer/Main.stl
 Examples/NonPlanarWobbleSlicer/w3DBenchy.gcode
 /Examples/NonPlanarWobbleSlicer/dbg
+Examples/NonPlanarWobbleSlicer/slice2model.stl
+Examples/NonPlanarWobbleSlicer/slice2tool.stl

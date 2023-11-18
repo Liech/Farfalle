@@ -25,7 +25,7 @@ zCounter = getData({'Name':'ZCounter'});
 for i in range(0,zCounter):
   gcode += linearPrint({
     'Line': 'Result' + str(i),
-    'Feedrate': 0.025
+    'Feedrate': 0.028
   })
 
 gcode += shutdown({});

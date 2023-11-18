@@ -26,6 +26,7 @@ TEST_CASE("TorusSlice", "[TorusSlice]") {
     {"ToolName"   , "Tool"  },
     {"Mode"       , "Line"  },
     {"LineName"   , "Result"},
+    {"ResultName" , "BenchySliceModel"}
     });
   api->getFunction("sliceModel").call(sliceModelParams);
 

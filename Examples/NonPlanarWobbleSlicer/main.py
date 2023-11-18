@@ -1,19 +1,24 @@
 from PolyglotModule import *
 print("Prepare Config");
 config = {
-  'Filename':"3DBenchy.stl",
-  'ResultFilename' : '3DBenchy.gcode',
-  'BuildplateCenter' : [100,100,0],
-  'LayerHeight' : 0.2,
-  'WallAmount' : 2,
-  'NozzleDiameter' : 0.43,
-  'VoxelResolution':[512,512,512],
-  'SliceResolution':[32,32,32],
-  'WallThickness' : 0.4,
-  'PlanarSlicing' : True,
-  'LayerLimit' : -1, # -1 for unlimited
-  'Detail' : 0.3, #0.0-1.0
-  'IntermediateFiles' : False 
+  'Filename'          :"3DBenchy.stl",
+  'ResultFilename'    : '3DBenchy.gcode',
+  'BuildplateCenter'  : [100,100,0],
+  'LayerHeight'       : 0.2,
+  'WallAmount'        : 2,
+  'NozzleDiameter'    : 0.42,
+  'VoxelResolution'   :[512,512,512],
+  'SliceResolution'   :[32,32,32],
+  'WallThickness'     : 0.4,
+  'PlanarSlicing'     : False,
+  'LayerLimit'        : -1, # -1 for unlimited
+  'Detail'            : 0.3, #0.0-1.0
+  'IntermediateFiles' : True,
+  'WobbleAmplitude'   : 1.0, # z height
+  'WobbleFrequency'   : 4.14*10, #amount of waves in full volume
+  'WobbleFrom'        : 0.11, # percentage where wobble is full
+  'WobbleTo'          : 0.31, #percentage where wobble stops being full
+  'rampTime'          : 0.06 #percentage before and after full wobble where it fades out
 };
 
 #createPlane({

@@ -19,6 +19,8 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_length_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
 #include <boost/variant/get.hpp>
+#include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
+
 
 
 typedef CGAL::AABB_face_graph_triangle_primitive<Surface_mesh> AABB_face_graph_primitive;
@@ -287,7 +289,7 @@ void Model::getBoundingSphere(glm::dvec3& center, double& radius) const {
   }
 
   radius /= 2;
-}
+} 
 
 void Model::repair() {
 
@@ -295,6 +297,8 @@ void Model::repair() {
   assert(CGAL::is_valid_polygon_mesh(p->mesh));
   CGAL::Polygon_mesh_processing::remove_isolated_vertices(p->mesh);
   CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(p->mesh);
+  CGAL::Polygon_mesh_processing::remove_degenerate_faces(p->mesh);
+
   if (CGAL::Polygon_mesh_processing::does_self_intersect(p->mesh)) {
     std::cout << "Remove Self Intersection..." << std::endl;
     if (!CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(p->mesh, CGAL::parameters::preserve_genus(false))) {

@@ -44,7 +44,7 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Triangulation_vertex_base_2<K> Vb;
 typedef CGAL::Delaunay_mesh_face_base_2<K> Fb;
 typedef CGAL::Triangulation_data_structure_2<Vb, Fb> Tds;
-typedef CGAL::Constrained_Delaunay_triangulation_2<K, Tds> CDT;
+typedef CGAL::Constrained_Delaunay_triangulation_2<K, Tds, CGAL::Exact_intersections_tag> CDT;
 typedef CGAL::Delaunay_mesh_size_criteria_2<CDT> Criteria;
 typedef CDT::Vertex_handle Vertex_handle;
 typedef CDT::Point Point;
@@ -183,7 +183,7 @@ std::vector<Polygon_with_holes_2> Mesh2DPIMPL::loopSoup2Polys(const std::vector<
     Polygon_2 poly = Polygon_2();
     for (auto& x : loop)
       poly.push_back(x);  
-    poly = PS::simplify(poly, cost, Stop(0.5));
+    //poly = PS::simplify(poly, cost, Stop(0.5));
 
 
     outer.push_back(poly);
@@ -214,7 +214,7 @@ std::vector<Polygon_with_holes_2> Mesh2DPIMPL::loopSoup2Polys(const std::vector<
     Polygon_2 h = Polygon_2();
     for (auto& x : hole)      
       h.push_back(x);
-    h = PS::simplify(h, cost, Stop(0.5));
+    //h = PS::simplify(h, cost, Stop(0.5));
 
     assignedHoles[bestPoly].push_back(h);
   }

@@ -70,6 +70,7 @@ for i in range(0,WallAmount+1):
     'Start' : voxelizeMin,
     'End'   : voxelizeMax
   });
+  repairModel({'Name':name})
   if (IO):
     saveModel({"Name":name,"Filename":"dbg/" + name + ".stl"});
   if (Detail < 1):
