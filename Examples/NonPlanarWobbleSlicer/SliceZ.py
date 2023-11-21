@@ -18,7 +18,7 @@ sliceMax[2] = sliceMax[2] + boundary['Size'][2]/10.0;
 
 Z = 0.2
 counter = 0;
-#Z = 9
+Z = 9
 
 setData({'Name':'ZCounter', 'Data' : 0});
 

@@ -22,17 +22,17 @@ voxelizeModel({
   'Start'     : voxelizeMin,
   'End'       : voxelizeMax
 });
-if (IO):
-  print('  Remesh Model')
-  triangulateVolume({
-      'VoxelName': 'Main',
-      'ModelName': 'Remeshed',
-      'Resolution' : VoxelResolution,
-      'Start' : voxelizeMin,
-      'End'   : voxelizeMax
-  }); 
-  print('  Save Model')
-  saveModel({"Name":"Remeshed","Filename":"dbg/remeshed.stl"});
+#if (IO):
+  #print('  Remesh Model')
+  #triangulateVolume({
+  #    'VoxelName': 'Main',
+  #    'ModelName': 'Remeshed',
+  #    'Resolution' : VoxelResolution,
+  #    'Start' : voxelizeMin,
+  #    'End'   : voxelizeMax
+  #}); 
+  #print('  Save Model')
+  #saveModel({"Name":"Remeshed","Filename":"dbg/remeshed.stl"});
 
 
 print('Distance Map')
@@ -70,7 +70,7 @@ for i in range(0,WallAmount+1):
     'Start' : voxelizeMin,
     'End'   : voxelizeMax
   });
-  repairModel({'Name':name})
+  #repairModel({'Name':name})
   if (IO):
     saveModel({"Name":name,"Filename":"dbg/" + name + ".stl"});
   if (Detail < 1):

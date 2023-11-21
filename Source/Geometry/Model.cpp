@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <map>
+#include <sstream>
 
 #include "CGALDefs.h"
 #include "Mesh2D.h"
@@ -88,40 +89,26 @@ Model::Model(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>
 }
 
 Model::Model(const std::vector<glm::dvec3>& input) {
-  std::map<std::tuple<double,double,double>, size_t> indexMap;
-  std::vector<glm::dvec3> vertecies;
-  std::vector<size_t>     indices;
-  for (glm::dvec3 x : input) {
-    size_t index = 0;
-    std::tuple<double, double, double> key = std::make_tuple(x.x, x.y, x.z);
-    if (indexMap.count(key) != 0) {
-      index = indexMap[key];
-    }
-    else {
-      vertecies.push_back(x);
-      index = vertecies.size() - 1;
-      indexMap[key] = index;
-    }
-    indices.push_back(index);
-  }
-
   p = std::make_unique<ModelImplementation>();
-  Surface_mesh mesh;
-  //https://doc.cgal.org/latest/Surface_mesh/Surface_mesh_2sm_iterators_8cpp-example.html
-  std::map<size_t, vertex_descriptor> vertexMap;
-  size_t counter = 0;
-  for (auto& x : vertecies) {
-    vertex_descriptor desc = mesh.add_vertex(Point(x.x, x.y, x.z));
-    vertexMap[counter] = desc;
-    counter++;
+  std::vector<std::vector<size_t>> dumbIndices;
+  std::vector<Point> dumbVertices;
+  dumbVertices.reserve(input.size());
+  dumbIndices.reserve(input.size());
+  for (size_t i = 0; i < input.size(); i+=3) {
+    dumbIndices.push_back({ i,i + 1,i + 2 });
   }
-  for (size_t i = 0; i < indices.size(); i += 3) {
-    vertex_descriptor a = vertexMap[indices[i + 0]];
-    vertex_descriptor b = vertexMap[indices[i + 1]];
-    vertex_descriptor c = vertexMap[indices[i + 2]];
-    mesh.add_face(a, b, c);
-  }
+  for(auto& x : input)
+    dumbVertices.push_back(Point(x.x, x.y, x.z));
 
+  std::ostringstream  buffer;
+  CGAL::IO::write_STL(buffer, dumbVertices, dumbIndices);
+  std::stringstream asd;
+  asd << buffer.str();
+  Surface_mesh mesh;
+  std::vector<std::vector<std::size_t>> goodIndices;
+  std::vector<Point>  goodVertices;
+  CGAL::IO::read_STL(asd,goodVertices,goodIndices);
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(goodVertices, goodIndices, mesh);
   p->mesh = mesh;
   init();
 }

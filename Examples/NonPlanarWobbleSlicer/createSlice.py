@@ -37,7 +37,7 @@ if (counter == 0 or PlanarSlicing):
   });
 else:
   triangulateDouble({"DoubleName":"Slice","ModelName":"Slice","Resolution":SliceResolution,"Start":voxelizeMin,"End":voxelizeMax,"Isovalue":isovalue})
-  repairModel({'Name':'Slice'})
+  #repairModel({'Name':'Slice'})
 
 if (IO):
   saveModel({"Name":"Slice","Filename":"dbg/slice/ZSlice" + "{:.2f}".format(Z) + ".stl"});
