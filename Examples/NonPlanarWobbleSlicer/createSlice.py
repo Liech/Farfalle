@@ -10,13 +10,13 @@ counter = getData({'Name':'ZCounter'});
 
 boundary = modelBoundary({'Name':'Main'})
 voxelizeMin=boundary['Min']
-voxelizeMin[0] = voxelizeMin[0] - boundary['UniformSize'][0];
-voxelizeMin[1] = voxelizeMin[1] - boundary['UniformSize'][1];
+voxelizeMin[0] = voxelizeMin[0] - boundary['UniformSize'][0]/10;
+voxelizeMin[1] = voxelizeMin[1] - boundary['UniformSize'][1]/10;
 voxelizeMin[2] = voxelizeMin[2];
 
 voxelizeMax=boundary['UniformMax']
-voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0];
-voxelizeMax[1] = voxelizeMax[1] + boundary['UniformSize'][1];
+voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0]/10;
+voxelizeMax[1] = voxelizeMax[1] + boundary['UniformSize'][1]/10;
 voxelizeMax[2] = voxelizeMax[2];
 
 print("  Generate Double Field...");

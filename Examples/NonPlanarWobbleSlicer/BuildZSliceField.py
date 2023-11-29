@@ -14,12 +14,12 @@ Z = getData({'Name':'Z'});
 
 boundary = modelBoundary({'Name':'Main'})
 voxelizeMin=boundary['Min']
-voxelizeMin[0] = voxelizeMin[0] - boundary['UniformSize'][0];
-voxelizeMin[1] = voxelizeMin[1] - boundary['UniformSize'][1];
+voxelizeMin[0] = voxelizeMin[0] - boundary['UniformSize'][0]/10;
+voxelizeMin[1] = voxelizeMin[1] - boundary['UniformSize'][1]/10;
 
 voxelizeMax=boundary['UniformMax']
-voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0];
-voxelizeMax[1] = voxelizeMax[1] + boundary['UniformSize'][1];
+voxelizeMax[0] = voxelizeMax[0] + boundary['UniformSize'][0]/10;
+voxelizeMax[1] = voxelizeMax[1] + boundary['UniformSize'][1]/10;
 
 print("  Generate Double Field...");
 minZ = voxelizeMin[2]
@@ -42,7 +42,8 @@ def density(input):
   data = input["Data"]
   xWobble = data["WobbleFrequency"]
   zWobble = data["WobbleAmplitude"]
-  distortion = (math.sin(coord[1]*(xWobble/data["SliceResolution"][0]))*zWobble + math.cos(coord[0]*(xWobble/data["SliceResolution"][0]))*zWobble);
+  #distortion = (math.sin(coord[1]*(xWobble/data["SliceResolution"][0]))*zWobble + math.cos(coord[0]*(xWobble/data["SliceResolution"][0]))*zWobble);
+  distortion = (math.sin(coord[0]*(xWobble/data["SliceResolution"][0]) + 3.14/2)*zWobble)*zWobble;
   perc = (coord[2] / data["SliceResolution"][2])
   distortionInfluence = 0
   fromPercentage = data["WobbleFrom"]
