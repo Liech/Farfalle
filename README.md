@@ -17,21 +17,41 @@ Also the script code is pretty small and therefor hopefully inviting for experim
 
 It is not finished yet though.
 
-# First Layer of a Benchy:
+# Planar Benchy
 
-![image](https://github.com/Liech/Farfalle/assets/16963076/cfbc93d1-0b2c-4d8a-aefe-3cc99a688246)
-
+![image](https://github.com/Liech/Farfalle/assets/16963076/0a7804f8-7165-44d1-a22d-eb7d4a5f5a29)
+![image](https://github.com/Liech/Farfalle/assets/16963076/3175d62c-1d4b-4b9d-95bc-18cf9a1bb011)
 There are Gaps between the lines, because the extrusion is not yet tuned. Im currently concentrating on the correct toolpath.
 
-# Benchy
 
-![image](https://github.com/Liech/Farfalle/assets/16963076/6337a47b-58b6-4a4e-a550-5f6661f16f7e)![image](https://github.com/Liech/Farfalle/assets/16963076/db76803d-3b40-4448-b80d-fe03578fd4b3)
+# Non-Planar Benchy
 
-Currently there is a tiny infill error connecting things that should not be connected.
+![image](https://github.com/Liech/Farfalle/assets/16963076/6f8c8b6b-6ea7-4a43-891e-270a4c3548f2)
+![image](https://github.com/Liech/Farfalle/assets/16963076/31e5ac3a-adde-4039-9acf-06baad6e3da8)
+![image](https://github.com/Liech/Farfalle/assets/16963076/f270d1fe-ab3e-4424-821b-30a7f16e2c2b)
+
+Obviously there is some tuning of the retraction settings needed.
 
 # Future
 
-It is currently pretty slow. Slicing a Benchy can take some minutes. This is due to the heavy use of unoptimized giant marching cubes meshes. Most of the times this is not needed and a polygon offsetting algortihm would be the better choice. But i was not able to find one tailored to the needs of beeing 2d but working on a 3d mesh plane. Maybe i'll just write a custom one later.
+## Next Steps
+
+ * It is currently pretty slow. Slicing a Benchy can take a day. I am confident that it would be possible in under 15 Minutes.
+ * The Retraction Settings and similar Settings are not tuned, therefor a lot of stringing is happening
+ * The line Merging is naive and it should incorporate also wall sections.
+ * The order the lines are printed does not respect common sense
+ * The drawn lines are too detailed. It should be possible to shrink down the slicer files.
+
+## Far Future
+
+ * Instead of Sinus Curves it should be possible to follow top Surfaces
+ * Infill
+ * Support
+ * Mindfullness regarding Printer Geometry
+ * 3D Non Planar Polygon Offsetting instead of Voxel Erosion
+ * Multi Layer Region Coupling to reduce stringing potential
+ * I want to experiment with intentionally move the nozzle into the already printed material to stich layers together
+ * I want to experiment with Layerless Hot Plasticblob as Infill to get stronger prints
 
 # License
 
