@@ -4,7 +4,8 @@
 #include <vector>
 #include <string>
 
-class STLWriter {
+class STL {
 public:
   static void write(const std::string& filename, const std::vector<glm::dvec3>&);
+  static std::vector<glm::dvec3> read(const std::string& filename);
 };

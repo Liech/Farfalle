@@ -31,8 +31,8 @@ set(Tools_Files
     "Source/Tools/MovementType.h"
     "Source/Tools/glm2svg.h"
     "Source/Tools/glm2svg.cpp"
-	"Source/Tools/STLWriter.cpp"
-	"Source/Tools/STLWriter.h"
+	"Source/Tools/STL.cpp"
+	"Source/Tools/STL.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 
@@ -58,6 +58,8 @@ set(Geometry_Files
     "Source/Geometry/CGALDefs.h"
     "Source/Geometry/Model.h"
     "Source/Geometry/Model.cpp"
+    "Source/Geometry/Model2.h"
+    "Source/Geometry/Model2.cpp"
     "Source/Geometry/ModelImplementation.h"
     "Source/Geometry/ModelImplementation.cpp"
     "Source/Geometry/Mesh2D.h"

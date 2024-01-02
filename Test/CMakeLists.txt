@@ -36,6 +36,6 @@ add_custom_command(TARGET FarfalleTests POST_BUILD
                "${FarfalleTests_SOURCE_DIR}/TestData"              
                 $<TARGET_FILE_DIR:FarfalleTests>/TestData)
 
-#include(CTest)
-#include(Catch)
-#catch_discover_tests(FarfalleTests)
+include(CTest)
+include(Catch)
+catch_discover_tests(FarfalleTests)

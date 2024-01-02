@@ -1,8 +1,8 @@
-#include "STLWriter.h"
+#include "STL.h"
 
 #include <fstream>
 
-void STLWriter::write(const std::string& filename, const std::vector<glm::dvec3>& data) {
+void STL::write(const std::string& filename, const std::vector<glm::dvec3>& data) {
   std::ofstream file;
   file.open(filename);
 
@@ -37,4 +37,8 @@ void STLWriter::write(const std::string& filename, const std::vector<glm::dvec3>
   std::string end = "endsolid https://github.com/Liech\n";
   file.write(end.c_str(),end.size());
   file.close();
+}
+
+std::vector<glm::dvec3> STL::read(const std::string& filename) {
+  return {};
 }
