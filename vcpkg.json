@@ -8,6 +8,7 @@
 	"cgal",
     "lua",
 	"pybind11",
-	"catch2"
+	"catch2",
+	"python3"
   ]
 }
