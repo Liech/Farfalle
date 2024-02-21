@@ -12,6 +12,7 @@ class ModelAPI;
 class LineAPI;
 class GCodeAPI;
 class ScriptAPI;
+class CustomPythonFunctions;
 
 namespace PolyglotAPI {
   class API;
@@ -24,6 +25,7 @@ public:
   virtual ~FarfalleAPI();
 
   void add(PolyglotAPI::API&, PolyglotAPI::FunctionRelay& relay);
+  void addCustomPythonFunctions();
 
   std::unique_ptr<PolyglotAPI::API> getAPI(PolyglotAPI::FunctionRelay&);
   apiDatabase& getDB();
@@ -34,4 +36,5 @@ private:
   std::unique_ptr<GCodeAPI>    gcode;
   std::unique_ptr<ScriptAPI>   script;
   std::unique_ptr<apiDatabase> db;
+  std::unique_ptr< CustomPythonFunctions> pyFun;
 };

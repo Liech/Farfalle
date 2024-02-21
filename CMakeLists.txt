@@ -96,6 +96,8 @@ set(API_Files
 	"Source/API/ScriptAPI.h"
 	"Source/API/apiDatabase.cpp"
 	"Source/API/apiDatabase.h"
+	"Source/API/CustomPythonFunctions.cpp"
+	"Source/API/CustomPythonFunctions.h"	
 )
 source_group("Source/API" FILES ${API_Files})
 

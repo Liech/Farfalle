@@ -12,6 +12,7 @@
 #include "LineAPI.h"
 #include "GCodeAPI.h"
 #include "ScriptAPI.h"
+#include "CustomPythonFunctions.h"
 
 #include "Geometry/Model.h"
 
@@ -47,4 +48,9 @@ std::unique_ptr<PolyglotAPI::API> FarfalleAPI::getAPI(PolyglotAPI::FunctionRelay
 
 apiDatabase& FarfalleAPI::getDB() {
   return *db;
+}
+
+void FarfalleAPI::addCustomPythonFunctions() {
+  pyFun = std::make_unique<CustomPythonFunctions>();
+  pyFun->add(*db);
 }

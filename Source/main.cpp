@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
   auto& py = PolyglotAPI::Python::PythonEngine::instance();
   std::shared_ptr<PolyglotAPI::API> api = farfalle.getAPI(py.getRelay());
   py.addAPI(api);
+  farfalle.addCustomPythonFunctions();
   py.initialize();
 
   std::string current = argv[0];
