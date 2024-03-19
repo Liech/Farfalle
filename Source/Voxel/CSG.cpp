@@ -47,3 +47,30 @@ void CSG::applySingleCore(std::vector<double>& a, std::function<double(int, int,
     }
   }
 }
+
+void CSG::andInplace(bool* a, bool* b, size_t size)
+{
+  apply(a, b,size, [](bool a, bool b) {return a && b; });
+}
+
+void CSG::orInplace(bool* a, bool* b, size_t size)
+{
+  apply(a, b, size, [](bool a, bool b) {return a || b; });
+}
+
+void CSG::subtractInplace(bool* a, bool* b, size_t size)
+{
+  apply(a, b, size, [](bool a, bool b) {return b && (!a); });
+}
+
+void CSG::apply(bool* a, bool* b,size_t size, std::function<bool(bool, bool)> fun)
+{
+  assert(a.size() == b.size());
+  assert(a.size() % 8 == 0);
+#pragma omp parallel for
+  for (long long i = 0; i < size; i += 8) {
+    for (int sub = 0; sub < 8; sub++) { //std::vector<bool> is a special flower in terms of parallelism
+      b[i + sub] = fun(a[i + sub], b[i + sub]);
+    }
+  }
+}

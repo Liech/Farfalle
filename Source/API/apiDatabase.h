@@ -29,7 +29,9 @@ public:
 
   void initLua();
 
-  std::map<std::string, std::unique_ptr<std::vector<bool>>>                    voxel;
+  std::map<std::string, std::unique_ptr<bool[]>>                               voxel;
+  std::map<std::string, glm::ivec3>                                            voxelResolution;
+
   std::map<std::string, std::unique_ptr<std::vector<double>>>                  volume;
   std::map<std::string, std::unique_ptr<std::vector<int   >>>                  distanceMaps;
   std::map<std::string, std::unique_ptr<Model>>                                models;

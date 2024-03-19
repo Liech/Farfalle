@@ -114,7 +114,7 @@ nlohmann::json VoxelAPI::createVolume(const nlohmann::json& input) {
   size_t x = input["Resolution"][0];
   size_t y = input["Resolution"][1];
   size_t z = input["Resolution"][2];
-  database.voxel[input["Name"]] = std::make_unique<std::vector<bool>>(std::vector<bool>(x * y * z, false));
+  database.voxel[input["Name"]] = std::make_unique<bool[]>(x * y * z);
   return "";
 }
 
@@ -136,7 +136,7 @@ nlohmann::json VoxelAPI::triangulateVolume(const nlohmann::json& input) {
   glm::dvec3 voxelSize = (end - start);
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
   voxelSize = glm::dvec3(voxelSize.x / resolution.x, voxelSize.y / resolution.y, voxelSize.z / resolution.z);
-  auto tri = MarchingCubes::polygonize(*database.voxel[input["VoxelName"]], start, voxelSize, resolution);
+  auto tri = MarchingCubes::polygonize(database.voxel[input["VoxelName"]].get(), start, voxelSize, resolution);
   database.models[input["ModelName"]] = std::make_unique<Model>(tri);
   return "";
 }
@@ -189,7 +189,7 @@ nlohmann::json VoxelAPI::packVolume(const nlohmann::json& input) {
 
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
   glm::ivec3 packageSize = glm::ivec3(input["PackageSize"][0], input["PackageSize"][1], input["PackageSize"][2]);
-  database.volume[input["DoubleName"]] = std::make_unique<std::vector<double>>(MarchingCubes::pack(*database.voxel[input["VoxelName"]], resolution, packageSize));
+  database.volume[input["DoubleName"]] = std::make_unique<std::vector<double>>(MarchingCubes::pack(database.voxel[input["VoxelName"]].get(), resolution, packageSize));
   return "";
 }
 
@@ -222,15 +222,15 @@ deleteDouble({
 }
 
 nlohmann::json VoxelAPI::distanceMap(const nlohmann::json& input) {
-  auto& voxel = *database.voxel[input["VoxelName"]];
+  auto voxel = database.voxel[input["VoxelName"]].get();
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
   std::string mode = input["Mode"];
   std::cout << "distanceMap::resolution: " << resolution[0] << " / " << resolution[1] << " / " << resolution[2] << std::endl;
 
   if (mode == "XYZ")
-    database.distanceMaps[input["DistanceMapName"]] = std::make_unique<std::vector<int>>(DistanceMap<int>().distanceMap(voxel, resolution));
+    database.distanceMaps[input["DistanceMapName"]] = std::make_unique<std::vector<int>>(DistanceMap<int,bool*>().distanceMap(voxel, resolution));
   else if (mode == "XY")
-    database.distanceMaps[input["DistanceMapName"]] = std::make_unique<std::vector<int>>(DistanceMap<int>().distanceMapXY(voxel, resolution));
+    database.distanceMaps[input["DistanceMapName"]] = std::make_unique<std::vector<int>>(DistanceMap<int, bool*>().distanceMapXY(voxel, resolution));
   else
     throw std::runtime_error("Meh");
 
@@ -252,8 +252,11 @@ distanceMap({
 
 nlohmann::json VoxelAPI::transformDistanceMap(const nlohmann::json& input) {
   double distance = input["Distance"];
-  auto& distanceMap = *database.distanceMaps[input["DistanceMapName"]]; 
-  database.voxel[input["VoxelName"]] = std::make_unique<std::vector<bool>>(DistanceMap<int>().map(distanceMap, [distance](int distanceSqrt) { return distance * distance < distanceSqrt; }));
+  auto& distanceMap = *database.distanceMaps[input["DistanceMapName"]];  
+  auto result = DistanceMap<int>().map(distanceMap, [distance](int distanceSqrt) { return distance * distance < distanceSqrt; });
+  database.voxel[input["VoxelName"]] = std::make_unique<bool[]>(result.size());
+  auto destination = database.voxel[input["VoxelName"]].get();
+  std::copy(result.begin(), result.end(), destination);
   return "";
 }
 
@@ -272,7 +275,9 @@ transformDistanceMap({
 nlohmann::json VoxelAPI::unionVoxel(const nlohmann::json& input) {
   auto& source = database.voxel[input["Target"]];
   auto& tool   = database.voxel[input["Tool"]];
-  CSG::orInplace(*tool, *source);
+  glm::ivec3 resolution = database.voxelResolution[input["Target"]];
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  CSG::orInplace(tool.get(), source.get(), dataSize);
   return "";
 }
 
@@ -290,7 +295,9 @@ unionVoxel({
 nlohmann::json VoxelAPI::intersectVoxel(const nlohmann::json& input) {
   auto& source = database.voxel[input["Target"]];
   auto& tool = database.voxel[input["Tool"]];
-  CSG::andInplace(*tool, *source);
+  glm::ivec3 resolution = database.voxelResolution[input["Target"]];
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  CSG::andInplace(tool.get(), source.get(), dataSize);
   return "";
 }
 
@@ -308,7 +315,9 @@ intersectVoxel({
 nlohmann::json VoxelAPI::subtractVoxel(const nlohmann::json& input) {
   auto& source = database.voxel[input["Target"]];
   auto& tool = database.voxel[input["Tool"]];
-  CSG::subtractInplace(*tool, *source);
+  glm::ivec3 resolution = database.voxelResolution[input["Target"]];
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  CSG::subtractInplace(tool.get(), source.get(), dataSize);
   return "";
 }
 
@@ -324,7 +333,14 @@ intersectVoxel({
 }
 
 nlohmann::json VoxelAPI::copyVoxel(const nlohmann::json& input) {
-  database.voxel[input["Target"]] = std::make_unique<std::vector<bool>>(*database.voxel[input["Source"]]);
+  glm::ivec3 resolution = database.voxelResolution[input["Target"]];
+  bool* toCopy = database.voxel[input["Source"]].get();
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  database.voxel[input["Target"]] = std::make_unique<bool[]>(dataSize);
+  bool* dest = database.voxel[input["Target"]].get();
+  for (size_t i = 0; i < dataSize; i++)
+    dest[i] = toCopy[i];
+
   return "";
 }
 

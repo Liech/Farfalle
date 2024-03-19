@@ -9,14 +9,15 @@
 //https://tc18.org/DataSets/Code/SEDT/index.html
 //Based on sedt
 //sedt is a simple program to compute the squared Euclidean distance transform of a binary object (using the VOL format) in optimal time (i.e. in O(n) if n is the number of voxels). It is an implementation of the Saito and Toriwaki algorithm [SAITO_1994] with the optimization proposed by [HIRATA_1996] and [MEIJSTER_2000].
-template<typename T>
+template<typename T, typename BOOLARRAY = bool*>
 class DistanceMap {
 public:
-  std::vector<T> distanceMap(const std::vector<bool>& data, const glm::u64vec3& resolution) {
+  std::vector<T> distanceMap(BOOLARRAY data, const glm::u64vec3& resolution) {
+    size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
     std::vector<T> sdt_x;
-    sdt_x.resize(data.size());
+    sdt_x.resize(dataSize);
     std::vector<T> sdt_xy;
-    sdt_xy.resize(data.size());
+    sdt_xy.resize(dataSize);
 
     phaseSaitoX(data, sdt_x,resolution);
     phaseSaitoY(sdt_x, sdt_xy,resolution);
@@ -31,18 +32,19 @@ public:
     result.resize(data.size());
 
 #pragma omp parallel for
-    for (long long i = 0; i < data.size(); i += 8) { //std::vector<bool> is special and partially not thread safe
+    for (long long i = 0; i < data.size(); i += 8) { //std::vector<bool> (and bool*) is special and partially not thread safe
       for (int64_t j = 0; j < 8; j++)
         result[i + j] = condition(data[i + j]);
     }
     return result;
   }
 
-  std::vector<T> distanceMapXY(const std::vector<bool>& data, const glm::u64vec3& resolution) {
+  std::vector<T> distanceMapXY(BOOLARRAY data, const glm::u64vec3& resolution) {
+    size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
     std::vector<T> sdt_x;
-    sdt_x.resize(data.size());
+    sdt_x.resize(dataSize);
     std::vector<T> sdt_xy;
-    sdt_xy.resize(data.size());
+    sdt_xy.resize(dataSize);
 
     phaseSaitoX(data, sdt_x, resolution);
     phaseSaitoY(sdt_x, sdt_xy, resolution);
@@ -92,7 +94,8 @@ private:
   int64_t getAddress(int64_t x, int64_t y, int64_t z, const glm::u64vec3& resolution) const {
     return z + resolution.z * y + resolution.z * resolution.y * x;
   }
-  void phaseSaitoX(const std::vector<bool>& V, std::vector<T>& sdt_x, const glm::u64vec3& resolution)
+
+  void phaseSaitoX(BOOLARRAY V, std::vector<T>& sdt_x, const glm::u64vec3& resolution)
   {
 #pragma omp parallel for
     for (long long z = 0; z < resolution.z; z++) {
@@ -128,6 +131,7 @@ private:
       }
     }
   }
+
   void phaseSaitoY(const std::vector<T>& sdt_x, std::vector<T>& sdt_xy, const glm::u64vec3& resolution)
   {
     std::vector<int64_t> s;

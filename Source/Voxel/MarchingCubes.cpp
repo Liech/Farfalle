@@ -428,6 +428,48 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<bool>& data,
   return result;
 }
 
+std::vector<glm::dvec3> MarchingCubes::polygonize(const bool* data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::u64vec3& resolution) {
+  std::vector<glm::dvec3> result;
+
+  std::vector<std::vector<glm::dvec3>> subResult;
+  subResult.resize(resolution.x);
+
+#pragma omp parallel for
+  for (long long x = 0; x < resolution.x - 1; x++) {
+    for (size_t y = 0; y < resolution.y - 1; y++) {
+      for (size_t z = 0; z < resolution.z - 1; z++) {
+        std::array<double, 8> values = {
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z + 1)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z + 1)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)] ? 1 : 0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)] ? 1 : 0
+        };
+        glm::dvec3 o = origin + glm::dvec3(x * voxelSize.x, y * voxelSize.y, z * voxelSize.z + voxelSize.z);
+        std::array<glm::dvec3, 8> positions = {
+         o
+        ,o + glm::dvec3(voxelSize.x,           0, 0)
+        ,o + glm::dvec3(voxelSize.x, voxelSize.y, 0)
+        ,o + glm::dvec3(0          , voxelSize.y, 0)
+        ,o + glm::dvec3(0          ,           0, voxelSize.z)
+        ,o + glm::dvec3(voxelSize.x,           0, voxelSize.z)
+        ,o + glm::dvec3(voxelSize.x, voxelSize.y, voxelSize.z)
+        ,o + glm::dvec3(0          , voxelSize.y, voxelSize.z)
+        };
+        auto sub = polygonize(positions, values, 0.5);
+        subResult[x].insert(subResult[x].begin(), sub.begin(), sub.end());
+      }
+    }
+  }
+  for (auto sub : subResult) {
+    result.insert(result.begin(), sub.begin(), sub.end());
+  }
+  return result;
+}
+
 std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<double>& data, const glm::dvec3& origin, const glm::dvec3& voxelSize, const glm::u64vec3& resolution, double isovalue) {
   std::vector<glm::dvec3> result;
 
@@ -490,6 +532,31 @@ std::vector<double> MarchingCubes::pack(const std::vector<bool>& data, const glm
         }
     result[i] = (double)val / (double)packSize;
    }
+
+  return result;
+}
+
+std::vector<double> MarchingCubes::pack(const bool* data, const glm::u64vec3& resolution, const glm::u64vec3& oneVoxelSize) {
+  std::vector<double> result;
+  size_t packSize = oneVoxelSize.x * oneVoxelSize.y * oneVoxelSize.z;
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  result.resize(dataSize / packSize);
+  glm::u64vec3 resultResolution = glm::u64vec3(resolution.x / oneVoxelSize.x, resolution.y / oneVoxelSize.y, resolution.z / oneVoxelSize.z);
+
+  //#pragma omp parallel for
+  for (long long i = 0; i < result.size(); i++) {
+    glm::u64vec3 coord = glm::u64vec3(i / (resultResolution.y * resultResolution.z), (i / resultResolution.z) % resultResolution.y, i % resultResolution.z);
+    size_t val = 0;
+    size_t offset = oneVoxelSize.z * coord.z + coord.y * oneVoxelSize.y * resolution.z + coord.x * oneVoxelSize.y * resolution.z * resolution.y;
+    for (size_t x = 0; x < oneVoxelSize.x; x++)
+      for (size_t y = 0; y < oneVoxelSize.y; y++)
+        for (size_t z = 0; z < oneVoxelSize.z; z++) {
+          size_t address = z + y * resolution.z + x * resolution.z * resolution.y + offset;
+          if (data[address])
+            val++;
+        }
+    result[i] = (double)val / (double)packSize;
+  }
 
   return result;
 }

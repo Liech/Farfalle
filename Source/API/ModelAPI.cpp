@@ -160,7 +160,12 @@ nlohmann::json ModelAPI::voxelizeModel(const nlohmann::json& input) {
   glm::dvec3 end   = glm::dvec3(input["End"][0], input["End"][1], input["End"][2]);
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
   auto voxel = Voxelizer().voxelize(soup.first, soup.second, start, end, resolution);
-  database.voxel[input["VoxelName"]] = std::move(voxel);
+
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  database.voxel[input["VoxelName"]] = std::make_unique<bool[]>(dataSize);
+  database.voxelResolution[input["VoxelName"]] = resolution;
+  auto destination = database.voxel[input["VoxelName"]].get();
+  std::copy(voxel->begin(), voxel->end(), destination);
   return "";
 }
 
