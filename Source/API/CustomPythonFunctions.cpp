@@ -31,7 +31,8 @@ void CustomPythonFunctions::add(apiDatabase& db) {
       glm::ivec3 resolution = db.voxelResolution[name];
       size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
       pybind11::ssize_t size = dataSize;
-      return pybind11::array_t<bool>{size, vox, pybind11::cast(vox)};
+      auto shape = pybind11::array::ShapeContainer({ (pybind11::ssize_t)resolution.x, (pybind11::ssize_t)resolution.y, (pybind11::ssize_t)resolution.y });
+      return pybind11::array_t<bool>{shape, vox, pybind11::cast(vox)};
       }, pybind11::arg("input") = pybind11::none());
     });
 
