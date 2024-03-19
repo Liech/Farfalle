@@ -115,6 +115,7 @@ nlohmann::json VoxelAPI::createVolume(const nlohmann::json& input) {
   size_t y = input["Resolution"][1];
   size_t z = input["Resolution"][2];
   database.voxel[input["Name"]] = std::make_unique<bool[]>(x * y * z);
+  database.voxelResolution[input["Name"]] = glm::ivec3(x, y, z);
   return "";
 }
 
