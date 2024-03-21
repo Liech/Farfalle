@@ -32,7 +32,7 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   deleteModelAPI->setDescription(deleteModelDescription());
   api.addFunction(std::move(deleteModelAPI));
 
-  //repair model
+  //repair model (CGAL exklusive)
   std::unique_ptr<PolyglotAPI::APIFunction> repairModelAPI = std::make_unique<PolyglotAPI::APIFunction>("repairModel", [this](const nlohmann::json& input) { return repairModel(input); });
   repairModelAPI->setDescription(repairModelDescription());
   api.addFunction(std::move(repairModelAPI));
@@ -52,7 +52,7 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   modelBoundaryAPI->setDescription(modelBoundaryDescription());
   api.addFunction(std::move(modelBoundaryAPI));
 
-  //slice Model
+  //slice Model (CGAL exklusive)
   std::unique_ptr<PolyglotAPI::APIFunction> sliceModelAPI = std::make_unique<PolyglotAPI::APIFunction>("sliceModel", [this](const nlohmann::json& input) { return sliceModel(input); });
   sliceModelAPI->setDescription(modelBoundaryDescription());
   api.addFunction(std::move(sliceModelAPI));
@@ -72,7 +72,7 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   createPlaneAPI->setDescription(hasAnyTriangleDescription());
   api.addFunction(std::move(createPlaneAPI));
 
-  //simplify Model
+  //simplify Model (CGAL exklusive)
   std::unique_ptr<PolyglotAPI::APIFunction> simplifyModelAPI = std::make_unique<PolyglotAPI::APIFunction>("simplifyModel", [this](const nlohmann::json& input) { return simplifyModel(input); });
   simplifyModelAPI->setDescription(simplifyModelDescription());
   api.addFunction(std::move(simplifyModelAPI));
