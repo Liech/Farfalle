@@ -24,5 +24,5 @@ private:
   static unsigned int readUInt (const std::vector<unsigned char>& data, size_t& position);
   static int          readInt  (const std::vector<unsigned char>& data, size_t& position);
   static float        readFloat(const std::vector<unsigned char>& data, size_t& position);
-  static short        readShort(const std::vector<unsigned char>& data, size_t& position)
+  static short        readShort(const std::vector<unsigned char>& data, size_t& position);
 };
