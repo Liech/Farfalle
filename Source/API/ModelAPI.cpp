@@ -162,9 +162,8 @@ nlohmann::json ModelAPI::voxelizeModel(const nlohmann::json& input) {
   auto voxel = Voxelizer().voxelize(soup.first, soup.second, start, end, resolution);
 
   size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
-  database.voxel[input["VoxelName"]] = std::make_unique<bool[]>(dataSize);
-  database.voxelResolution[input["VoxelName"]] = resolution;
-  auto destination = database.voxel[input["VoxelName"]].get();
+  database.boolField[input["VoxelName"]] = std::make_pair(std::make_unique<bool[]>(dataSize), resolution);
+  auto destination = database.boolField[input["VoxelName"]].first.get();
   std::copy(voxel->begin(), voxel->end(), destination);
   return "";
 }
