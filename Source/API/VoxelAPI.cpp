@@ -137,7 +137,13 @@ nlohmann::json VoxelAPI::triangulateVolume(const nlohmann::json& input) {
   glm::ivec3 resolution = database.boolField[input["VoxelName"]].second;
   voxelSize = glm::dvec3(voxelSize.x / resolution.x, voxelSize.y / resolution.y, voxelSize.z / resolution.z);
   auto tri = MarchingCubes::polygonize(database.boolField[input["VoxelName"]].first.get(), start, voxelSize, resolution);
-  database.models[input["ModelName"]] = std::make_unique<Model>(tri);
+
+  if (!input.contains("Mode") || input["Mode"] == "CGAL")
+    database.models[input["ModelName"]] = std::make_unique<Model>(tri);
+  else if (input["Mode"] == "SOUP")
+    database.triangleSoup[input["ModelName"]] = std::make_unique<std::vector<glm::dvec3>>(tri);
+  else
+    throw std::runtime_error("Unkown mode in triangulateVolume");
   return "";
 }
 
@@ -149,7 +155,8 @@ triangulateVolume({
     'VoxelName': 'VoxelBenchy',
     'ModelName': 'Benchy',
     'Start' : [3,3,3],
-    'End'   : [6,6,6]
+    'End'   : [6,6,6],
+    'Mode' : 'CGAL' # 'CGAL' / 'SOUP'
 });
 )";
 }

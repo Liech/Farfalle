@@ -138,12 +138,19 @@ save model to file
 saveModel({
     'Name' : 'Name',
     'Filename': 'fil/name/of/model.stl'
+    'Mode' : 'CGAL' # 'CGAL' / 'SOUP'
 });
 )";
 }
 
 nlohmann::json ModelAPI::saveModel(const nlohmann::json& input) {
-  database.models[input["Name"]]->save(input["Filename"]);
+  if (!input.contains("Mode") || input["Mode"] == "CGAL")
+    database.models[input["Name"]]->save(input["Filename"]);
+  else if (input["Mode"] == "SOUP")
+    STL::write(input["Filename"], *database.triangleSoup[input["Name"]]);
+  else
+    throw std::runtime_error("Unkown Mode in saveModel");
+
   return "";
 }
 
