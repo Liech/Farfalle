@@ -12,21 +12,48 @@ struct EpsilonEqualityPredicate {
   }
 };
 
-std::unique_ptr<std::vector<bool>> Voxelizer::voxelize(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution) {
+std::unique_ptr<bool[]> Voxelizer::voxelize(const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution) {
   assert(resolution.z % 8 == 0);
   size_t memorySize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
   glm::dvec3 span = end - start;
-  std::unique_ptr<std::vector<bool>> result = std::make_unique<std::vector<bool>>(memorySize, false);
+
+  std::unique_ptr<bool[]> result = std::make_unique<bool[]>(memorySize);
+  for (size_t i = 0; i < memorySize; i++)
+    result[i] = false;
+
   std::vector<std::vector<size_t>> triangleStack;
   triangleStack.resize(resolution.x * resolution.y);
 
   spatialHashTriangles(vertecies,indices,start,end,resolution, triangleStack);
-  applyTrianglesToVolume(*result, triangleStack, vertecies, indices, start, end, resolution);
+  applyTrianglesToVolume(result.get(), triangleStack, vertecies, indices, start, end, resolution);
 
-  return std::move(result);
+  return result;
 }
 
-void Voxelizer::applyTrianglesToVolume(std::vector<bool>& data, const std::vector<std::vector<size_t>>& triangleStack, const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution) {
+std::unique_ptr<bool[]> Voxelizer::voxelize(const std::vector<glm::dvec3>& vertecies, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution)
+{
+  assert(resolution.z % 8 == 0);
+  size_t memorySize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  glm::dvec3 span = end - start;
+
+  std::unique_ptr<bool[]> result = std::make_unique<bool[]>(memorySize);
+  for (size_t i = 0; i < memorySize; i++)
+    result[i] = false;
+
+  std::vector<std::vector<size_t>> triangleStack;
+  triangleStack.resize(resolution.x * resolution.y);
+  std::vector<size_t> indices;
+  indices.resize(vertecies.size());
+  for (size_t i = 0; i < indices.size(); i++)
+    indices[i] = i;
+
+  spatialHashTriangles(vertecies, indices, start, end, resolution, triangleStack);
+  applyTrianglesToVolume(result.get(), triangleStack, vertecies, indices, start, end, resolution);
+
+  return result;
+}
+
+void Voxelizer::applyTrianglesToVolume(bool* data, const std::vector<std::vector<size_t>>& triangleStack, const std::vector<glm::dvec3>& vertecies, const std::vector<size_t>& indices, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution) {
   glm::dvec3 span = end - start;
   glm::dvec3 rayDirection = glm::dvec3(0, 0, 1);
   EpsilonEqualityPredicate predicate(1e-6);
@@ -137,10 +164,11 @@ bool Voxelizer::intersectRayTriangle(const glm::dvec3& rayOrigin, const glm::dve
     return false;
 }
 
-void Voxelizer::boxelize(const std::vector<bool>& data, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution, std::vector<glm::dvec3>& out_triangles) {
+void Voxelizer::boxelize(const bool* data, const glm::dvec3& start, const glm::dvec3& end, const glm::u64vec3& resolution, std::vector<glm::dvec3>& out_triangles) {
   glm::dvec3 span = end - start;
   glm::dvec3 voxelSize = glm::dvec3(span.x / (double)resolution.x, span.y / (double)resolution.y, span.z / (double)resolution.z);
-  for (size_t i = 0; i < data.size(); i++) {
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  for (size_t i = 0; i < dataSize; i++) {
     if (!data[i])
       continue;
     size_t x = i / (resolution.y * resolution.z);

@@ -8,13 +8,13 @@
 class STL {
 public:
   static void write(const std::string& filename, const std::vector<glm::dvec3>&, bool binaryFormat = false);
-  static std::vector<glm::dvec3> read(const std::string& filename);
+  static std::unique_ptr<std::vector<glm::dvec3>> read(const std::string& filename);
 
 private:
   static void writeAscii(const std::string& filename, const std::vector<glm::dvec3>&);
   static void writeBinary(const std::string& filename, const std::vector<glm::dvec3>&);
-  static std::vector<glm::dvec3> readAscii(const std::vector<unsigned char>&);
-  static std::vector<glm::dvec3> readBinary(const std::vector<unsigned char>&);
+  static std::unique_ptr<std::vector<glm::dvec3>> readAscii(const std::vector<unsigned char>&);
+  static std::unique_ptr<std::vector<glm::dvec3>> readBinary(const std::vector<unsigned char>&);
 
   static void writeUInt(std::ofstream& stream, const unsigned int& value);
   static void writeInt(std::ofstream& stream, const int& value);

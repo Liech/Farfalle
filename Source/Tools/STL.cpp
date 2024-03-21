@@ -77,7 +77,7 @@ void STL::write(const std::string& filename, const std::vector<glm::dvec3>& tris
     writeAscii(filename, tris);
 }
 
-std::vector<glm::dvec3> STL::read(const std::string& filename)
+std::unique_ptr<std::vector<glm::dvec3>> STL::read(const std::string& filename)
 {
   std::ifstream input(filename, std::ios::binary);
   if (input.fail())
@@ -161,8 +161,8 @@ void STL::writeBinary(const std::string& filename, const std::vector<glm::dvec3>
   file.close();
 }
 
-std::vector<glm::dvec3> STL::readAscii(const std::vector<unsigned char>& buffer) {
-  std::vector<glm::dvec3> result;
+std::unique_ptr<std::vector<glm::dvec3>>  STL::readAscii(const std::vector<unsigned char>& buffer) {
+  std::unique_ptr<std::vector<glm::dvec3>> result = std::make_unique<std::vector<glm::dvec3>>();
   std::string data = std::string(buffer.begin(), buffer.end());
   std::istringstream iss(data);
   std::string line;
@@ -182,18 +182,18 @@ std::vector<glm::dvec3> STL::readAscii(const std::vector<unsigned char>& buffer)
       subresult.y = std::stod(element);
       std::getline(lineStream, element);
       subresult.z = std::stod(element);
-      result.push_back(subresult);      
+      result->push_back(subresult);      
     }
   }
 
-  return result;
+  return std::move(result);
 }
 
-std::vector<glm::dvec3> STL::readBinary(const std::vector<unsigned char>& buffer) {
-  std::vector<glm::dvec3> result;
+std::unique_ptr<std::vector<glm::dvec3>>  STL::readBinary(const std::vector<unsigned char>& buffer) {
+  std::unique_ptr<std::vector<glm::dvec3>> result = std::make_unique<std::vector<glm::dvec3>>();
   size_t position = 80; //header first 80 bytes are ignored
   uint32_t numberOfTrianlges = readUInt(buffer, position);
-  result.reserve(numberOfTrianlges * 3);
+  result->reserve(numberOfTrianlges * 3);
   
   for (size_t i = 0; i < numberOfTrianlges; i++)
   {
@@ -214,10 +214,10 @@ std::vector<glm::dvec3> STL::readBinary(const std::vector<unsigned char>& buffer
     c.y = readFloat(buffer, position);
     c.z = readFloat(buffer, position);
     readShort(buffer, position); // "Attribute byte count" Not used
-    result.push_back(a);
-    result.push_back(b);
-    result.push_back(c);
+    result->push_back(a);
+    result->push_back(b);
+    result->push_back(c);
   }
 
-  return result;
+  return std::move(result);
 }

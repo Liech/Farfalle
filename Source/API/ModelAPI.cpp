@@ -9,6 +9,7 @@
 
 #include "Voxel/Voxelizer.h"
 #include "Geometry/Mesh2D.h"
+#include "Tools/STL.h"
 
 #include "Geometry/Model.h"
 
@@ -83,13 +84,19 @@ load model from file
 
 loadModel({
     'Name' : 'Name',
-    'Filename': 'fil/name/of/model.stl'
+    'Filename': 'fil/name/of/model.stl',
+    'Mode' : 'CGAL' # CGAL / SOUP
 });
 )";
 }
 
 nlohmann::json ModelAPI::loadModel(const nlohmann::json& input) {
-  database.models[input["Name"]] = std::make_unique<Model>(input["Filename"]);
+  if (!input.contains("Mode") || input["Mode"] == "CGAL")
+    database.models[input["Name"]] = std::make_unique<Model>(input["Filename"]);
+  else if (input["Mode"] == "SOUP")
+  {
+    database.triangleSoup[input["Name"]] = STL::read(input["Filename"]);
+  }
   return "";
 }
 
@@ -149,22 +156,33 @@ voxelizeModel({
     'VoxelName'  : 'VoxelizedBenchy',
     'Resolution' : [128,128,128], //divideable by 8
     'Start'      : [3,3,3],
-    'End'        : [7,7,7]
+    'End'        : [7,7,7],
+    'Mode'       : "CGAL" # "CGAL" / "SOUP"
 });
 )";
 }
 
 nlohmann::json ModelAPI::voxelizeModel(const nlohmann::json& input) {
-  auto soup = database.models[input["ModelName"]]->toSoup();
+  
+
+
   glm::dvec3 start = glm::dvec3(input["Start"][0], input["Start"][1], input["Start"][2]);
   glm::dvec3 end   = glm::dvec3(input["End"][0], input["End"][1], input["End"][2]);
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
-  auto voxel = Voxelizer().voxelize(soup.first, soup.second, start, end, resolution);
 
-  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
-  database.boolField[input["VoxelName"]] = std::make_pair(std::make_unique<bool[]>(dataSize), resolution);
-  auto destination = database.boolField[input["VoxelName"]].first.get();
-  std::copy(voxel->begin(), voxel->end(), destination);
+  std::unique_ptr<bool[]> voxel;
+  if (!input.contains("Mode") || input["Mode"] == "CGAL")
+  {
+    auto soup = database.models[input["ModelName"]]->toSoup();
+    voxel = Voxelizer().voxelize(soup.first, soup.second, start, end, resolution);
+  }
+  else
+  {
+    auto soup = database.triangleSoup[input["ModelName"]].get();
+    voxel = Voxelizer().voxelize(*soup, start, end, resolution);
+  }
+
+  database.boolField[input["VoxelName"]] = std::make_pair(std::move(voxel), resolution);
   return "";
 }
 
