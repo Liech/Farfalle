@@ -1,7 +1,6 @@
 #include "apiDatabase.h"
 
 #include "FarfalleAPI.h"
-#include "Geometry/Model.h"
 #include "PolyglotAPI/API/API.h"
 #include "PolyglotAPI/Lua/LuaEngine.h"
 #include "PolyglotAPI/Lua/FunctionRelay.h"

@@ -88,10 +88,10 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   densityAPI->setDescription(copyVoxelDescription());
   api.addFunction(std::move(densityAPI));
 
-  //voxelization boundary
-  std::unique_ptr<PolyglotAPI::APIFunction> voxelizationBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizationBoundary", [this](const nlohmann::json& input) { return voxelizationBoundary(input); });
-  voxelizationBoundaryAPI->setDescription(voxelizationBoundaryDescription());
-  api.addFunction(std::move(voxelizationBoundaryAPI));
+  ////voxelization boundary
+  //std::unique_ptr<PolyglotAPI::APIFunction> voxelizationBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizationBoundary", [this](const nlohmann::json& input) { return voxelizationBoundary(input); });
+  //voxelizationBoundaryAPI->setDescription(voxelizationBoundaryDescription());
+  //api.addFunction(std::move(voxelizationBoundaryAPI));
 }
 
 nlohmann::json VoxelAPI::deleteVolume(const nlohmann::json& input) {
@@ -145,12 +145,7 @@ nlohmann::json VoxelAPI::triangulateVolume(const nlohmann::json& input) {
   voxelSize = glm::dvec3(voxelSize.x / resolution.x, voxelSize.y / resolution.y, voxelSize.z / resolution.z);
   auto tri = MarchingCubes::polygonize(database.boolField[input["VoxelName"]].first.get(), start, voxelSize, resolution);
 
-  if (!input.contains("Mode") || input["Mode"] == "CGAL")
-    database.models[input["ModelName"]] = std::make_unique<Model>(tri);
-  else if (input["Mode"] == "SOUP")
-    database.triangleSoup[input["ModelName"]] = std::make_unique<std::vector<glm::dvec3>>(tri);
-  else
-    throw std::runtime_error("Unkown mode in triangulateVolume");
+  database.triangleSoup[input["ModelName"]] = std::make_unique<std::vector<glm::dvec3>>(tri);
   return "";
 }
 
@@ -162,8 +157,7 @@ triangulateVolume({
     'VoxelName': 'VoxelBenchy',
     'ModelName': 'Benchy',
     'Start' : [3,3,3],
-    'End'   : [6,6,6],
-    'Mode' : 'CGAL' # 'CGAL' / 'SOUP'
+    'End'   : [6,6,6]
 });
 )";
 }
@@ -179,7 +173,7 @@ nlohmann::json VoxelAPI::triangulateDouble(const nlohmann::json& input) {
   if (input.contains("Isovalue"))
     isovalue = input["Isovalue"];
   auto tri = MarchingCubes::polygonize(*database.doubleField[input["DoubleName"]].first, start, voxelSize, resolution, isovalue);
-  database.models[input["ModelName"]] = std::make_unique<Model>(tri);
+  database.triangleSoup[input["ModelName"]] = std::make_unique<std::vector<glm::dvec3>>(tri);
   return "";
 }
 
@@ -415,41 +409,41 @@ createDensityField({
 });
 )";
 }
-
-nlohmann::json VoxelAPI::voxelizationBoundary(const nlohmann::json& input) {
-  nlohmann::json result;
-  auto& model = *database.models[input["Name"]];
-  size_t resolution = input["Resolution"];
-  size_t outerVoxels = input["OuterVoxels"];
-  auto min = model.getMin();
-  auto max = model.getMax();
-
-  auto span = max - min;
-  double biggest = glm::max(span.x, glm::max(span.y, span.z));
-
-  double vlBefore = biggest / (double)resolution;
-  double vlNew = vlBefore * (((double)resolution + outerVoxels) / (double)resolution);
-
-  double offset = vlNew * (outerVoxels / 2);
-  result["Min"] = nlohmann::json::array();
-  result["Min"].push_back(min[0] - offset);
-  result["Min"].push_back(min[1] - offset);
-  result["Min"].push_back(min[2] - offset);
-
-  result["Max"] = nlohmann::json::array();
-  result["Max"].push_back(min[0] + biggest + offset);
-  result["Max"].push_back(min[1] + biggest + offset);
-  result["Max"].push_back(min[2] + biggest + offset);
-  return result;
-}
-
-std::string VoxelAPI::voxelizationBoundaryDescription() {
-  return R"(
-returns an boundary for a resolution and a model that does minimizes error. Outer Voxels are the number of voxels outside of the min/max are of the model
-voxelizationBoundary({
-    'Name'  : 'Benchy' # Model Name
-    'Resolution' : 128,  # must be uniform
-    'OuterVoxels' : 2 # even number, should be higher when pack is used
-});
-)";
-}
+//
+//nlohmann::json VoxelAPI::voxelizationBoundary(const nlohmann::json& input) {
+//  nlohmann::json result;
+//  auto& model = *database.models[input["Name"]];
+//  size_t resolution = input["Resolution"];
+//  size_t outerVoxels = input["OuterVoxels"];
+//  auto min = model.getMin();
+//  auto max = model.getMax();
+//
+//  auto span = max - min;
+//  double biggest = glm::max(span.x, glm::max(span.y, span.z));
+//
+//  double vlBefore = biggest / (double)resolution;
+//  double vlNew = vlBefore * (((double)resolution + outerVoxels) / (double)resolution);
+//
+//  double offset = vlNew * (outerVoxels / 2);
+//  result["Min"] = nlohmann::json::array();
+//  result["Min"].push_back(min[0] - offset);
+//  result["Min"].push_back(min[1] - offset);
+//  result["Min"].push_back(min[2] - offset);
+//
+//  result["Max"] = nlohmann::json::array();
+//  result["Max"].push_back(min[0] + biggest + offset);
+//  result["Max"].push_back(min[1] + biggest + offset);
+//  result["Max"].push_back(min[2] + biggest + offset);
+//  return result;
+//}
+//
+//std::string VoxelAPI::voxelizationBoundaryDescription() {
+//  return R"(
+//returns an boundary for a resolution and a model that does minimizes error. Outer Voxels are the number of voxels outside of the min/max are of the model
+//voxelizationBoundary({
+//    'Name'  : 'Benchy' # Model Name
+//    'Resolution' : 128,  # must be uniform
+//    'OuterVoxels' : 2 # even number, should be higher when pack is used
+//});
+//)";
+//}

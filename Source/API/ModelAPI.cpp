@@ -32,11 +32,6 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   deleteModelAPI->setDescription(deleteModelDescription());
   api.addFunction(std::move(deleteModelAPI));
 
-  //repair model (CGAL exklusive)
-  std::unique_ptr<PolyglotAPI::APIFunction> repairModelAPI = std::make_unique<PolyglotAPI::APIFunction>("repairModel", [this](const nlohmann::json& input) { return repairModel(input); });
-  repairModelAPI->setDescription(repairModelDescription());
-  api.addFunction(std::move(repairModelAPI));
-
   //save model
   std::unique_ptr<PolyglotAPI::APIFunction> saveModelAPI = std::make_unique<PolyglotAPI::APIFunction>("saveModel", [this](const nlohmann::json& input) { return saveModel(input); });
   saveModelAPI->setDescription(saveModelDescription());
@@ -52,11 +47,6 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   modelBoundaryAPI->setDescription(modelBoundaryDescription());
   api.addFunction(std::move(modelBoundaryAPI));
 
-  //slice Model (CGAL exklusive)
-  std::unique_ptr<PolyglotAPI::APIFunction> sliceModelAPI = std::make_unique<PolyglotAPI::APIFunction>("sliceModel", [this](const nlohmann::json& input) { return sliceModel(input); });
-  sliceModelAPI->setDescription(modelBoundaryDescription());
-  api.addFunction(std::move(sliceModelAPI));
-
   //transform Model
   std::unique_ptr<PolyglotAPI::APIFunction> transformModelAPI = std::make_unique<PolyglotAPI::APIFunction>("transformModel", [this](const nlohmann::json& input) { return transformModel(input); });
   transformModelAPI->setDescription(transformModelDescription());
@@ -71,11 +61,6 @@ void ModelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> createPlaneAPI = std::make_unique<PolyglotAPI::APIFunction>("createPlane", [this](const nlohmann::json& input) { return createPlane(input); });
   createPlaneAPI->setDescription(hasAnyTriangleDescription());
   api.addFunction(std::move(createPlaneAPI));
-
-  //simplify Model (CGAL exklusive)
-  std::unique_ptr<PolyglotAPI::APIFunction> simplifyModelAPI = std::make_unique<PolyglotAPI::APIFunction>("simplifyModel", [this](const nlohmann::json& input) { return simplifyModel(input); });
-  simplifyModelAPI->setDescription(simplifyModelDescription());
-  api.addFunction(std::move(simplifyModelAPI));
 }
 
 std::string ModelAPI::loadModelDescription() {
@@ -84,19 +69,13 @@ load model from file
 
 loadModel({
     'Name' : 'Name',
-    'Filename': 'fil/name/of/model.stl',
-    'Mode' : 'CGAL' # CGAL / SOUP
+    'Filename': 'Model.stl'
 });
 )";
 }
 
 nlohmann::json ModelAPI::loadModel(const nlohmann::json& input) {
-  if (!input.contains("Mode") || input["Mode"] == "CGAL")
-    database.models[input["Name"]] = std::make_unique<Model>(input["Filename"]);
-  else if (input["Mode"] == "SOUP")
-  {
-    database.triangleSoup[input["Name"]] = STL::read(input["Filename"]);
-  }
+  database.triangleSoup[input["Name"]] = STL::read(input["Filename"]);
   return "";
 }
 
@@ -111,23 +90,7 @@ deleteModel({
 }
 
 nlohmann::json ModelAPI::deleteModel(const nlohmann::json& input) {
-  database.models.erase(input["Name"]);
-  return "";
-}
-
-
-std::string ModelAPI::repairModelDescription() {
-  return R"(
-repairs model
-
-repairModel({
-    'Name' : 'Name'
-});
-)";
-}
-
-nlohmann::json ModelAPI::repairModel(const nlohmann::json& input) {
-  database.models[input["Name"]]->repair();
+  database.triangleSoup.erase(input["Name"]);
   return "";
 }
 
@@ -137,20 +100,13 @@ save model to file
 
 saveModel({
     'Name' : 'Name',
-    'Filename': 'fil/name/of/model.stl'
-    'Mode' : 'CGAL' # 'CGAL' / 'SOUP'
+    'Filename': 'Model.stl'
 });
 )";
 }
 
 nlohmann::json ModelAPI::saveModel(const nlohmann::json& input) {
-  if (!input.contains("Mode") || input["Mode"] == "CGAL")
-    database.models[input["Name"]]->save(input["Filename"]);
-  else if (input["Mode"] == "SOUP")
-    STL::write(input["Filename"], *database.triangleSoup[input["Name"]]);
-  else
-    throw std::runtime_error("Unkown Mode in saveModel");
-
+  STL::write(input["Filename"], *database.triangleSoup[input["Name"]],true);
   return "";
 }
 
@@ -163,8 +119,7 @@ voxelizeModel({
     'VoxelName'  : 'VoxelizedBenchy',
     'Resolution' : [128,128,128], # divideable by 8
     'Start'      : [3,3,3],
-    'End'        : [7,7,7],
-    'Mode'       : "CGAL" # "CGAL" / "SOUP"
+    'End'        : [7,7,7]
 });
 )";
 }
@@ -178,16 +133,8 @@ nlohmann::json ModelAPI::voxelizeModel(const nlohmann::json& input) {
   glm::ivec3 resolution = glm::ivec3(input["Resolution"][0], input["Resolution"][1], input["Resolution"][2]);
 
   std::unique_ptr<bool[]> voxel;
-  if (!input.contains("Mode") || input["Mode"] == "CGAL")
-  {
-    auto soup = database.models[input["ModelName"]]->toSoup();
-    voxel = Voxelizer().voxelize(soup.first, soup.second, start, end, resolution);
-  }
-  else
-  {
-    auto soup = database.triangleSoup[input["ModelName"]].get();
-    voxel = Voxelizer().voxelize(*soup, start, end, resolution);
-  }
+  auto soup = database.triangleSoup[input["ModelName"]].get();
+  voxel = Voxelizer().voxelize(*soup, start, end, resolution);
 
   database.boolField[input["VoxelName"]] = std::make_pair(std::move(voxel), resolution);
   return "";
@@ -202,28 +149,17 @@ nlohmann::json ModelAPI::modelBoundary(const nlohmann::json& input) {
 
   glm::dvec3 min;
   glm::dvec3 max;
-  if (!input.contains("Mode") || input["Mode"] == "CGAL")
-  {
-    auto& model = *database.models[input["Name"]];
-    min = model.getMin();
-    max = model.getMax();
+  min = glm::dvec3(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+  max = glm::dvec3(-std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
+  const auto& tris = *database.triangleSoup[input["Name"]];
+  for (size_t i = 0; i < tris.size(); i++) {
+    min.x = std::min(min.x, tris[i].x);
+    min.y = std::min(min.y, tris[i].y);
+    min.z = std::min(min.z, tris[i].z);
+    max.x = std::max(max.x, tris[i].x);
+    max.y = std::max(max.y, tris[i].y);
+    max.z = std::max(max.z, tris[i].z);
   }
-  else if (input["Mode"] == "SOUP")
-  {
-    min = glm::dvec3(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-    max = glm::dvec3(-std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
-    const auto& tris = *database.triangleSoup[input["Name"]];
-    for (size_t i = 0; i < tris.size(); i++) {
-      min.x = std::min(min.x, tris[i].x);
-      min.y = std::min(min.y, tris[i].y);
-      min.z = std::min(min.z, tris[i].z);
-      max.x = std::max(max.x, tris[i].x);
-      max.y = std::max(max.y, tris[i].y);
-      max.z = std::max(max.z, tris[i].z);
-    }
-  }
-  else 
-    throw std::runtime_error("Unkown Mode in modelBoundary");
   
   min -= glm::dvec3(padding, padding, padding);
   max += glm::dvec3(padding, padding, padding);
@@ -265,7 +201,6 @@ gets the boundary of a model
 
 modelBoundary({
     'Name'  : 'Benchy',
-    'Mode'  : 'CGAL', # 'CGAL' / 'SOUP'
     'Padding' : 2 # 2 greater in each direction (e.g. 2*VoxelLength)
 });
 
@@ -280,57 +215,11 @@ result = {
 )";
 }
 
-nlohmann::json ModelAPI::sliceModel(const nlohmann::json& input) {
-  auto& model = *database.models[input["ModelName"]];
-  auto& tool  = *database.models[input["ToolName"]];
-  std::string mode = input["Mode"];
-  if (mode == "Model") {
-    auto streaks = model.slice(tool);
-    auto uvMesh = Mesh2D(tool, streaks);
-    auto triangulation = uvMesh.getTriangulation(&tool);
-    auto vertecies3d = tool.uv2World(triangulation.first);
-    auto& indices = triangulation.second;
-    std::unique_ptr<Model> m = std::make_unique<Model>(vertecies3d, indices);
-    database.models[input["ResultName"]] = std::move(m);
-  }
-  else if (mode == "Line") {
-    auto noodle = model.slice2(tool);
-    database.lines[input["LineName"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(noodle);
-  }
-  else {
-    throw std::runtime_error("Unkown Mode");
-  }
-
-  return "";
-}
-
-std::string ModelAPI::sliceModelDescription() {
-  return R"(
-slice model with model
-
-sliceModel({
-    'ModelName'  : 'Benchy',
-    'ToolName'   : 'ModelPlane',
-    'Mode'       : 'Line',
-    'LineName'   : 'HalfBakedGCode'
-});
-
-sliceModel({
-    'ModelName'  : 'Benchy',
-    'ToolName'   : 'ModelPlane',
-    'Mode'       : 'Model',
-    'ResultName' : 'BenchySliceModel'
-});
-)";
-}
-
 nlohmann::json ModelAPI::transformModel(const nlohmann::json& input) {
-  auto& model = *database.models[input["Name"]];
-  auto soup = model.toSoup();
+  auto& model = *database.triangleSoup[input["Name"]];
   glm::dvec3 offset = glm::dvec3(input["Offset"][0], input["Offset"][1], input["Offset"][2]);
-  for (glm::dvec3& x : soup.first)
+  for (glm::dvec3& x : model)
     x += offset;
-  database.models[input["Name"]] = std::make_unique<Model>(soup.first, soup.second);
   return "";
 }
 
@@ -346,8 +235,8 @@ transformModel({
 }
 
 nlohmann::json ModelAPI::hasAnyTriangle(const nlohmann::json& input) {
-  auto& model = *database.models[input["Name"]];
-  return model.toSoup().first.size() != 0;
+  auto& model = *database.triangleSoup[input["Name"]];
+  return model.size() != 0;
 }
 
 std::string ModelAPI::hasAnyTriangleDescription() {
@@ -365,8 +254,8 @@ nlohmann::json ModelAPI::createPlane(const nlohmann::json& input) {
   glm::dvec3 normal = glm::normalize(glm::dvec3(input["Normal"][0], input["Normal"][1], input["Normal"][2]));
   double size = input["Size"];
 
-  std::vector<size_t> indices;
-  indices.resize(6);
+  std::vector<glm::dvec3> result;
+  result.resize(6);
   std::vector<glm::dvec3> vertices;
   vertices.resize(4);
   glm::dvec3 someRay = glm::dvec3(1, 0, 0);
@@ -381,15 +270,15 @@ nlohmann::json ModelAPI::createPlane(const nlohmann::json& input) {
   vertices[2] = origin - beamA * size;
   vertices[3] = origin - beamB * size;
 
-  indices[0] = 0;
-  indices[1] = 1;
-  indices[2] = 3;
+  result[0] = vertices[0];
+  result[1] = vertices[1];
+  result[2] = vertices[3];
 
-  indices[3] = 1;
-  indices[4] = 2;
-  indices[5] = 3;
+  result[3] = vertices[1];
+  result[4] = vertices[2];
+  result[5] = vertices[3];
 
-  database.models[input["Name"]] = std::make_unique<Model>(vertices,indices);
+  database.triangleSoup[input["Name"]] = std::make_unique<std::vector<glm::dvec3>>(result);
   return "";
 }
 
@@ -402,23 +291,6 @@ createPlane({
     'Origin' : [0,0,0.2],
     'Normal' : [0,0,1],
     'Size' : 5000
-});
-)";
-}
-
-nlohmann::json ModelAPI::simplifyModel(const nlohmann::json& input) {
-  auto& model = *database.models[input["Name"]];
-  model.simplify(input["Ratio"]);
-  return "";
-}
-
-std::string ModelAPI::simplifyModelDescription() {
-  return R"(
-simplifiy model
-
-simplifyModel({
-    'Name'   : 'Name',
-    'Ratio'   : 0.5
 });
 )";
 }

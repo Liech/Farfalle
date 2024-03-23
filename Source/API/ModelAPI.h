@@ -27,24 +27,18 @@ private:
   std::string loadModelDescription();
   nlohmann::json deleteModel(const nlohmann::json& input);
   std::string deleteModelDescription();
-  nlohmann::json repairModel(const nlohmann::json& input);
-  std::string repairModelDescription();
   nlohmann::json saveModel(const nlohmann::json& input);
   std::string saveModelDescription();
   nlohmann::json voxelizeModel(const nlohmann::json& input);
   std::string voxelizeModelDescription();
   nlohmann::json modelBoundary(const nlohmann::json& input);
   std::string modelBoundaryDescription();
-  nlohmann::json sliceModel(const nlohmann::json& input);
-  std::string sliceModelDescription();
   nlohmann::json transformModel(const nlohmann::json& input);
   std::string transformModelDescription();
   nlohmann::json hasAnyTriangle(const nlohmann::json& input);
   std::string hasAnyTriangleDescription();
   nlohmann::json createPlane(const nlohmann::json& input);
   std::string createPlaneDescription();
-  nlohmann::json simplifyModel(const nlohmann::json& input);
-  std::string simplifyModelDescription();
 
   apiDatabase& database;
 };

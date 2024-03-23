@@ -12,7 +12,6 @@
 #include "GCode/Extruder.h"
 #include "GCode/Temperature.h"
 
-class Model;
 class Printer;
 class FarfalleAPI;
 
@@ -33,7 +32,6 @@ public:
   std::map<std::string, std::pair<std::unique_ptr<std::vector<double>>,glm::ivec3>> doubleField;
   std::map<std::string, std::pair<std::unique_ptr<std::vector<int   >>,glm::ivec3>> intField;
 
-  std::map<std::string, std::unique_ptr<Model>>                                    models;
   std::map<std::string, std::unique_ptr<std::vector<glm::dvec3>>>                  triangleSoup;
   std::map<std::string, std::unique_ptr<std::vector<std::vector<glm::dvec3>>>>     lines;
   std::map<std::string, nlohmann::json>                                            data;

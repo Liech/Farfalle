@@ -3,9 +3,6 @@ filename = "C:\\Users\\nicol\\Downloads\\_3DBenchy_-_The_jolly_3D_printing_tortu
 print('Load Model')
 loadModel({'Name': 'Main', 'Filename':filename})
 
-print('Repair Model')
-repairModel({'Name':'Main'})
-
 print('Voxelization')
 boundary = modelBoundary({'Name':'Main'})
 

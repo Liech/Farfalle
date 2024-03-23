@@ -13,9 +13,6 @@ createPlane({
     'Size' : 5000
 });
 
-print('Repair Model')
-repairModel({'Name':'Main'})
-
 print('Center Model')
 
 boundary = modelBoundary({'Name':'Main'})

@@ -1,7 +1,6 @@
 
 import numpy
 
-print("Hello World");
 res =  [8,8,8]
 createVolume({"Name":"Kartoffel", "Resolution":res});
 data = GetFarfalleVoxel("Kartoffel");
