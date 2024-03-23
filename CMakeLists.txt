@@ -9,7 +9,6 @@ project(Farfalle)
 find_package(OpenMP)
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(glm REQUIRED)
-find_package(cgal REQUIRED)
 
 add_subdirectory(Lib)
 
@@ -54,21 +53,6 @@ set(GCode_Files
 )
 source_group("Source/GCode" FILES ${GCode_Files})
 
-set(Geometry_Files
-    "Source/Geometry/CGALDefs.h"
-    "Source/Geometry/Model.h"
-    "Source/Geometry/Model.cpp"
-    "Source/Geometry/Model2.h"
-    "Source/Geometry/Model2.cpp"
-    "Source/Geometry/ModelImplementation.h"
-    "Source/Geometry/ModelImplementation.cpp"
-    "Source/Geometry/Mesh2D.h"
-    "Source/Geometry/Mesh2D.cpp"
-    "Source/Geometry/KDTree.h"
-    "Source/Geometry/KDTree.cpp"
-)
-source_group("Source/Geometry" FILES ${Geometry_Files})
-
 set(Voxel_Files
 	"Source/Voxel/Voxelizer.cpp"
 	"Source/Voxel/Voxelizer.h"
@@ -107,7 +91,6 @@ set(ALL_FILES
     ${Voxel_Files}
     ${GCode_Files}
 	${API_Files}
-    ${Geometry_Files}
 )
 
 ############################################################################
@@ -123,7 +106,6 @@ set_property(TARGET FarfalleLib PROPERTY CXX_STANDARD 20)
 target_link_libraries(FarfalleLib
 glm::glm
 Eigen3::Eigen
-CGAL::CGAL
 OpenMP::OpenMP_CXX
 PolyglotAPI
 )
