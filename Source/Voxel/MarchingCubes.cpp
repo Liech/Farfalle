@@ -397,23 +397,23 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const std::vector<bool>& data,
     for (size_t y = 0; y < resolution.y - 1; y++) {
       for (size_t z = 0; z < resolution.z - 1; z++) {
         std::array<double, 8> values = {
-          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z + 1)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z + 1)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)] ? 1 : 0
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z + 1)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z + 1)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)] ? 1.0 : 0.0
         };
         glm::dvec3 o = origin + glm::dvec3(x*voxelSize.x,y*voxelSize.y,z*voxelSize.z+ voxelSize.z);
         std::array<glm::dvec3, 8> positions = {
          o
-        ,o + glm::dvec3(voxelSize.x,           0, 0)
-        ,o + glm::dvec3(voxelSize.x, voxelSize.y, 0)
-        ,o + glm::dvec3(0          , voxelSize.y, 0)
-        ,o + glm::dvec3(0          ,           0, voxelSize.z)
-        ,o + glm::dvec3(voxelSize.x,           0, voxelSize.z)
+        ,o + glm::dvec3(voxelSize.x,         0.0, 0.0)
+        ,o + glm::dvec3(voxelSize.x, voxelSize.y, 0.0)
+        ,o + glm::dvec3(0          , voxelSize.y, 0.0)
+        ,o + glm::dvec3(0          ,         0.0, voxelSize.z)
+        ,o + glm::dvec3(voxelSize.x,         0.0, voxelSize.z)
         ,o + glm::dvec3(voxelSize.x, voxelSize.y, voxelSize.z)
         ,o + glm::dvec3(0          , voxelSize.y, voxelSize.z)
         };
@@ -439,14 +439,14 @@ std::vector<glm::dvec3> MarchingCubes::polygonize(const bool* data, const glm::d
     for (size_t y = 0; y < resolution.y - 1; y++) {
       for (size_t z = 0; z < resolution.z - 1; z++) {
         std::array<double, 8> values = {
-          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z + 1)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z + 1)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)] ? 1 : 0,
-          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)] ? 1 : 0
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y)+(z + 1)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y)+(z + 1)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x + 1) + resolution.z * (y + 1) + (z + 1)] ? 1.0 : 0.0,
+          data[resolution.z * resolution.y * (x)+resolution.z * (y + 1) + (z + 1)] ? 1.0 : 0.0
         };
         glm::dvec3 o = origin + glm::dvec3(x * voxelSize.x, y * voxelSize.y, z * voxelSize.z + voxelSize.z);
         std::array<glm::dvec3, 8> positions = {

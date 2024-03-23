@@ -161,7 +161,7 @@ voxelize model
 voxelizeModel({
     'ModelName'  : 'Benchy',
     'VoxelName'  : 'VoxelizedBenchy',
-    'Resolution' : [128,128,128], //divideable by 8
+    'Resolution' : [128,128,128], # divideable by 8
     'Start'      : [3,3,3],
     'End'        : [7,7,7],
     'Mode'       : "CGAL" # "CGAL" / "SOUP"
@@ -195,9 +195,39 @@ nlohmann::json ModelAPI::voxelizeModel(const nlohmann::json& input) {
 
 nlohmann::json ModelAPI::modelBoundary(const nlohmann::json& input) {
   nlohmann::json result;
-  auto& model = *database.models[input["Name"]];
-  auto min = model.getMin();
-  auto max = model.getMax();
+  
+  double padding = 0;
+  if (input.contains("Padding"))
+    padding = input["Padding"];
+
+  glm::dvec3 min;
+  glm::dvec3 max;
+  if (!input.contains("Mode") || input["Mode"] == "CGAL")
+  {
+    auto& model = *database.models[input["Name"]];
+    min = model.getMin();
+    max = model.getMax();
+  }
+  else if (input["Mode"] == "SOUP")
+  {
+    min = glm::dvec3(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+    max = glm::dvec3(-std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
+    const auto& tris = *database.triangleSoup[input["Name"]];
+    for (size_t i = 0; i < tris.size(); i++) {
+      min.x = std::min(min.x, tris[i].x);
+      min.y = std::min(min.y, tris[i].y);
+      min.z = std::min(min.z, tris[i].z);
+      max.x = std::max(max.x, tris[i].x);
+      max.y = std::max(max.y, tris[i].y);
+      max.z = std::max(max.z, tris[i].z);
+    }
+  }
+  else 
+    throw std::runtime_error("Unkown Mode in modelBoundary");
+  
+  min -= glm::dvec3(padding, padding, padding);
+  max += glm::dvec3(padding, padding, padding);
+
   result["Min"] = nlohmann::json::array();
   result["Min"].push_back(min[0]);
   result["Min"].push_back(min[1]);
@@ -234,7 +264,9 @@ std::string ModelAPI::modelBoundaryDescription() {
 gets the boundary of a model
 
 modelBoundary({
-    'Name'  : 'Benchy'
+    'Name'  : 'Benchy',
+    'Mode'  : 'CGAL', # 'CGAL' / 'SOUP'
+    'Padding' : 2 # 2 greater in each direction (e.g. 2*VoxelLength)
 });
 
 result = { 

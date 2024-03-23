@@ -83,8 +83,9 @@ std::unique_ptr<std::vector<glm::dvec3>> STL::read(const std::string& filename)
   if (input.fail())
     throw std::runtime_error("Error opening " + filename);
   std::vector<unsigned char> buffer = std::vector<unsigned char>(std::istreambuf_iterator<char>(input), {});
-  std::string header = std::string(buffer.begin(), buffer.begin() + 5);
-  if (header == "solid")
+  std::string beginning = std::string(buffer.begin(), buffer.begin() + std::min(buffer.size()-1,(size_t)300));
+  bool isAscii = beginning.find("facet") != std::string::npos && beginning.find("solid") != std::string::npos;
+  if (isAscii)
     return readAscii(buffer);
   else
     return readBinary(buffer);
