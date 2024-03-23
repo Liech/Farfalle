@@ -8,10 +8,8 @@
 #include "PolyglotAPI/Source/PolyglotAPI/API/FunctionRelay.h"
 
 #include "Voxel/Voxelizer.h"
-#include "Geometry/Mesh2D.h"
 #include "Tools/STL.h"
 
-#include "Geometry/Model.h"
 
 ModelAPI::ModelAPI(apiDatabase& db) : database(db) {
 

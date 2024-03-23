@@ -14,7 +14,6 @@
 #include "ScriptAPI.h"
 #include "CustomPythonFunctions.h"
 
-#include "Geometry/Model.h"
 
 FarfalleAPI::FarfalleAPI() {
   db     = std::make_unique<apiDatabase>(this);

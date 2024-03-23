@@ -9,7 +9,6 @@
 #include "PolyglotAPI/Source/PolyglotAPI/Python/PythonEngine.h"
 #include "PolyglotAPI/Source/PolyglotAPI/Lua/LuaEngine.h"
 
-#include "Geometry/Model.h"
 #include "Voxel/MarchingCubes.h"
 #include "Voxel/DistanceMap.h"
 #include "Voxel/CSG.h"
