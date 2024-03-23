@@ -114,7 +114,13 @@ nlohmann::json VoxelAPI::createVolume(const nlohmann::json& input) {
   size_t x = input["Resolution"][0];
   size_t y = input["Resolution"][1];
   size_t z = input["Resolution"][2];
-  database.boolField[input["Name"]] = std::make_pair(std::make_unique<bool[]>(x * y * z), glm::ivec3(x, y, z));
+  if (!input.contains("Type")||input["Type"] == "Bool")
+    database.boolField[input["Name"]] = std::make_pair(std::make_unique<bool[]>(x * y * z), glm::ivec3(x, y, z));
+  else if (input["Type"] == "Double")
+    database.doubleField[input["Name"]] = std::make_pair(std::make_unique<std::vector<double>>(x * y * z), glm::ivec3(x, y, z));
+  else if (input["Type"] == "Int")
+    database.intField[input["Name"]] = std::make_pair(std::make_unique<std::vector<int>>(x * y * z), glm::ivec3(x, y, z));
+
   return "";
 }
 
@@ -124,7 +130,8 @@ create a named voxel volume
 
 createVolume({
     'Name': 'Name',
-    'Resolution': [128,128,128], //dividable by 8
+    'Resolution': [128,128,128], #dividable by 8
+    'Type' : 'Bool' # 'Bool' / 'Double' / 'Int'
 });
 )";
 }
