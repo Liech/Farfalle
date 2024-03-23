@@ -5,8 +5,9 @@
 
 #include <glm/glm.hpp>
 
-#include "GCode/Printer.h"
 #include "Tools/MovementType.h"
+
+class Printer;
 
 namespace GCode
 {
@@ -14,6 +15,7 @@ namespace GCode
   {
   public:
     LinearPrint(Printer&);
+    virtual ~LinearPrint();
 
     std::vector<glm::dvec3> controlPoints;    
     double feedrate = 0.0267225;

@@ -2,10 +2,15 @@
 
 #include "Extruder.h"
 #include "Movement.h"
+#include "GCode/Printer.h"
 
 namespace GCode
 {
   LinearPrint::LinearPrint(Printer& _printer) : printer(_printer){
+
+  }
+
+  LinearPrint::~LinearPrint() {
 
   }
 

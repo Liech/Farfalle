@@ -2,10 +2,16 @@
 
 #include "Extruder.h"
 #include "Movement.h"
+#include "GCode/Printer.h"
 
 namespace GCode
 {
   Travel::Travel(Printer& _printer) : printer(_printer){
+
+  }
+
+  Travel::~Travel()
+  {
 
   }
 

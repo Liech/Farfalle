@@ -5,8 +5,7 @@
 
 #include <glm/glm.hpp>
 
-#include "GCode/Printer.h"
-#include "Tools/MovementType.h"
+class Printer;
 
 namespace GCode
 {
@@ -14,6 +13,7 @@ namespace GCode
   {
   public:
     Travel(Printer&);
+    virtual ~Travel();
 
     std::vector<glm::dvec3> controlPoints;
 

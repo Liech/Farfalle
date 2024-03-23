@@ -7,10 +7,6 @@
 #include <nlohmann/json.hpp>
 #include <glm/glm.hpp>
 
-#include "GCode/Printer.h"
-#include "GCode/Movement.h"
-#include "GCode/Extruder.h"
-#include "GCode/Temperature.h"
 
 class Printer;
 class FarfalleAPI;

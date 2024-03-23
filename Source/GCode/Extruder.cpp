@@ -3,8 +3,13 @@
 #include "LinearPrint.h"
 #include "Travel.h"
 #include "Movement.h"
+#include "Printer.h"
 
 Extruder::Extruder(Printer& p ) : printer(p){
+
+}
+
+Extruder::~Extruder() {
 
 }
 

@@ -11,6 +11,9 @@
 #include "GCode/LinearPrint.h"
 #include "GCode/Printer.h"
 #include "GCode/Travel.h"
+#include "GCode/Movement.h"
+#include "GCode/Extruder.h"
+#include "GCode/Temperature.h"
 
 GCodeAPI::GCodeAPI(apiDatabase& db) : database(db) {
   db.printer = std::make_unique<Printer>();

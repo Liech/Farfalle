@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Printer.h"
+class Printer;
 
 class Extruder {
 public:
@@ -17,6 +17,8 @@ public:
   double maximumFeedrate          = 0.5;
 
   Extruder(Printer&);
+  virtual ~Extruder();
+
   void startup(std::string& result);
   void prime  (std::string& result);
   void retract(std::string& result);

@@ -2,9 +2,15 @@
 
 #include <algorithm>
 
+#include "Printer.h"
+
 Movement::Movement(Printer& p) : printer(p) {
   currentPosition = glm::dvec3(printer.dimensions[0] / 2  , printer.dimensions[1] / 2, 15);
   restPosition    = glm::dvec2(printer.dimensions[0] * 0.8, printer.dimensions[1] * 0.8);
+}
+
+Movement::~Movement() {
+
 }
 
 void Movement::startup(std::string& result) {

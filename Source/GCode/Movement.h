@@ -3,8 +3,9 @@
 #include <string>
 #include <glm/glm.hpp>
 
-#include "Printer.h"
 #include "Tools/MovementType.h"
+
+class Printer;
 
 class Movement {
 public:
@@ -24,7 +25,7 @@ public:
   bool         hasMeshBedLeveling    = true;
 
   Movement(Printer& printer);
-  ~Movement() = default;
+  virtual ~Movement();
 
   void startup(std::string&);
   void home(std::string&);

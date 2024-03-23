@@ -5,6 +5,11 @@
 #include "PolyglotAPI/Lua/LuaEngine.h"
 #include "PolyglotAPI/Lua/FunctionRelay.h"
 
+#include "GCode/Printer.h"
+#include "GCode/Movement.h"
+#include "GCode/Extruder.h"
+#include "GCode/Temperature.h"
+
 apiDatabase::apiDatabase(FarfalleAPI* a) {
   api = a;
 }
