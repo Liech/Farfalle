@@ -104,7 +104,7 @@ saveModel({
 }
 
 nlohmann::json ModelAPI::saveModel(const nlohmann::json& input) {
-  STL::write(input["Filename"], *database.triangleSoup[input["Name"]],true);
+  STL::write(input["Filename"], *database.triangleSoup[input["Name"]],false);
   return "";
 }
 

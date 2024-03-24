@@ -20,8 +20,8 @@ void CustomPythonFunctions::add(apiDatabase& db) {
       return input;
       }, pybind11::arg("input") = pybind11::none());
     });
-  engine.addCustomFunction("GetFarfalleVoxel", [&db](pybind11::module_& m) {
-    m.def("GetFarfalleVoxel", [&db](const pybind11::object& input) {
+  engine.addCustomFunction("GetFarfalleBool", [&db](pybind11::module_& m) {
+    m.def("GetFarfalleBool", [&db](const pybind11::object& input) {
       auto& engine = PolyglotAPI::Python::PythonEngine::instance();
       nlohmann::json inputJ = PolyglotAPI::Python::Conversion::py2j(input, (PolyglotAPI::Python::FunctionRelay&)engine.getRelay());
       if (!inputJ.is_string())
