@@ -12,6 +12,7 @@
 #include "Voxel/MarchingCubes.h"
 #include "Voxel/DistanceMap.h"
 #include "Voxel/CSG.h"
+#include "Voxel/LineTracer.h"
 
 VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
@@ -86,6 +87,11 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   std::unique_ptr<PolyglotAPI::APIFunction> densityAPI = std::make_unique<PolyglotAPI::APIFunction>("createDensityField", [this](const nlohmann::json& input) { return createDensityField(input); });
   densityAPI->setDescription(copyVoxelDescription());
   api.addFunction(std::move(densityAPI));
+
+  //copy a voxel volume
+  std::unique_ptr<PolyglotAPI::APIFunction> traceVoxelLinesAPI = std::make_unique<PolyglotAPI::APIFunction>("traceVoxelLines", [this](const nlohmann::json& input) { return traceVoxelLines(input); });
+  densityAPI->setDescription(traceVoxelLinesDescription());
+  api.addFunction(std::move(traceVoxelLinesAPI));
 
   ////voxelization boundary
   //std::unique_ptr<PolyglotAPI::APIFunction> voxelizationBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizationBoundary", [this](const nlohmann::json& input) { return voxelizationBoundary(input); });
@@ -407,6 +413,26 @@ createDensityField({
 });
 )";
 }
+
+nlohmann::json VoxelAPI::traceVoxelLines(const nlohmann::json& input) {
+  auto& source = database.boolField[input["Source"]];
+  auto lines = LineTracer::traceLines(source.first.get(), source.second);
+  database.lines[input["Target"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(lines);
+  return "";
+}
+
+std::string VoxelAPI::traceVoxelLinesDescription() {
+  return R"(
+Traces all Lines found in a Voxel volume. 
+Lines should be 1 Voxel thin, algorithm is dumb.
+
+traceVoxelLines({
+    'Source' : 'BoolField',
+    'Target' : 'LineCollection'
+});
+)";
+}
+
 //
 //nlohmann::json VoxelAPI::voxelizationBoundary(const nlohmann::json& input) {
 //  nlohmann::json result;

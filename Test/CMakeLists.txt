@@ -5,8 +5,7 @@ find_package(Catch2 REQUIRED)
 
 
 set(Test_Files
-	"BasicLineSlice.cpp"
-	"TorusSlice.cpp"
+	"LineTracerTest.cpp"
 )
 source_group("Main" FILES ${Main_Files})
 set(Main_Files
