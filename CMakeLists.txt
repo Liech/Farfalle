@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8...3.20)
 project(FarfalleLib)
 project(Farfalle)
+project(FarfalleDev) # without python copy for faster iteration
 
 ############################################################################
 ############################################################################
@@ -99,7 +100,9 @@ set(ALL_FILES
 
 add_library(FarfalleLib ${ALL_FILES})
 add_executable(Farfalle "Source/main.cpp")
+add_executable(FarfalleDev "Source/main.cpp")
 set_property(TARGET Farfalle PROPERTY CXX_STANDARD 20)
+set_property(TARGET FarfalleDev PROPERTY CXX_STANDARD 20)
 set_property(TARGET FarfalleLib PROPERTY CXX_STANDARD 20)
 
 
@@ -110,6 +113,9 @@ OpenMP::OpenMP_CXX
 PolyglotAPI
 )
 target_link_libraries(Farfalle
+FarfalleLib
+)
+target_link_libraries(FarfalleDev
 FarfalleLib
 )
 
@@ -133,6 +139,6 @@ add_custom_command(TARGET Farfalle POST_BUILD
 
 	
 
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Farfalle)
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT FarfalleDev)
 
 add_subdirectory(Test)
