@@ -129,6 +129,7 @@ get_filename_component(pyDir "${Python3_EXECUTABLE}" DIRECTORY )
 # .\python -m ensurepip
 execute_process(COMMAND ${Python3_EXECUTABLE} -m ensurepip)
 #.\scripts\pip install scipy
+execute_process(COMMAND "${pyDir}/scripts/pip3" install numpy)
 execute_process(COMMAND "${pyDir}/scripts/pip3" install scipy)
 
 add_custom_command(TARGET Farfalle POST_BUILD 
