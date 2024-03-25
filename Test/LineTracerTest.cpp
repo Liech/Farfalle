@@ -119,3 +119,27 @@ TEST_CASE("LineTracer/Two/X") {
   REQUIRE(resultSet.contains(a));
   REQUIRE(resultSet.contains(b));
 }
+
+TEST_CASE("LineTracer/Straigth/Z") {
+  glm::ivec3 resolution = glm::ivec3(8, 8, 8);
+  size_t dataSize = resolution.x * resolution.y * resolution.z;
+  auto volume = std::make_unique<bool[]>(dataSize);
+  for (size_t i = 0; i < dataSize; i++)
+    volume[i] = false;
+
+  glm::ivec3 a = glm::ivec3(2, 4, 4);
+  glm::ivec3 b = glm::ivec3(6, 4, 4);
+
+  for (size_t i = a.z; i <= b.z; i++) {
+    size_t address = i + a.y * resolution.z + a.x * resolution.x * resolution.y;
+    volume[address] = true;
+  }
+
+  auto result = LineTracer::traceLines(volume.get(), resolution);
+  REQUIRE(result.size() == 1);
+  REQUIRE(result[0].size() == 2);
+
+  std::unordered_set<glm::ivec3> resultSet = std::unordered_set<glm::ivec3>(result[0].begin(), result[0].end());
+  REQUIRE(resultSet.contains(a));
+  REQUIRE(resultSet.contains(b));
+}
