@@ -417,7 +417,16 @@ createDensityField({
 nlohmann::json VoxelAPI::traceVoxelLines(const nlohmann::json& input) {
   auto& source = database.boolField[input["Source"]];
   auto lines = LineTracer::traceLines(source.first.get(), source.second);
-  database.lines[input["Target"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(lines);
+  std::vector<std::vector<glm::dvec3>> glmd;
+  for (const auto& streak : lines) {
+    std::vector<glm::dvec3> sub;
+    sub.reserve(streak.size());
+    for (const auto& x : streak)
+      sub.push_back(x);
+    glmd.push_back(sub);
+  }
+    
+  database.lines[input["Target"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(glmd);
   return "";
 }
 

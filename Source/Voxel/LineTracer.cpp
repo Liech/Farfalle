@@ -1,9 +1,14 @@
 #include "LineTracer.h"
 
-std::vector<std::vector<glm::dvec3>> LineTracer::traceLines(const bool* data, const glm::ivec3& resolution) {
-  std::vector<std::vector<glm::dvec3>> result;
+#include <unordered_set>
 
+std::vector<std::vector<glm::ivec3>> LineTracer::traceLines(const bool* data, const glm::ivec3& resolution) {
+  std::vector<std::vector<glm::ivec3>> result;
 
+  auto trueBits = gatherTrues(data, resolution);
+  //std::unordered_set<glm::ivec3> trueVoxels = std::unordered_set<glm::ivec3>(trueBits.begin(), trueBits.end());
+  if (trueBits.size() != 0)
+    result.push_back(trueBits);
   return result;
 }
 
