@@ -6,3 +6,34 @@ std::vector<std::vector<glm::dvec3>> LineTracer::traceLines(const bool* data, co
 
   return result;
 }
+
+std::vector<glm::ivec3> LineTracer::gatherTrues(const bool* data, const glm::ivec3& resolution) {
+  std::vector<glm::ivec3> result;  
+  size_t threadAmount = 8;
+  size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
+  assert(dataSize % threadAmount == 0);
+
+  std::vector<std::vector<glm::ivec3>> subResults;
+  subResults.resize(threadAmount);
+
+  size_t chunk = dataSize / 8;
+#pragma omp parallel for
+  for (long long thread = 0; thread < threadAmount; thread++) {
+    size_t start = chunk * thread;
+    for (size_t i = 0; i < chunk; i++) {
+      size_t pos = i + start;
+      if (data[pos]) {
+        size_t x = pos / (resolution.y * resolution.z);
+        size_t y = (pos % (resolution.y * resolution.z)) / resolution.z;
+        size_t z = pos % resolution.z;
+        glm::ivec3 coord = glm::ivec3(x, y, z);
+        subResults[thread].push_back(coord);
+      }
+    }
+  }
+  for (size_t i = 0; i < threadAmount; i++) {
+    result.insert(result.end(), subResults[i].begin(), subResults[i].end());
+  }
+
+  return result;
+}
