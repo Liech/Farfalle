@@ -143,3 +143,51 @@ TEST_CASE("LineTracer/Straigth/Z") {
   REQUIRE(resultSet.contains(a));
   REQUIRE(resultSet.contains(b));
 }
+
+TEST_CASE("LineTracer/Straigth/X") {
+  glm::ivec3 resolution = glm::ivec3(8, 8, 8);
+  size_t dataSize = resolution.x * resolution.y * resolution.z;
+  auto volume = std::make_unique<bool[]>(dataSize);
+  for (size_t i = 0; i < dataSize; i++)
+    volume[i] = false;
+
+  glm::ivec3 a = glm::ivec3(0 ,4, 4);
+  glm::ivec3 b = glm::ivec3(7 ,4, 4);
+
+  for (size_t i = a.x; i <= b.x; i++) {
+    size_t address = a.z + a.y * resolution.z + i * resolution.x * resolution.y;
+    volume[address] = true;
+  }
+
+  auto result = LineTracer::traceLines(volume.get(), resolution);
+  REQUIRE(result.size() == 1);
+  REQUIRE(result[0].size() == 2);
+
+  std::unordered_set<glm::ivec3> resultSet = std::unordered_set<glm::ivec3>(result[0].begin(), result[0].end());
+  REQUIRE(resultSet.contains(a));
+  REQUIRE(resultSet.contains(b));
+}
+
+TEST_CASE("LineTracer/Straigth/Y") {
+  glm::ivec3 resolution = glm::ivec3(8, 8, 8);
+  size_t dataSize = resolution.x * resolution.y * resolution.z;
+  auto volume = std::make_unique<bool[]>(dataSize);
+  for (size_t i = 0; i < dataSize; i++)
+    volume[i] = false;
+
+  glm::ivec3 a = glm::ivec3(4, 0, 4);
+  glm::ivec3 b = glm::ivec3(4, 7, 4);
+
+  for (size_t i = a.y; i <= b.y; i++) {
+    size_t address = a.x + i * resolution.z + a.x * resolution.x * resolution.y;
+    volume[address] = true;
+  }
+
+  auto result = LineTracer::traceLines(volume.get(), resolution);
+  REQUIRE(result.size() == 1);
+  REQUIRE(result[0].size() == 2);
+
+  std::unordered_set<glm::ivec3> resultSet = std::unordered_set<glm::ivec3>(result[0].begin(), result[0].end());
+  REQUIRE(resultSet.contains(a));
+  REQUIRE(resultSet.contains(b));
+}

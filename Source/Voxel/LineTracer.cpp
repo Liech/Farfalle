@@ -41,8 +41,8 @@ std::vector<std::vector<glm::ivec3>> LineTracer::traceLines(const bool* data, co
           sub.push_back(current);
           sub.push_back(nPos);
           result.push_back(sub);
-          lineEndMap[current] = std::make_pair(false, result.size() - 1);
-          lineEndMap[nPos   ] = std::make_pair(true, result.size() - 1);
+          lineEndMap[current] = std::make_pair(true, result.size() - 1);
+          lineEndMap[nPos   ] = std::make_pair(false, result.size() - 1);
         }
 
       }
@@ -58,7 +58,16 @@ std::vector<std::vector<glm::ivec3>> LineTracer::traceLines(const bool* data, co
 
 
 void LineTracer::removePointsOnLine(std::vector<glm::ivec3>& line) {
-
+  glm::dvec3 previous = line[0];
+  for (size_t i = 1; i < line.size()-1; i++) {
+    glm::dvec3 current = line[i];
+    glm::dvec3 next = line[i + 1];
+    auto closest = glm::closestPointOnLine(current, previous, next);
+    if (glm::distance(closest, current) < 1e-6) {
+      line.erase(line.begin() + i);
+      i--;
+    }
+  }
 }
 
 constexpr std::vector<glm::ivec3> LineTracer::getNeighbours() {
