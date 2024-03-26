@@ -1,10 +1,13 @@
 #include "LineTracer.h"
 
 #include <glm/gtx/hash.hpp>
+#include <glm/gtx/closest_point.hpp>
 #include <unordered_set>
 
 std::vector<std::vector<glm::ivec3>> LineTracer::traceLines(const bool* data, const glm::ivec3& resolution) {
   std::vector<std::vector<glm::ivec3>> result;
+
+  std::unordered_map<glm::ivec3, std::pair<bool, size_t>> lineEndMap;
 
   std::vector<glm::ivec3> todo = gatherTrues(data, resolution);
   std::unordered_set<glm::ivec3> trueVoxels = std::unordered_set<glm::ivec3>(todo.begin(), todo.end());
@@ -21,12 +24,41 @@ std::vector<std::vector<glm::ivec3>> LineTracer::traceLines(const bool* data, co
     for (size_t i = 0; i < neighbourAmount; i++) {
       glm::ivec3 nPos = neighbourPos[i] + current;
       if (!visited.contains(nPos) && trueVoxels.contains(nPos)) {
-        //connect
+        todo.push_back(nPos);
+        
+        auto search = lineEndMap.find(current);
+        if (search != lineEndMap.end()) {
+          bool& atBeginning = search->second.first;
+          auto& foundList = result[search->second.second];
+          if (atBeginning)
+            foundList.insert(foundList.begin(), nPos);
+          else
+            foundList.push_back(nPos);
+          lineEndMap[nPos] = std::make_pair(atBeginning, search->second.second);
+        }
+        else {
+          std::vector<glm::ivec3> sub;
+          sub.push_back(current);
+          sub.push_back(nPos);
+          result.push_back(sub);
+          lineEndMap[current] = std::make_pair(false, result.size() - 1);
+          lineEndMap[nPos   ] = std::make_pair(true, result.size() - 1);
+        }
+
       }
     }
   }
   
+  for (auto& streak : result) {
+    removePointsOnLine(streak);
+  }
+
   return result;
+}
+
+
+void LineTracer::removePointsOnLine(std::vector<glm::ivec3>& line) {
+
 }
 
 constexpr std::vector<glm::ivec3> LineTracer::getNeighbours() {

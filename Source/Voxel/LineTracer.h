@@ -10,4 +10,5 @@ public:
 
 private:
   static constexpr std::vector<glm::ivec3> getNeighbours();
+  static void removePointsOnLine(std::vector<glm::ivec3>&);
 };

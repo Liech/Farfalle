@@ -127,8 +127,8 @@ TEST_CASE("LineTracer/Straigth/Z") {
   for (size_t i = 0; i < dataSize; i++)
     volume[i] = false;
 
-  glm::ivec3 a = glm::ivec3(2, 4, 4);
-  glm::ivec3 b = glm::ivec3(6, 4, 4);
+  glm::ivec3 a = glm::ivec3(4, 4, 2);
+  glm::ivec3 b = glm::ivec3(4, 4, 6);
 
   for (size_t i = a.z; i <= b.z; i++) {
     size_t address = i + a.y * resolution.z + a.x * resolution.x * resolution.y;
