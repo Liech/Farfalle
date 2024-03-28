@@ -22,7 +22,7 @@ setData({'Name':'config', 'Data' : config });
 
 resolution     = [config["VoxelResolution"],config["VoxelResolution"],config["VoxelResolution"]]
 LayerHeight    = config["LayerHeight"];
-NozzleDiameter =config["NozzleDiameter"];
+NozzleDiameter = config["NozzleDiameter"];
 
 ###############
 # Preparation
@@ -87,15 +87,29 @@ print("Create First Line");
 import time
 start_time = time.time()
 
-layerPos = bounds["Min"][2] + voxelLength*20;
-XPos = bounds["Min"][0] + NozzleDiameter*80;
-for x in range(resolution[0]):
-    for y in range(resolution[1]):
-        for z in range(resolution[2]):
-                InZLayer = ZLayer[x,y,z] < layerPos + LayerHeight and ZLayer[x,y,z] > layerPos - LayerHeight;
-                InXLayer = XLayer[x,y,z] < XPos + voxelLength and XLayer[x,y,z] > XPos - voxelLength;
-                Canvas[x,y,z] = InXLayer and InZLayer and Model[x,y,z];
+ZIso = bounds["Min"][2] + voxelLength*20;
+XIso = bounds["Min"][0] + NozzleDiameter*110;
+for x in range(resolution[0]-1):
+    for y in range(resolution[1]-1):
+        for z in range(resolution[2]-1):
+                z0 = ZLayer[x,y,z] < ZIso
+                z1 = ZLayer[x,y,z+1] < ZIso
+                x0 = XLayer[x,y,z] < XIso
+                x1 = XLayer[x+1,y,z] < XIso
+                isZIsosurface = (z1 and not z0) or (not z1 and z0)
+                isXIsosurface = (x1 and not x0) or (not x1 and x0)
+                isTrue = Model[x,y,z] and isZIsosurface and isXIsosurface;
+                Canvas[x,y,z] = isTrue
+
 print("--- %s seconds ---" % (time.time() - start_time))
+
+print("Trace Voxels");
+traceVoxelLines({
+    'Source' : 'Canvas',
+    'Target' : 'LineCollection',
+    'Min'    : bounds["Min"],
+    'Max'    : bounds["UniformMax"]
+});
 
 print("Triangulate");
 triangulateVolume({
@@ -110,6 +124,35 @@ print("Save");
 saveModel({
     'Name' : 'Canvas',
     'Filename': 'Canvas.stl'
+});
+
+
+print('Write GCode');
+ResultFilename = config['ResultFilename'];
+
+gcode = ""
+gcode += setHeat({
+    'Mode' : 'Set',
+    'Nozzle' : 215,
+    'Bed': 60
+});
+
+gcode += startup({});
+#gcode += prime({});
+gcode += "\n; ;;;;;;;;;;;;;;;;;;";
+gcode += "\n; Printing:  ";
+gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
+
+gcode += linearPrint({
+  'Line': "LineCollection",
+  'Feedrate': 0.028
+})
+
+gcode += shutdown({});
+
+saveText({
+    'Text' : gcode,
+    'Filename' : ResultFilename
 });
 
 print("Finished");

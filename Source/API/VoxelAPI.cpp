@@ -90,7 +90,7 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
 
   //copy a voxel volume
   std::unique_ptr<PolyglotAPI::APIFunction> traceVoxelLinesAPI = std::make_unique<PolyglotAPI::APIFunction>("traceVoxelLines", [this](const nlohmann::json& input) { return traceVoxelLines(input); });
-  densityAPI->setDescription(traceVoxelLinesDescription());
+  traceVoxelLinesAPI->setDescription(traceVoxelLinesDescription());
   api.addFunction(std::move(traceVoxelLinesAPI));
 
   ////voxelization boundary
@@ -416,6 +416,10 @@ createDensityField({
 
 nlohmann::json VoxelAPI::traceVoxelLines(const nlohmann::json& input) {
   auto& source = database.boolField[input["Source"]];
+
+  glm::dvec3 min = glm::dvec3(input["Min"][0], input["Min"][1], input["Min"][2]);
+  glm::dvec3 max = glm::dvec3(input["Max"][0], input["Max"][1], input["Max"][2]);
+
   auto lines = LineTracer::traceLines(source.first.get(), source.second);
   std::vector<std::vector<glm::dvec3>> glmd;
   for (const auto& streak : lines) {
@@ -425,8 +429,24 @@ nlohmann::json VoxelAPI::traceVoxelLines(const nlohmann::json& input) {
       sub.push_back(x);
     glmd.push_back(sub);
   }
+
+  auto span = max - min;
+  auto resolution = source.second;
+  for (auto& streak : glmd) {
+    for (auto& point : streak) {
+      point[0] = (point[0] / resolution[0]) * span[0] + min[0];
+      point[1] = (point[1] / resolution[1]) * span[1] + min[1];
+      point[2] = (point[2] / resolution[2]) * span[2] + min[2];
+    }
+  }
     
-  database.lines[input["Target"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(glmd);
+  if (database.lines.contains(input["Target"])) {
+    auto& d = database.lines[input["Target"]];
+    if (glmd.size() > 0)
+      d->insert(d->begin(), glmd.begin(), glmd.end());
+  }
+  else
+    database.lines[input["Target"]] = std::make_unique<std::vector<std::vector<glm::dvec3>>>(glmd);
   return "";
 }
 
@@ -437,7 +457,9 @@ Lines should be 1 Voxel thin, algorithm is dumb.
 
 traceVoxelLines({
     'Source' : 'BoolField',
-    'Target' : 'LineCollection'
+    'Target' : 'LineCollection',
+    'Min'    : bounds["Min"],
+    'Max'    : bounds["UniformMax"]
 });
 )";
 }
