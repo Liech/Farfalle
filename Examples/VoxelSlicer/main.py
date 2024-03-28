@@ -1,3 +1,4 @@
+import numpy
 
 print("Prepare Config");
 config = {
@@ -7,16 +8,9 @@ config = {
   'LayerHeight'       : 0.2,
   'WallAmount'        : 2,
   'NozzleDiameter'    : 0.40,
-  'VoxelResolution'   : 128, #dividable by 8
-  'PlanarSlicing'     : False,
+  'VoxelResolution'   : 256, #dividable by 8
   'LayerLimit'        : -1, # -1 for unlimited
-  'IntermediateFiles' : True,
-  # Non Planar Sinus Wobble:
-  'WobbleAmplitude'   : 1.0, # z height
-  'WobbleFrequency'   : 4.14*15, #amount of waves in full volume
-  'WobbleFrom'        : 0.11, # percentage where wobble is full
-  'WobbleTo'          : 0.51, #percentage where wobble stops being full
-  'rampTime'          : 0.1 #percentage before and after full wobble where it fades out
+  'WindowSize'        : 1 #mm   -- sliding voxel window
 };
 setData({'Name':'config', 'Data' : config });
 
@@ -27,6 +21,7 @@ NozzleDiameter = config["NozzleDiameter"];
 ###############
 # Preparation
 ###############
+padding = 1;
 
 print("Load Model");
 loadModel({'Name': 'Main', 'Filename': config["Filename"]})
@@ -36,123 +31,131 @@ bounds = modelBoundary({
 });
 
 minPos         = bounds["Min"];
-maxPos         = bounds["UniformMax"];
+maxPos         = bounds["Max"];
 cubeSize       = maxPos[0]-minPos[0]
-voxelLength    = cubeSize / resolution[0];
+voxelLength    = [
+(maxPos[0]-minPos[0]) / resolution[0],
+(maxPos[1]-minPos[1]) / resolution[1],
+(maxPos[2]-minPos[2]) / resolution[2],
+];
 print("Voxel Length: " + str(voxelLength));
 
-print("Voxelize Model");
-voxelizeModel({
-    'ModelName'  : 'Main',
-    'VoxelName'  : 'Main',
-    'Resolution' : resolution, # divideable by 8
-    'Start'      : bounds["Min"],
-    'End'        : bounds["UniformMax"]
-});
-Model = GetFarfalleBool("Main");
+windowSize = config["WindowSize"]
+ZResolution = int(windowSize / LayerHeight);
+ZResolution = ZResolution + (8-ZResolution%8); # has to be %8==0
 
 print("Init Z Layer");
 createVolume({
     'Name': 'ZLayer',
-    'Resolution': resolution, #dividable by 8
+    'Resolution': [resolution[0],resolution[1],ZResolution], #dividable by 8
     'Type' : 'Double' # 'Bool' / 'Double' / 'Int'
 });
 ZLayer = GetFarfalleDouble("ZLayer");
-for x in range(resolution[0]):
-    for y in range(resolution[1]):
-        for z in range(resolution[2]):
-                ZLayer[x,y,z] = z * voxelLength;
 
 print("Init X Layer");
 createVolume({
     'Name': 'XLayer',
-    'Resolution': resolution, #dividable by 8
+    'Resolution': [resolution[0],resolution[1],ZResolution], #dividable by 8
     'Type' : 'Double' # 'Bool' / 'Double' / 'Int'
 });
 XLayer = GetFarfalleDouble("XLayer");
-for x in range(resolution[0]):
-    for y in range(resolution[1]):
-        for z in range(resolution[2]):
-                XLayer[x,y,z] = x * voxelLength;
 
 print("Init Canvas");
 createVolume({
     'Name': 'Canvas',
-    'Resolution': resolution, # dividable by 8
+    'Resolution': [resolution[0],resolution[1],ZResolution], # dividable by 8
     'Type' : 'Bool' # 'Bool' / 'Double' / 'Int'
 });
 Canvas = GetFarfalleBool("Canvas");
 
 print("Create First Line");
-import time
-start_time = time.time()
-
-ZIso = bounds["Min"][2] + voxelLength*20;
-XIso = bounds["Min"][0] + NozzleDiameter*110;
-
-print(XIso)
-print(ZIso);
-dualIsoVoxel({
-    'VoxelField'     : 'Main',
-    'ResultField'    : 'Canvas',
-    'DensityField1'  : 'XLayer',
-    'DensityField2'  : 'ZLayer',
-    'Isovalue1'      : XIso,
-    'Isovalue2'      : ZIso
-});
-
-print("--- %s seconds ---" % (time.time() - start_time))
-
-print("Trace Voxels");
-traceVoxelLines({
-    'Source' : 'Canvas',
-    'Target' : 'LineCollection',
-    'Min'    : bounds["Min"],
-    'Max'    : bounds["UniformMax"]
-});
-
-print("Triangulate");
-triangulateVolume({
-    'VoxelName': 'Canvas',
-    'ModelName': 'Canvas',
-    'Start' : bounds["Min"],
-    'End'   : bounds["UniformMax"]
-});
-
-print("Save");
-
-saveModel({
-    'Name' : 'Canvas',
-    'Filename': 'Canvas.stl'
-});
 
 
-print('Write GCode');
-ResultFilename = config['ResultFilename'];
+print("Z Resolution: " + str(ZResolution));
 
-gcode = ""
-gcode += setHeat({
-    'Mode' : 'Set',
-    'Nozzle' : 215,
-    'Bed': 60
-});
+counter = 0;
+startZ = minPos[2] + padding - voxelLength[2];
+endZ   = maxPos[2] - padding + voxelLength[2];
+for windowPos in numpy.arange(startZ,endZ,LayerHeight):
+  counter = counter + 1
+  print("Window Position: " + str(windowPos));
+  windowMin = bounds["Min"]
+  windowMax = bounds["Max"]
+  windowMin[2] = windowPos - windowSize/2.0;
+  windowMax[2] = windowPos + windowSize/2.0; 
+  
+  voxelizeModel({
+    'ModelName'  : 'Main',
+    'VoxelName'  : 'Main',
+    'Resolution' : [resolution[0],resolution[1],ZResolution], # divideable by 8
+    'Start'      : windowMin,
+    'End'        : windowMax
+  });
+  triangulateVolume({
+    'VoxelName': 'Main',
+    'ModelName': 'MainSave',
+    'Start' : windowMin,
+    'End'   : windowMax
+  });
+  saveModel({
+      'Name' : 'MainSave',
+      'Filename': "dbg/voxel" + str(counter) + ".stl"
+  });
+  
+  for x in range(resolution[0]):
+    for y in range(resolution[1]):
+        for z in range(ZResolution):
+                ZLayer[x,y,z] = windowPos + z * voxelLength[2];
+  for x in range(resolution[0]):
+    for y in range(resolution[1]):
+        for z in range(ZResolution):
+                XLayer[x,y,z] = x * voxelLength[0];
+                
+  for XIso in numpy.arange(windowMin[0],windowMax[0],NozzleDiameter):
+    ZIso = windowPos;
+    #print(str(XIso) + " - "  + str(ZIso));
+    
+    dualIsoVoxel({
+        'VoxelField'     : 'Main',
+        'ResultField'    : 'Canvas',
+        'DensityField1'  : 'XLayer',
+        'DensityField2'  : 'ZLayer',
+        'Isovalue1'      : XIso,
+        'Isovalue2'      : ZIso
+    });
+    traceVoxelLines({
+        'Source' : 'Canvas',
+        'Target' : "LineCollection" + str(counter),
+        'Min'    : bounds["Min"],
+        'Max'    : bounds["Max"]
+    });
 
-gcode += startup({});
-#gcode += prime({});
-gcode += "\n; ;;;;;;;;;;;;;;;;;;";
-gcode += "\n; Printing:  ";
-gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
-
-gcode += linearPrint({
-  'Line': "LineCollection",
-  'Feedrate': 0.028
-})
-
-gcode += shutdown({});
-
-saveText({
-    'Text' : gcode,
-    'Filename' : ResultFilename
-});
-
+  print('Write GCode');
+  ResultFilename = config['ResultFilename'];
+  
+  gcode = ""
+  gcode += setHeat({
+      'Mode' : 'Set',
+      'Nozzle' : 215,
+      'Bed': 60
+  });
+  
+  gcode += startup({});
+  #gcode += prime({});
+  gcode += "\n; ;;;;;;;;;;;;;;;;;;";
+  gcode += "\n; Printing:  ";
+  gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
+  
+  gcode += linearPrint({
+    'Line': "LineCollection" + str(counter),
+    'Feedrate': 0.028
+  })
+  
+  gcode += shutdown({});
+  
+  saveText({
+      'Text' : gcode,
+      'Filename' : 'dbg/gcode_'+ str(windowPos) + '.gcode'
+  });
+  
 print("Finished");

@@ -31,7 +31,7 @@ void CustomPythonFunctions::add(apiDatabase& db) {
       glm::ivec3 resolution = db.boolField[name].second;
       size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
       pybind11::ssize_t size = dataSize;
-      auto shape = pybind11::array::ShapeContainer({ (pybind11::ssize_t)resolution.x, (pybind11::ssize_t)resolution.y, (pybind11::ssize_t)resolution.y });
+      auto shape = pybind11::array::ShapeContainer({ (pybind11::ssize_t)resolution.x, (pybind11::ssize_t)resolution.y, (pybind11::ssize_t)resolution.z });
       return pybind11::array_t<bool>{shape, vox, pybind11::cast(vox)};
       }, pybind11::arg("input") = pybind11::none());
     });
@@ -46,7 +46,7 @@ void CustomPythonFunctions::add(apiDatabase& db) {
       glm::ivec3 resolution = db.doubleField[name].second;
       size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
       pybind11::ssize_t size = dataSize;
-      auto shape = pybind11::array::ShapeContainer({ (pybind11::ssize_t)resolution.x, (pybind11::ssize_t)resolution.y, (pybind11::ssize_t)resolution.y });
+      auto shape = pybind11::array::ShapeContainer({ (pybind11::ssize_t)resolution.x, (pybind11::ssize_t)resolution.y, (pybind11::ssize_t)resolution.z });
       return pybind11::array_t<double>{shape, vox, pybind11::cast(vox)};
       }, pybind11::arg("input") = pybind11::none());
     });
@@ -61,7 +61,7 @@ void CustomPythonFunctions::add(apiDatabase& db) {
       glm::ivec3 resolution = db.intField[name].second;
       size_t dataSize = (size_t)resolution.x * (size_t)resolution.y * (size_t)resolution.z;
       pybind11::ssize_t size = dataSize;
-      auto shape = pybind11::array::ShapeContainer({ (pybind11::ssize_t)resolution.x, (pybind11::ssize_t)resolution.y, (pybind11::ssize_t)resolution.y });
+      auto shape = pybind11::array::ShapeContainer({ (pybind11::ssize_t)resolution.x, (pybind11::ssize_t)resolution.y, (pybind11::ssize_t)resolution.z });
       return pybind11::array_t<int32_t>{shape, vox, pybind11::cast(vox)};
       }, pybind11::arg("input") = pybind11::none());
     });
