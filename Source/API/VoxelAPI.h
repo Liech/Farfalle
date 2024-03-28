@@ -52,6 +52,8 @@ private:
   std::string createDensityFieldDescription();
   nlohmann::json traceVoxelLines(const nlohmann::json& input);
   std::string traceVoxelLinesDescription();
+  nlohmann::json dualIsoVoxel(const nlohmann::json& input);
+  std::string dualIsoVoxelDescription();
   //nlohmann::json voxelizationBoundary(const nlohmann::json& input);
   //std::string voxelizationBoundaryDescription();
 

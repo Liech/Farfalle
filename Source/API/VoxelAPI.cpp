@@ -88,10 +88,15 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   densityAPI->setDescription(copyVoxelDescription());
   api.addFunction(std::move(densityAPI));
 
-  //copy a voxel volume
+  //trace a voxel line
   std::unique_ptr<PolyglotAPI::APIFunction> traceVoxelLinesAPI = std::make_unique<PolyglotAPI::APIFunction>("traceVoxelLines", [this](const nlohmann::json& input) { return traceVoxelLines(input); });
   traceVoxelLinesAPI->setDescription(traceVoxelLinesDescription());
   api.addFunction(std::move(traceVoxelLinesAPI));
+
+  //finds based on two density fields an isoline of voxels
+  std::unique_ptr<PolyglotAPI::APIFunction> dualIsoVoxelAPI = std::make_unique<PolyglotAPI::APIFunction>("dualIsoVoxel", [this](const nlohmann::json& input) { return dualIsoVoxel(input); });
+  dualIsoVoxelAPI->setDescription(dualIsoVoxelDescription());
+  api.addFunction(std::move(dualIsoVoxelAPI));
 
   ////voxelization boundary
   //std::unique_ptr<PolyglotAPI::APIFunction> voxelizationBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizationBoundary", [this](const nlohmann::json& input) { return voxelizationBoundary(input); });
@@ -460,6 +465,67 @@ traceVoxelLines({
     'Target' : 'LineCollection',
     'Min'    : bounds["Min"],
     'Max'    : bounds["UniformMax"]
+});
+)";
+}
+
+
+nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
+  auto& voxelField = database.boolField[input["VoxelField"]];
+  auto& resultField = database.boolField[input["ResultField"]];
+  auto& densityField1 = database.doubleField[input["DensityField1"]];
+  auto& densityField2 = database.doubleField[input["DensityField2"]];
+  double isoValue1 = input["Isovalue1"];
+  double isoValue2 = input["Isovalue2"];
+  glm::ivec3 resolution = voxelField.second;
+  assert(resolution = densityField1.second);
+  assert(resolution = densityField2.second);
+  assert(resolution = resultField.second);
+
+  const bool* v  = voxelField.first.get();
+  const auto& d1 = *densityField1.first;
+  const auto& d2 = *densityField2.first;
+        auto* r  = resultField.first.get();
+
+#pragma omp parallel for
+  for (long long z = 0; z < resolution.z-1; z++) { //memory layout main direction
+    for (size_t y = 0; y < resolution.y-1; y++) {
+      for (size_t x = 0; x < resolution.x-1; x++) {
+        size_t address = z + y * resolution.z + x * resolution.z * resolution.y;
+        bool d1Value = d1[address] < isoValue1;
+        bool d2Value = d2[address] < isoValue2;
+        bool vValue  = v[address];
+
+        bool d1X = d1[address + resolution.z * resolution.y] < isoValue1; //d1[current + glm::ivec3(1,0,0)
+        bool d1Y = d1[address + resolution.z] < isoValue1;                //d1[current + glm::ivec3(0,1,0)
+        bool d1Z = d1[address + 1] < isoValue1;                           //d1[current + glm::ivec3(0,0,1)
+
+        bool d2X = d2[address + resolution.z * resolution.y] < isoValue2;
+        bool d2Y = d2[address + resolution.z] < isoValue2;
+        bool d2Z = d2[address + 1] < isoValue2;
+
+        bool d1Diff = d1Value != d1X || d1Value != d1Y || d1Value != d1Z;
+        bool d2Diff = d2Value != d2X || d2Value != d2Y || d2Value != d2Z;
+
+        r[address] = vValue && (d1Diff && d2Diff);
+      }
+    }
+  }
+  return "";
+}
+
+std::string VoxelAPI::dualIsoVoxelDescription() {
+  return R"(
+Puts the intersection line of two density field isosurfaces into a voxel field.
+Expects a voxel field to be true at that point as well.
+
+dualIsoVoxel({
+    'VoxelField'     : 'BoolField',
+    'ResultField'    : 'BoolField',
+    'DensityField1'  : 'DoubleField',
+    'DensityField2'  : 'DoubleField2',
+    'Isovalue1'      : 0.3,
+    'Isovalue2'      : 0.3
 });
 )";
 }

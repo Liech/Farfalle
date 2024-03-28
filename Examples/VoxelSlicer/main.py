@@ -89,17 +89,17 @@ start_time = time.time()
 
 ZIso = bounds["Min"][2] + voxelLength*20;
 XIso = bounds["Min"][0] + NozzleDiameter*110;
-for x in range(resolution[0]-1):
-    for y in range(resolution[1]-1):
-        for z in range(resolution[2]-1):
-                z0 = ZLayer[x,y,z] < ZIso
-                z1 = ZLayer[x,y,z+1] < ZIso
-                x0 = XLayer[x,y,z] < XIso
-                x1 = XLayer[x+1,y,z] < XIso
-                isZIsosurface = (z1 and not z0) or (not z1 and z0)
-                isXIsosurface = (x1 and not x0) or (not x1 and x0)
-                isTrue = Model[x,y,z] and isZIsosurface and isXIsosurface;
-                Canvas[x,y,z] = isTrue
+
+print(XIso)
+print(ZIso);
+dualIsoVoxel({
+    'VoxelField'     : 'Main',
+    'ResultField'    : 'Canvas',
+    'DensityField1'  : 'XLayer',
+    'DensityField2'  : 'ZLayer',
+    'Isovalue1'      : XIso,
+    'Isovalue2'      : ZIso
+});
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
