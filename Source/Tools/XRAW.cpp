@@ -4,8 +4,27 @@
 #include <stdexcept>
 
 namespace XRAW {
-  void XRAW::write(const std::string& filename, const bool*) {
+  void XRAW::write(const std::string& filename, const bool* data, size_t xResolution, size_t yResolution, size_t zResolution) {
+    header h;
+    h.colorChannelDataType = ColorChannelDataType::UnsignedInteger;
+    h.numOfColorChannels = NumberOfColorChannels::R;
+    h.bitsPerChannel = BitsPerChannel::Short;
+    h.bitsPerIndex = BitsPerIndex::NoPallete;
+    h.xResolution = xResolution;
+    h.xResolution = yResolution;
+    h.xResolution = zResolution;
+    h.numberOfPalleteColors = NumberOfPalleteColors::Amount256;
 
+    std::ofstream file;
+    file.open(filename);
+    writeHeader(file,h);
+
+    size_t dataSize = h.getDataSize();
+
+    for (size_t i = 0; i < dataSize; i++) {
+      writeUShort(file, data[i] ? 1 : 0);
+    }
+    file.close();
   }
 
   header XRAW::readHeader(const std::string& filename) {
@@ -15,7 +34,7 @@ namespace XRAW {
     return readHeader(buffer, position);
   }
 
-  std::unique_ptr<bool[]> XRAW::read(const std::string& filename) {
+  std::unique_ptr<bool[]> XRAW::readBool(const std::string& filename) {
     std::vector<unsigned char> buffer;
     size_t position = 0;
     readBuffer(filename, buffer);
@@ -75,6 +94,22 @@ namespace XRAW {
     return result;
   }
 
+  void XRAW::writeHeader(std::ofstream& stream, const header& input) {
+    stream.write("XRAW", 4);
+    unsigned char colorChannelDataType = (char)input.colorChannelDataType;
+    stream.write((const char*)colorChannelDataType, 1);
+    unsigned char numOfColorChannels = (char)input.numOfColorChannels;
+    stream.write((const char*)numOfColorChannels, 1);
+    unsigned char bitsPerChannel = (char)input.bitsPerChannel;
+    stream.write((const char*)bitsPerChannel, 1);
+    unsigned char bitsPerIndex = (char)input.bitsPerIndex;
+    stream.write((const char*)bitsPerIndex, 1);
+    writeUInt(stream, input.xResolution);
+    writeUInt(stream, input.yResolution);
+    writeUInt(stream, input.zResolution);
+    writeUInt(stream, (unsigned int)input.numberOfPalleteColors);
+  }
+
   unsigned int XRAW::readUInt(const std::vector<unsigned char>& data, size_t& position)
   {
     unsigned char bytes[] = { data[position],data[position + 1],data[position + 2],data[position + 3] };
@@ -82,5 +117,20 @@ namespace XRAW {
     unsigned int result = *pInt;
     position += 4;
     return result;
+  }
+
+  void XRAW::writeUInt(std::ofstream& stream, const unsigned int& value) {
+    unsigned char bytes[4];
+    bytes[0] = ((value >> 24) & 0xFF);
+    bytes[1] = ((value >> 16) & 0xFF);
+    bytes[2] = ((value >> 8) & 0xFF);
+    bytes[3] = (value & 0xFF);
+    stream.write((const char*)(bytes), 4);
+  }
+  void XRAW::writeUShort(std::ofstream& stream, const unsigned short& value) {
+    unsigned char bytes[2];
+    bytes[0] = ((value >> 8) & 0xFF);
+    bytes[1] = (value & 0xFF);
+    stream.write((const char*)(bytes), 2);
   }
 }

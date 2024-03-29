@@ -71,8 +71,7 @@ namespace XRAW {
   //importable by magicaVox (and simple to implement)
   class XRAW {
   public:
-    static void write(const std::string& filename, const bool*);
-    static std::unique_ptr<bool[]> read(const std::string& filename);
+    static void write(const std::string& filename, const bool*, size_t xResolution, size_t yResolution, size_t zResolution);
 
     static header readHeader(const std::string& filename);
     //static std::vector<std::array<float, 4>> readRGBAFloat(const std::string& filename);
@@ -82,8 +81,11 @@ namespace XRAW {
   private:
     static void readBuffer(const std::string& filename, std::vector<unsigned char>& data);
     static header readHeader(const std::vector<unsigned char>& data, size_t& position);
+    static void writeHeader(std::ofstream& stream,const header&);
 
 
     static unsigned int readUInt(const std::vector<unsigned char>& data, size_t& position);
+    static void writeUInt(std::ofstream& stream, const unsigned int& value);
+    static void writeUShort(std::ofstream& stream, const unsigned short& value);
   };
 }
