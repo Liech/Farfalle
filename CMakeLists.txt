@@ -33,6 +33,8 @@ set(Tools_Files
     "Source/Tools/glm2svg.cpp"
 	"Source/Tools/STL.cpp"
 	"Source/Tools/STL.h"
+	"Source/Tools/XRAW.cpp"
+	"Source/Tools/XRAW.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
 

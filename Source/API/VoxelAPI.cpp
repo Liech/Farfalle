@@ -478,9 +478,9 @@ nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
   double isoValue1 = input["Isovalue1"];
   double isoValue2 = input["Isovalue2"];
   glm::ivec3 resolution = voxelField.second;
-  assert(resolution = densityField1.second);
-  assert(resolution = densityField2.second);
-  assert(resolution = resultField.second);
+  assert(resolution == densityField1.second);
+  assert(resolution == densityField2.second);
+  assert(resolution == resultField.second);
 
   const bool* v  = voxelField.first.get();
   const auto& d1 = *densityField1.first;
