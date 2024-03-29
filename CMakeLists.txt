@@ -33,10 +33,48 @@ set(Tools_Files
     "Source/Tools/glm2svg.cpp"
 	"Source/Tools/STL.cpp"
 	"Source/Tools/STL.h"
-	"Source/Tools/XRAW.cpp"
-	"Source/Tools/XRAW.h"
 )
 source_group("Source/Tools" FILES ${Tools_Files})
+
+set(MagickaVox_Files
+    "Source/Tools/MagicaVox/Chunk.h"
+    "Source/Tools/MagicaVox/ChunkFactory.h"
+    "Source/Tools/MagicaVox/ChunkLAYR.h"
+    "Source/Tools/MagicaVox/ChunkMAIN.h"
+    "Source/Tools/MagicaVox/ChunkMATL.h"
+    "Source/Tools/MagicaVox/ChunknGRP.h"
+    "Source/Tools/MagicaVox/ChunknSHP.h"
+    "Source/Tools/MagicaVox/ChunknTRN.h"
+    "Source/Tools/MagicaVox/ChunkPACK.h"
+    "Source/Tools/MagicaVox/ChunkRGBA.h"
+    "Source/Tools/MagicaVox/ChunkrOBJ.h"
+    "Source/Tools/MagicaVox/ChunkSIZE.h"
+    "Source/Tools/MagicaVox/ChunkXYZI.h"
+    "Source/Tools/MagicaVox/Import.h"
+    "Source/Tools/MagicaVox/Reader.h"
+    "Source/Tools/MagicaVox/typeDICT.h"
+    "Source/Tools/MagicaVox/typeROTATION.h"
+    "Source/Tools/MagicaVox/VoxFile.h"
+	"Source/Tools/MagicaVox/Chunk.cpp"
+    "Source/Tools/MagicaVox/ChunkFactory.cpp"
+    "Source/Tools/MagicaVox/ChunkLAYR.cpp"
+    "Source/Tools/MagicaVox/ChunkMAIN.cpp"
+    "Source/Tools/MagicaVox/ChunkMATL.cpp"
+    "Source/Tools/MagicaVox/ChunknGRP.cpp"
+    "Source/Tools/MagicaVox/ChunknSHP.cpp"
+    "Source/Tools/MagicaVox/ChunknTRN.cpp"
+    "Source/Tools/MagicaVox/ChunkPACK.cpp"
+    "Source/Tools/MagicaVox/ChunkRGBA.cpp"
+    "Source/Tools/MagicaVox/ChunkrOBJ.cpp"
+    "Source/Tools/MagicaVox/ChunkSIZE.cpp"
+    "Source/Tools/MagicaVox/ChunkXYZI.cpp"
+    "Source/Tools/MagicaVox/Import.cpp"
+    "Source/Tools/MagicaVox/Reader.cpp"
+    "Source/Tools/MagicaVox/typeDICT.cpp"
+    "Source/Tools/MagicaVox/typeROTATION.cpp"
+    "Source/Tools/MagicaVox/VoxFile.cpp"
+)
+source_group("Source/Tools/MagicaVox" FILES ${MagickaVox_Files})
 
 set(GCode_Files
     "Source/GCode/LinearPrint.h"
@@ -90,9 +128,11 @@ set(API_Files
 )
 source_group("Source/API" FILES ${API_Files})
 
+
 set(ALL_FILES
     ${Source_Files}
     ${Tools_Files}
+	${MagickaVox_Files}
     ${Voxel_Files}
     ${GCode_Files}
 	${API_Files}

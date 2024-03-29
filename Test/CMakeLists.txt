@@ -6,6 +6,7 @@ find_package(Catch2 REQUIRED)
 
 set(Test_Files
 	"LineTracerTest.cpp"
+	"MagicaVoxTest.cpp"
 )
 source_group("Main" FILES ${Main_Files})
 set(Main_Files

@@ -13,7 +13,6 @@
 #include "Voxel/DistanceMap.h"
 #include "Voxel/CSG.h"
 #include "Voxel/LineTracer.h"
-#include "Tools/XRAW.h"
 
 VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
@@ -100,14 +99,14 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   api.addFunction(std::move(dualIsoVoxelAPI));
 
   //loads xraw files
-  std::unique_ptr<PolyglotAPI::APIFunction> loadXRawAPI = std::make_unique<PolyglotAPI::APIFunction>("loadXRaw", [this](const nlohmann::json& input) { return loadXRaw(input); });
-  loadXRawAPI->setDescription(loadXRawDescription());
-  api.addFunction(std::move(loadXRawAPI));
+  std::unique_ptr<PolyglotAPI::APIFunction> loadMagicaVoxAPI = std::make_unique<PolyglotAPI::APIFunction>("loadMagicaVox", [this](const nlohmann::json& input) { return loadMagicaVox(input); });
+  loadMagicaVoxAPI->setDescription(loadMagicaVoxDescription());
+  api.addFunction(std::move(loadMagicaVoxAPI));
 
   //saves as xraw file
-  std::unique_ptr<PolyglotAPI::APIFunction> saveXRawAPI = std::make_unique<PolyglotAPI::APIFunction>("saveXRaw", [this](const nlohmann::json& input) { return saveXRaw(input); });
-  saveXRawAPI->setDescription(saveXRawDescription());
-  api.addFunction(std::move(saveXRawAPI));
+  std::unique_ptr<PolyglotAPI::APIFunction> saveMagicaVoxAPI = std::make_unique<PolyglotAPI::APIFunction>("saveMagicaVox", [this](const nlohmann::json& input) { return saveMagicaVox(input); });
+  saveMagicaVoxAPI->setDescription(saveMagicaVoxDescription());
+  api.addFunction(std::move(saveMagicaVoxAPI));
 
   ////voxelization boundary
   //std::unique_ptr<PolyglotAPI::APIFunction> voxelizationBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizationBoundary", [this](const nlohmann::json& input) { return voxelizationBoundary(input); });
@@ -541,35 +540,34 @@ dualIsoVoxel({
 )";
 }
 
-nlohmann::json VoxelAPI::loadXRaw(const nlohmann::json& input) {
+nlohmann::json VoxelAPI::loadMagicaVox(const nlohmann::json& input) {
 
   return "";
 }
 
-std::string VoxelAPI::loadXRawDescription() {
+std::string VoxelAPI::loadMagicaVoxDescription() {
   return R"(
 Loads xraw as voxels. Can be exported with MagicaVox
 
 loadXRaw({
     'VoxelField'     : 'BoolField',
-    'Filename'       : 'Dataname.xraw'
+    'Filename'       : 'Dataname.vox'
 });
 )";
 }
 
-nlohmann::json VoxelAPI::saveXRaw(const nlohmann::json& input) {
-  auto& voxelField = database.boolField[input["VoxelField"]];
-  XRAW::XRAW::write(input["Filename"], voxelField.first.get(), voxelField.second.x, voxelField.second.y, voxelField.second.z);
+nlohmann::json VoxelAPI::saveMagicaVox(const nlohmann::json& input) {
+
   return "";
 }
 
-std::string VoxelAPI::saveXRawDescription() {
+std::string VoxelAPI::saveMagicaVoxDescription() {
   return R"(
 Saves Voxels as xraw. Can be imported with MagicaVox
 
 saveXRaw({
     'VoxelField'     : 'BoolField',
-    'Filename'       : 'Dataname.xraw'
+    'Filename'       : 'Dataname.vox'
 });
 )";
 }

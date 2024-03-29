@@ -54,10 +54,10 @@ private:
   std::string traceVoxelLinesDescription();
   nlohmann::json dualIsoVoxel(const nlohmann::json& input);
   std::string dualIsoVoxelDescription();
-  nlohmann::json loadXRaw(const nlohmann::json& input);
-  std::string loadXRawDescription(); 
-  nlohmann::json saveXRaw(const nlohmann::json& input);
-  std::string saveXRawDescription();
+  nlohmann::json loadMagicaVox(const nlohmann::json& input);
+  std::string loadMagicaVoxDescription();
+  nlohmann::json saveMagicaVox(const nlohmann::json& input);
+  std::string saveMagicaVoxDescription();
 
   //nlohmann::json voxelizationBoundary(const nlohmann::json& input);
   //std::string voxelizationBoundaryDescription();
