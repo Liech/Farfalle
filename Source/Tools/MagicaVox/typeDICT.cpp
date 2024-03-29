@@ -1,7 +1,5 @@
 #include "typeDICT.h"
 
-namespace Aezesel {
-  namespace MagicaVoxImporter {
+namespace MagicaVoxImporter {
 
-  }
 }

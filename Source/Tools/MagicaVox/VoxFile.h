@@ -8,19 +8,17 @@
 
 //https://paulbourke.net/dataformats/vox/
 
-namespace Aezesel {
-  namespace MagicaVoxImporter {
-    class ChunkMAIN;
+namespace MagicaVoxImporter {
+  class ChunkMAIN;
 
-    class VoxFile {
-    public:
-      VoxFile(std::string filename);
-      virtual ~VoxFile();
+  class VoxFile {
+  public:
+    VoxFile(std::string filename);
+    virtual ~VoxFile();
 
-      std::vector<std::vector<unsigned char>> Models;
-      std::array<std::array<unsigned char, 4>, 256>       Colors;
-      std::vector<std::map<std::string, std::string>>     Materials;
-    };
+    std::vector<std::vector<unsigned char>> Models;
+    std::array<std::array<unsigned char, 4>, 256>       Colors;
+    std::vector<std::map<std::string, std::string>>     Materials;
+  };
 
-  }
 }
