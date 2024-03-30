@@ -3,6 +3,7 @@
 #include "Chunk.h"
 
 namespace MagicaVoxImporter {
+  //Chunk id 'SIZE' : model size
   class ChunkSIZE : public  Chunk {
   public:
     std::string getID() override { return "SIZE"; }

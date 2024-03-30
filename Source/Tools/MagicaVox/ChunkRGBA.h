@@ -10,7 +10,8 @@ namespace MagicaVoxImporter {
     unsigned char a;
   };
 
-
+  //Chunk id 'RGBA' : palette
+  //Default Palette : if chunk 'RGBA' is absent
   class ChunkRGBA : public  Chunk {
   public:
     std::string getID() override { return "RGBA"; }

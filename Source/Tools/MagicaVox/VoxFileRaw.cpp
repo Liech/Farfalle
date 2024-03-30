@@ -31,7 +31,7 @@ namespace MagicaVoxImporter {
     if (version != 150 && version != 200)
       throw std::runtime_error("Unkown MagicaVox File Version. Supported: 150 && 200");
     std::unique_ptr<Chunk> chunk = content.readChunk();
-    chunk->print();
+    //chunk->print();
     return std::move(chunk);
   }
 }

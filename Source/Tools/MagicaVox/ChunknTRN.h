@@ -4,6 +4,7 @@
 #include "Chunk.h"
 
 namespace MagicaVoxImporter {
+  //Transform Node Chunk
   class ChunknTRN : public  Chunk {
   public:
     std::string getID() override { return "nTRN"; }

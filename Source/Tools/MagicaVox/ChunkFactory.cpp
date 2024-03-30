@@ -14,6 +14,8 @@
 #include "ChunkSIZE.h"
 #include "ChunkXYZI.h"
 #include "ChunkrOBJ.h"
+#include "ChunkRCAM.h"
+#include "ChunkNOTE.h"
 
 namespace MagicaVoxImporter {
   std::unique_ptr<Chunk> ChunkFactory::make(std::string id) {
@@ -39,6 +41,10 @@ namespace MagicaVoxImporter {
       return std::make_unique<ChunkXYZI>();
     else if (id == "rOBJ")
       return std::make_unique<ChunkrOBJ>();
+    else if (id == "rCAM")
+      return std::make_unique<ChunkRCAM>();
+    else if (id == "NOTE")
+      return std::make_unique<ChunkNOTE>();
     else
       throw std::runtime_error("Unkown ID: " + id);
   }

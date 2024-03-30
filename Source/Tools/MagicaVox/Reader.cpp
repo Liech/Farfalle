@@ -22,6 +22,8 @@ namespace MagicaVoxImporter {
   }
 
   std::vector<unsigned char> Reader::readChars(size_t numberOfBytes) {
+    if (numberOfBytes == 0)
+      return {};
     assertCanRead();
     std::vector<unsigned char> subVector(_content.begin() + _currentPosition, _content.begin() + _currentPosition + numberOfBytes);
     _currentPosition += numberOfBytes;

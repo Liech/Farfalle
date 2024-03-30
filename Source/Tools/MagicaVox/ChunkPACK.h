@@ -3,6 +3,7 @@
 #include "Chunk.h"
 
 namespace MagicaVoxImporter {
+  //Chunk id 'PACK' : if it is absent, only one model in the file; only used for the animation in 0.98.2
   class ChunkPACK : public  Chunk {
   public:
     std::string getID() override { return "PACK"; }

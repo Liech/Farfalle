@@ -3,6 +3,7 @@
 #include <map>
 
 namespace MagicaVoxImporter {
+  //Layer Chunk
   class ChunkLAYR : public Chunk {
   public:
     std::string getID() override { return "LAYR"; }

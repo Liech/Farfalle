@@ -36,7 +36,6 @@ namespace MagicaVoxImporter {
         size_t address = xyzi.content[j].X + xyzi.content[j].Y * size.sizeZ + xyzi.content[j].Z * size.sizeZ * size.sizeY;
         model[address] = xyzi.content[j].value;
       }
-      Models.push_back(model);
     }
 
 
@@ -55,8 +54,10 @@ namespace MagicaVoxImporter {
 
     Materials.resize(256);
     while (currentChunk < parsedFile->numberOfChilds()) {
-      const ChunkMATL& mat = (const ChunkMATL&)parsedFile->getChild(currentChunk);
-      Materials[mat.MaterialID] = mat.Properties;
+      if (parsedFile->childIsType<ChunkMATL>(currentChunk)) {
+        const ChunkMATL& mat = (const ChunkMATL&)parsedFile->getChild(currentChunk);
+        Materials[mat.MaterialID-1] = mat.Properties;
+      }
       currentChunk++;
     }
 

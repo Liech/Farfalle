@@ -5,6 +5,7 @@
 //https://github.com/ephtracy/voxel-model/issues/19
 
 namespace MagicaVoxImporter {
+  //Render Objects Chunk
   class ChunkrOBJ : public  Chunk {
   public:
     std::string getID() override { return "rOBJ"; }

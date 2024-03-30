@@ -4,6 +4,7 @@
 #include <map>
 
 namespace MagicaVoxImporter {
+  //Shape Node Chunk
   class ChunknSHP : public  Chunk {
   public:
     std::string getID() override { return "nSHP"; }

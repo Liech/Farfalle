@@ -4,6 +4,7 @@
 #include <map>
 
 namespace MagicaVoxImporter {
+  //Material Chunk
   class ChunkMATL : public Chunk {
   public:
     std::string getID() override { return "MATL"; }

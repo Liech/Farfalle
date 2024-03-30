@@ -4,6 +4,7 @@
 #include <map>
 
 namespace MagicaVoxImporter {
+  //Group Node Chunk
   class ChunknGRP : public Chunk {
   public:
     std::string getID() override { return "nGRP"; }
