@@ -1,6 +1,6 @@
 #include "ChunkMATL.h"
 
-#include "Reader.h"
+#include "Tools/MagicaVox/IO/Reader.h"
 #include <map>
 
 namespace MagicaVoxImporter {

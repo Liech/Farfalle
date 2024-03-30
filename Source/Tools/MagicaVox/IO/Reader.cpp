@@ -1,6 +1,6 @@
-#include "Reader.h"
-#include "ChunkFactory.h"
-#include "Chunk.h"
+#include "Tools/MagicaVox/IO/Reader.h"
+#include "Tools/MagicaVox/Chunk/ChunkFactory.h"
+#include "Tools/MagicaVox/Chunk/Chunk.h"
 #include <stdexcept>
 
 namespace MagicaVoxImporter {

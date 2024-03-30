@@ -1,5 +1,5 @@
 #include "ChunkNOTE.h"
-#include "Reader.h"
+#include "Tools/MagicaVox/IO/Reader.h"
 
 #include <iostream>
 #include <string>

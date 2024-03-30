@@ -1,6 +1,6 @@
 #include "Chunk.h"
 
-#include "Reader.h"
+#include "Tools/MagicaVox/IO/Reader.h"
 #include "ChunkFactory.h"
 
 #include <iostream>

@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <vector>
 
-#include "Chunk.h"
-#include "Reader.h"
+#include "Chunk/Chunk.h"
+#include "IO/Reader.h"
 
 namespace MagicaVoxImporter {
   VoxFileRaw::VoxFileRaw() {

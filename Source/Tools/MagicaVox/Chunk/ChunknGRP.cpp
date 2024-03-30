@@ -1,6 +1,6 @@
 #include "ChunknGRP.h"
 
-#include "Reader.h"
+#include "Tools/MagicaVox/IO/Reader.h"
 
 namespace MagicaVoxImporter {
   void ChunknGRP::read(Reader own, Reader child) {

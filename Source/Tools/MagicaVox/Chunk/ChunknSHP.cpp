@@ -1,6 +1,6 @@
 #include "ChunknSHP.h"
 
-#include "Reader.h"
+#include "Tools/MagicaVox/IO/Reader.h"
 
 namespace MagicaVoxImporter {
 

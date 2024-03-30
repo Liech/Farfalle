@@ -2,12 +2,12 @@
 
 #include <memory>
 
-#include "ChunkMAIN.h"
-#include "ChunkPACK.h"
-#include "ChunkSIZE.h"
-#include "ChunkXYZI.h"
-#include "ChunkRGBA.h"
-#include "ChunkMATL.h"
+#include "Chunk/ChunkMAIN.h"
+#include "Chunk/ChunkPACK.h"
+#include "Chunk/ChunkSIZE.h"
+#include "Chunk/ChunkXYZI.h"
+#include "Chunk/ChunkRGBA.h"
+#include "Chunk/ChunkMATL.h"
 
 #include "VoxFileRaw.h"
 
