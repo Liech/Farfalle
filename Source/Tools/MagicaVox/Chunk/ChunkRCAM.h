@@ -17,7 +17,7 @@ namespace MagicaVoxImporter {
   //Render Camera Chunk
   class ChunkRCAM : public  Chunk {
   public:
-    std::string getID() override { return "RCAM"; }
+    std::string getID() const override { return "RCAM"; }
     void        read(Reader own, Reader child) override;
 
     int                                cameraID;

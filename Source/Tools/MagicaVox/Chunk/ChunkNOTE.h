@@ -9,7 +9,7 @@ namespace MagicaVoxImporter {
   //Palette Note Chunk (defines palette color names)
   class ChunkNOTE : public  Chunk {
   public:
-    std::string getID() override { return "NOTE"; }
+    std::string getID() const override { return "NOTE"; }
     void        read(Reader own, Reader child) override;
 
     std::vector<std::string> colorNames;

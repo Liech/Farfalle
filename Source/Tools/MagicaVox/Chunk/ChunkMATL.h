@@ -7,7 +7,7 @@ namespace MagicaVoxImporter {
   //Material Chunk
   class ChunkMATL : public Chunk {
   public:
-    std::string getID() override { return "MATL"; }
+    std::string getID() const override { return "MATL"; }
     void        read(Reader own, Reader child) override;
 
     int MaterialID;

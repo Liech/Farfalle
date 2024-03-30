@@ -20,3 +20,8 @@ TEST_CASE("MagicaVox/3x3") {
   for (size_t i = 6; i < 10; i++)
     REQUIRE(voxel[i]);
 }
+
+TEST_CASE("MagicaVox/ReadWrite/3x3") {
+  auto vox = MagicaVoxImporter::VoxFile::readBinary("TestData/3x3x3.vox");
+  MagicaVoxImporter::VoxFile::writeBinary(vox.first.get(), vox.second, "3x3x3_farfalle.vox");
+}

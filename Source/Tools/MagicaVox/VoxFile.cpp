@@ -83,10 +83,10 @@ namespace MagicaVoxImporter {
 
   void VoxFile::writeBinary(bool* data, const std::array<size_t, 3>& size, const std::string& filename) {
     ChunkMAIN mainChunk;
-    ChunkSIZE sizeChunk;
-    sizeChunk.sizeX = size[0];
-    sizeChunk.sizeY = size[1];
-    sizeChunk.sizeZ = size[2];
+    std::unique_ptr<ChunkSIZE> sizeChunk = std::make_unique<ChunkSIZE>();
+    sizeChunk->sizeX = size[0];
+    sizeChunk->sizeY = size[1];
+    sizeChunk->sizeZ = size[2];
     
     std::unique_ptr<ChunkXYZI> contentChunk = std::make_unique<ChunkXYZI>();
     size_t dataSize = size[0] * size[1] * size[2];
@@ -100,12 +100,9 @@ namespace MagicaVoxImporter {
       vox.value = data[i]?'U':0;
     }
 
-    mainChunk.addChild(std::make_unique<ChunkSIZE>(sizeChunk));
+    mainChunk.addChild(std::move(sizeChunk));
     mainChunk.addChild(std::move(contentChunk));
 
-    std::ofstream file;
-    file.open(filename);
-
-    mainChunk.write(file);
+    VoxFileRaw::write(mainChunk, filename);
   }
 }

@@ -6,7 +6,7 @@ namespace MagicaVoxImporter {
   //Chunk id 'SIZE' : model size
   class ChunkSIZE : public  Chunk {
   public:
-    std::string getID() override { return "SIZE"; }
+    std::string getID() const override { return "SIZE"; }
     void        read(Reader own, Reader child) override;
     void        print(int indentation = 0) override;
 

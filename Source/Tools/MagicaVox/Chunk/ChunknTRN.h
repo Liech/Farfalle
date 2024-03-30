@@ -7,7 +7,7 @@ namespace MagicaVoxImporter {
   //Transform Node Chunk
   class ChunknTRN : public  Chunk {
   public:
-    std::string getID() override { return "nTRN"; }
+    std::string getID() const override { return "nTRN"; }
     void        read(Reader own, Reader child) override;
 
     int                ID;

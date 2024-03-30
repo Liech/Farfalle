@@ -13,7 +13,7 @@ namespace MagicaVoxImporter {
   //Chunk id 'XYZI' : model voxels, paired with the SIZE chunk
   class ChunkXYZI : public  Chunk {
   public:
-    std::string getID() override { return "XYZI"; }
+    std::string getID() const override { return "XYZI"; }
     void        read(Reader own, Reader child) override;
     void        print(int indentation = 0) override;
 

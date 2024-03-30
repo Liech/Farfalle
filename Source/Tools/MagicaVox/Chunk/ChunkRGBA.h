@@ -14,7 +14,7 @@ namespace MagicaVoxImporter {
   //Default Palette : if chunk 'RGBA' is absent
   class ChunkRGBA : public  Chunk {
   public:
-    std::string getID() override { return "RGBA"; }
+    std::string getID() const override { return "RGBA"; }
     void read(Reader own, Reader child) override;
 
     color palette[256];

@@ -13,11 +13,11 @@ namespace MagicaVoxImporter {
     }
   }
 
-  size_t Chunk::numberOfChilds() {
+  size_t Chunk::numberOfChilds() const {
     return _childs.size();
   }
 
-  const Chunk& Chunk::getChild(size_t i) {
+  const Chunk& Chunk::getChild(size_t i) const {
     return *_childs[i];
   }
 
@@ -31,7 +31,6 @@ namespace MagicaVoxImporter {
       _childs[i]->print(indentation + 1);
   }
 
-  void Chunk::write(std::ofstream& file) {
-    
+  void Chunk::write(std::vector<unsigned char>& file) const {
   }
 }

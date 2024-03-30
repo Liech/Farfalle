@@ -7,7 +7,7 @@ namespace MagicaVoxImporter {
   //Shape Node Chunk
   class ChunknSHP : public  Chunk {
   public:
-    std::string getID() override { return "nSHP"; }
+    std::string getID() const override { return "nSHP"; }
     void        read(Reader own, Reader child) override;
 
     int                                                             ID;

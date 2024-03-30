@@ -7,6 +7,7 @@
 
 #include "Chunk/Chunk.h"
 #include "IO/Reader.h"
+#include "IO/Writer.h"
 
 namespace MagicaVoxImporter {
   VoxFileRaw::VoxFileRaw() {
@@ -34,4 +35,15 @@ namespace MagicaVoxImporter {
     //chunk->print();
     return std::move(chunk);
   }
+
+  void VoxFileRaw::write(const Chunk& chunk, const std::string& filename) {
+    std::ofstream file;
+    file.open(filename);
+    file.write("VOX ", 4);
+    Writer::write(file, 200);
+    std::vector<unsigned char> toWrite;
+    chunk.write(toWrite);
+    file.write((const char*)toWrite.data(), toWrite.size());
+  }
+
 }

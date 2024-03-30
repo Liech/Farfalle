@@ -12,5 +12,9 @@ namespace MagicaVoxImporter {
     virtual ~VoxFileRaw();
 
     static std::unique_ptr<Chunk> read(const std::string& filename);
+    static void write(const Chunk&, const std::string& filename);
+
+  private:
+
   };
 }

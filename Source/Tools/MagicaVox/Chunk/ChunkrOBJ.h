@@ -8,7 +8,7 @@ namespace MagicaVoxImporter {
   //Render Objects Chunk
   class ChunkrOBJ : public  Chunk {
   public:
-    std::string getID() override { return "rOBJ"; }
+    std::string getID() const override { return "rOBJ"; }
     void        read(Reader own, Reader child) override;
   };
 }

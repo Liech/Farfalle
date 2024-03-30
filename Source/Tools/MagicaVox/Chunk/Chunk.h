@@ -9,11 +9,11 @@ namespace MagicaVoxImporter {
   class Reader;
   class Chunk {
   public:
-    virtual std::string    getID() = 0;
+    virtual std::string    getID() const = 0;
     virtual void           read(Reader own, Reader child);
 
-    size_t                 numberOfChilds();
-    const Chunk&           getChild(size_t i);
+    size_t                 numberOfChilds() const;
+    const Chunk&           getChild(size_t i) const;
 
     void                   addChild(std::unique_ptr<Chunk> newchild);
 
@@ -23,7 +23,7 @@ namespace MagicaVoxImporter {
       return dynamic_cast<T*>(_childs[i].get()) != nullptr;
     }
 
-    virtual void write(std::ofstream&);
+    virtual void write(std::vector<unsigned char>&) const;
 
   private:
     std::vector<std::unique_ptr<Chunk>> _childs;
