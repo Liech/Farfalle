@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <fstream>
 
 namespace MagicaVoxImporter {
   class Reader;
@@ -21,6 +22,8 @@ namespace MagicaVoxImporter {
     template<typename T> bool childIsType(size_t i) {
       return dynamic_cast<T*>(_childs[i].get()) != nullptr;
     }
+
+    virtual void write(std::ofstream&);
 
   private:
     std::vector<std::unique_ptr<Chunk>> _childs;

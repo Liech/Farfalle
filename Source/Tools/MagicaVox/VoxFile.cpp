@@ -1,6 +1,8 @@
 #include "VoxFile.h"
 
 #include <memory>
+#include <cassert>
+#include <fstream>
 
 #include "Chunk/ChunkMAIN.h"
 #include "Chunk/ChunkPACK.h"
@@ -28,14 +30,15 @@ namespace MagicaVoxImporter {
       currentChunk++;
       ChunkXYZI& xyzi = (ChunkXYZI&)parsedFile->getChild(currentChunk);
       currentChunk++;
-      Models.push_back({});
-      auto& model = Models.back();
+      std::vector<unsigned char> content;
       size_t dataSize = (size_t)size.sizeX * (size_t)size.sizeY * (size_t)size.sizeZ;
-      model.resize(dataSize);
+      content.resize(dataSize);
       for (int j = 0; j < xyzi.numVoxels; j++) {
         size_t address = xyzi.content[j].X + xyzi.content[j].Y * size.sizeZ + xyzi.content[j].Z * size.sizeZ * size.sizeY;
-        model[address] = xyzi.content[j].value;
+        content[address] = xyzi.content[j].value;
       }
+      std::array<size_t, 3> dimensions = { size.sizeX,size.sizeY,size.sizeZ };
+      Models.push_back(std::make_pair(content, dimensions));
     }
 
 
@@ -65,5 +68,44 @@ namespace MagicaVoxImporter {
 
   VoxFile::~VoxFile() {
 
+  }
+
+  std::pair<std::unique_ptr<bool[]>, std::array<size_t, 3>> VoxFile::readBinary(const std::string& filename) {
+    VoxFile v(filename);
+    assert(v.Models.size() == 1);
+    std::array<size_t, 3> dimensions = v.Models[0].second;  
+    size_t dataSize = dimensions[0] * dimensions[1] * dimensions[2];
+    std::unique_ptr<bool[]> content = std::make_unique<bool[]>(dataSize);
+    for (size_t i = 0; i < dataSize; i++)
+      content[i] = v.Models[0].first[i] != 0;
+    return std::make_pair(std::move(content),dimensions);
+  }
+
+  void VoxFile::writeBinary(bool* data, const std::array<size_t, 3>& size, const std::string& filename) {
+    ChunkMAIN mainChunk;
+    ChunkSIZE sizeChunk;
+    sizeChunk.sizeX = size[0];
+    sizeChunk.sizeY = size[1];
+    sizeChunk.sizeZ = size[2];
+    
+    std::unique_ptr<ChunkXYZI> contentChunk = std::make_unique<ChunkXYZI>();
+    size_t dataSize = size[0] * size[1] * size[2];
+    contentChunk->numVoxels = dataSize;
+    contentChunk->content.resize(dataSize);
+    for (size_t i = 0; i < dataSize; i++) {
+      auto& vox = contentChunk->content[i];
+      vox.X = i % size[0];
+      vox.Y = (i / size[0]) % (size[0] * size[1]);
+      vox.Z = i / (size[0] * size[1]);
+      vox.value = data[i]?'U':0;
+    }
+
+    mainChunk.addChild(std::make_unique<ChunkSIZE>(sizeChunk));
+    mainChunk.addChild(std::move(contentChunk));
+
+    std::ofstream file;
+    file.open(filename);
+
+    mainChunk.write(file);
   }
 }

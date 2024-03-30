@@ -77,6 +77,8 @@ set(MagickaVox_IO
     "Source/Tools/MagicaVox/IO/typeDICT.cpp"
     "Source/Tools/MagicaVox/IO/typeROTATION.h"
     "Source/Tools/MagicaVox/IO/typeROTATION.cpp"
+    "Source/Tools/MagicaVox/IO/Writer.h"
+    "Source/Tools/MagicaVox/IO/Writer.cpp"
 )
 source_group("Source/Tools/MagicaVox/IO" FILES ${MagickaVox_IO})
 

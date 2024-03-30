@@ -30,4 +30,8 @@ namespace MagicaVoxImporter {
     for (int i = 0; i < _childs.size(); i++)
       _childs[i]->print(indentation + 1);
   }
+
+  void Chunk::write(std::ofstream& file) {
+    
+  }
 }
