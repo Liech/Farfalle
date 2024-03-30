@@ -25,7 +25,7 @@ namespace MagicaVoxImporter {
 
     std::vector<std::pair<std::vector<unsigned char>, std::array<size_t, 3>>> Models;
     std::array<std::array<unsigned char, 4>, 256>                             Colors;
-    std::vector<std::map<std::string, std::string>>                           Materials;
+    std::vector<std::map<std::string, std::string>>                           Materials;    
   };
 
 }

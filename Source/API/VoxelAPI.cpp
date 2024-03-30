@@ -14,6 +14,8 @@
 #include "Voxel/CSG.h"
 #include "Voxel/LineTracer.h"
 
+#include "Tools/MagicaVox/VoxFile.h"
+
 
 VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
@@ -542,7 +544,8 @@ dualIsoVoxel({
 }
 
 nlohmann::json VoxelAPI::loadMagicaVox(const nlohmann::json& input) {
-
+  auto data = MagicaVoxImporter::VoxFile::readBinary(input["Filename"]);
+  database.boolField[input["VoxelField"]] = std::make_pair(std::move(data.first), glm::ivec3(data.second[0], data.second[1], data.second[2]));
   return "";
 }
 
@@ -558,7 +561,8 @@ loadXRaw({
 }
 
 nlohmann::json VoxelAPI::saveMagicaVox(const nlohmann::json& input) {
-
+  auto& voxelField = database.boolField[input["VoxelField"]];
+  MagicaVoxImporter::VoxFile::writeBinary(voxelField.first.get(), { (size_t)voxelField.second.x,(size_t)voxelField.second.y,(size_t)voxelField.second.z }, input["Filename"]);
   return "";
 }
 

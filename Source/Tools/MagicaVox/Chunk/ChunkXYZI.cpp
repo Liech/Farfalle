@@ -1,5 +1,6 @@
 #include "ChunkXYZI.h"
 #include "Tools/MagicaVox/IO/Reader.h"
+#include "Tools/MagicaVox/IO/Writer.h"
 
 #include <iostream>
 #include <string>
@@ -21,9 +22,23 @@ namespace MagicaVoxImporter {
     }
   }
 
-
   void ChunkXYZI::print(int indentation) {
     Chunk::print(indentation);
     std::cout << std::string(indentation + 1, ' ') << content.size() << std::endl;
+  }
+
+  void ChunkXYZI::write(std::vector<unsigned char>& file) const {
+    Writer::write(file, getID());
+    Writer::write(file, 4 + 4 * numVoxels);//own content size
+    Writer::write(file, 0); //child size
+    Writer::write(file, numVoxels);
+
+    for (size_t i = 0; i < numVoxels; i++) {
+      auto& v = content[i];
+      file.push_back(v.X);
+      file.push_back(v.Y);
+      file.push_back(v.Z);
+      file.push_back(v.value);
+    }
   }
 }

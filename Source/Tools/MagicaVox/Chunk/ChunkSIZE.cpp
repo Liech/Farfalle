@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "Tools/MagicaVox/IO/Reader.h"
+#include "Tools/MagicaVox/IO/Writer.h"
 
 namespace MagicaVoxImporter {
   void ChunkSIZE::read(Reader own, Reader child) {
@@ -18,5 +19,14 @@ namespace MagicaVoxImporter {
     std::cout << std::string(indentation + 1, ' ') << sizeX << std::endl;
     std::cout << std::string(indentation + 1, ' ') << sizeY << std::endl;
     std::cout << std::string(indentation + 1, ' ') << sizeZ << std::endl;
+  }
+
+  void ChunkSIZE::write(std::vector<unsigned char>& file) const {
+    Writer::write(file, getID());
+    Writer::write(file, 12);//own content size
+    Writer::write(file, 0); //child size
+    Writer::write(file,sizeX);
+    Writer::write(file,sizeY);
+    Writer::write(file,sizeZ);
   }
 }

@@ -16,6 +16,7 @@ namespace MagicaVoxImporter {
     std::string getID() const override { return "XYZI"; }
     void        read(Reader own, Reader child) override;
     void        print(int indentation = 0) override;
+    virtual void write(std::vector<unsigned char>&) const override;
 
     int                numVoxels = 0;
     std::vector<voxel> content;

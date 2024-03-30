@@ -20,6 +20,8 @@ namespace MagicaVoxImporter {
     virtual void           print(int indentation = 0);
 
     template<typename T> bool childIsType(size_t i) {
+      if (i >= _childs.size())
+        return false;
       return dynamic_cast<T*>(_childs[i].get()) != nullptr;
     }
 

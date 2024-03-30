@@ -17,6 +17,7 @@
 namespace MagicaVoxImporter {
   VoxFile::VoxFile(const std::string& filename) {
     std::unique_ptr<Chunk> parsedFile = VoxFileRaw::read(filename);
+    //parsedFile->print(1);
     size_t currentChunk = 0;
     int numberOfModels = 1;
     if (parsedFile->childIsType<ChunkPACK>(currentChunk)) {
@@ -95,7 +96,7 @@ namespace MagicaVoxImporter {
     for (size_t i = 0; i < dataSize; i++) {
       auto& vox = contentChunk->content[i];
       vox.X = i % size[0];
-      vox.Y = (i / size[0]) % (size[0] * size[1]);
+      vox.Y = (i / size[0]) % (size[1]);
       vox.Z = i / (size[0] * size[1]);
       vox.value = data[i]?'U':0;
     }

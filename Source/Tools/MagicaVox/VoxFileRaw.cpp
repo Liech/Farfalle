@@ -39,7 +39,8 @@ namespace MagicaVoxImporter {
   void VoxFileRaw::write(const Chunk& chunk, const std::string& filename) {
     std::ofstream file;
     file.open(filename);
-    file.write("VOX ", 4);
+    const char magic[4] = {'V','O','X',' '};
+    file.write(magic, 4);
     Writer::write(file, 200);
     std::vector<unsigned char> toWrite;
     chunk.write(toWrite);
