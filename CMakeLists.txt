@@ -37,6 +37,10 @@ set(Tools_Files
 source_group("Source/Tools" FILES ${Tools_Files})
 
 set(MagickaVox_Files
+    "Source/Tools/MagicaVox/VoxFile.h"
+    "Source/Tools/MagicaVox/VoxFile.cpp"
+    "Source/Tools/MagicaVox/VoxFileRaw.h"
+    "Source/Tools/MagicaVox/VoxFileRaw.cpp"
     "Source/Tools/MagicaVox/Chunk.h"
     "Source/Tools/MagicaVox/ChunkFactory.h"
     "Source/Tools/MagicaVox/ChunkLAYR.h"
@@ -50,11 +54,9 @@ set(MagickaVox_Files
     "Source/Tools/MagicaVox/ChunkrOBJ.h"
     "Source/Tools/MagicaVox/ChunkSIZE.h"
     "Source/Tools/MagicaVox/ChunkXYZI.h"
-    "Source/Tools/MagicaVox/Import.h"
     "Source/Tools/MagicaVox/Reader.h"
     "Source/Tools/MagicaVox/typeDICT.h"
     "Source/Tools/MagicaVox/typeROTATION.h"
-    "Source/Tools/MagicaVox/VoxFile.h"
 	"Source/Tools/MagicaVox/Chunk.cpp"
     "Source/Tools/MagicaVox/ChunkFactory.cpp"
     "Source/Tools/MagicaVox/ChunkLAYR.cpp"
@@ -68,11 +70,9 @@ set(MagickaVox_Files
     "Source/Tools/MagicaVox/ChunkrOBJ.cpp"
     "Source/Tools/MagicaVox/ChunkSIZE.cpp"
     "Source/Tools/MagicaVox/ChunkXYZI.cpp"
-    "Source/Tools/MagicaVox/Import.cpp"
     "Source/Tools/MagicaVox/Reader.cpp"
     "Source/Tools/MagicaVox/typeDICT.cpp"
     "Source/Tools/MagicaVox/typeROTATION.cpp"
-    "Source/Tools/MagicaVox/VoxFile.cpp"
 )
 source_group("Source/Tools/MagicaVox" FILES ${MagickaVox_Files})
 

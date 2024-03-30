@@ -13,16 +13,16 @@ namespace MagicaVoxImporter {
     }
   }
 
-  int Chunk::numberOfChilds() {
+  size_t Chunk::numberOfChilds() {
     return _childs.size();
   }
 
-  std::shared_ptr<Chunk> Chunk::getChild(int i) {
-    return _childs[i];
+  const Chunk& Chunk::getChild(size_t i) {
+    return *_childs[i];
   }
 
-  void Chunk::addChild(std::shared_ptr<Chunk> newchild) {
-    _childs.push_back(newchild);
+  void Chunk::addChild(std::unique_ptr<Chunk> newchild) {
+    _childs.push_back(std::move(newchild));
   }
 
   void Chunk::print(int indentation) {

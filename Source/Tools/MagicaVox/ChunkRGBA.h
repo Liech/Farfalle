@@ -18,6 +18,6 @@ namespace MagicaVoxImporter {
 
     color palette[256];
 
-    static std::shared_ptr<ChunkRGBA> getDefault();
+    static std::unique_ptr<ChunkRGBA> getDefault();
   };
 }

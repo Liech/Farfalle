@@ -45,7 +45,7 @@ namespace MagicaVoxImporter {
     return result;
   }
 
-  std::shared_ptr<Chunk> Reader::readChunk() {
+  std::unique_ptr<Chunk> Reader::readChunk() {
     std::string id = readChunkID();
     int ownContent = readInt();
     int childContent = readInt();
@@ -53,9 +53,9 @@ namespace MagicaVoxImporter {
     if (ownContent > 0) own = read(ownContent);
     Reader child;
     if (childContent > 0) child = read(childContent);
-    std::shared_ptr<Chunk> result = ChunkFactory::make(id);
+    std::unique_ptr<Chunk> result = ChunkFactory::make(id);
     result->read(own, child);
-    return result;
+    return std::move(result);
   }
 
   std::string Reader::readString() {

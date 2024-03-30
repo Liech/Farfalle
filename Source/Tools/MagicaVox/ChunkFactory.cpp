@@ -16,29 +16,29 @@
 #include "ChunkrOBJ.h"
 
 namespace MagicaVoxImporter {
-  std::shared_ptr<Chunk> ChunkFactory::make(std::string id) {
+  std::unique_ptr<Chunk> ChunkFactory::make(std::string id) {
     if (id == "LAYR")
-      return std::make_shared<ChunkLAYR>();
+      return std::make_unique<ChunkLAYR>();
     else if (id == "MAIN")
-      return std::make_shared<ChunkMAIN>();
+      return std::make_unique<ChunkMAIN>();
     else if (id == "MATL")
-      return std::make_shared<ChunkMATL>();
+      return std::make_unique<ChunkMATL>();
     else if (id == "nGRP")
-      return std::make_shared<ChunknGRP>();
+      return std::make_unique<ChunknGRP>();
     else if (id == "nSHP")
-      return std::make_shared<ChunknSHP>();
+      return std::make_unique<ChunknSHP>();
     else if (id == "nTRN")
-      return std::make_shared<ChunknTRN>();
+      return std::make_unique<ChunknTRN>();
     else if (id == "PACK")
-      return std::make_shared<ChunkPACK>();
+      return std::make_unique<ChunkPACK>();
     else if (id == "RGBA")
-      return std::make_shared<ChunkRGBA>();
+      return std::make_unique<ChunkRGBA>();
     else if (id == "SIZE")
-      return std::make_shared<ChunkSIZE>();
+      return std::make_unique<ChunkSIZE>();
     else if (id == "XYZI")
-      return std::make_shared<ChunkXYZI>();
+      return std::make_unique<ChunkXYZI>();
     else if (id == "rOBJ")
-      return std::make_shared<ChunkrOBJ>();
+      return std::make_unique<ChunkrOBJ>();
     else
       throw std::runtime_error("Unkown ID: " + id);
   }

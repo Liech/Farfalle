@@ -22,7 +22,7 @@ namespace MagicaVoxImporter {
     std::vector<unsigned char> readChars(size_t numberOfBytes);
     std::string readChunkID();
     int         readInt();
-    std::shared_ptr<Chunk> readChunk();
+    std::unique_ptr<Chunk> readChunk();
     bool endOfBufferReached();
     std::string readString();
     std::map<std::string, std::string> readDict();

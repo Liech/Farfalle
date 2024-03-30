@@ -7,6 +7,5 @@ namespace MagicaVoxImporter {
   class ChunkMAIN : public Chunk {
   public:
     std::string getID() override { return "MAIN"; }
-
   };
 }

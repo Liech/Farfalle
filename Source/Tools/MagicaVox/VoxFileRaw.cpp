@@ -1,15 +1,23 @@
-#include "Import.h"
+#include "VoxFileRaw.h"
 
 #include <fstream>
 #include <iterator>
 #include <algorithm>
 #include <vector>
 
-
+#include "Chunk.h"
 #include "Reader.h"
 
 namespace MagicaVoxImporter {
-  Import::Import(std::string filename) {
+  VoxFileRaw::VoxFileRaw() {
+
+  }
+
+  VoxFileRaw::~VoxFileRaw() {
+
+  }
+
+  std::unique_ptr<Chunk> VoxFileRaw::read(const std::string& filename) {
     std::ifstream input(filename, std::ios::binary);
     if (input.fail())
       throw std::runtime_error("Error opening " + filename);
@@ -18,12 +26,12 @@ namespace MagicaVoxImporter {
     Reader content(buffer);
     std::string magicByte = content.readChunkID();
     if (magicByte != "VOX ")
-      throw std::runtime_error("Magic Byte not found!");
+      throw std::runtime_error("Magic Byte not found! No a MagicaVox File!");
     int version = content.readInt();
-    if (version != 150)
-      throw std::runtime_error("Im not sure that i can handle this version");
-    std::shared_ptr<ChunkMAIN> raw = std::dynamic_pointer_cast<ChunkMAIN>(content.readChunk());
-    _rawData = raw;
-    _rawData->print();
+    if (version != 150 && version != 200)
+      throw std::runtime_error("Unkown MagicaVox File Version. Supported: 150 && 200");
+    std::unique_ptr<Chunk> chunk = content.readChunk();
+    chunk->print();
+    return std::move(chunk);
   }
 }

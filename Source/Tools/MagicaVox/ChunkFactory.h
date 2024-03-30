@@ -8,6 +8,6 @@ namespace MagicaVoxImporter {
   class Chunk;
   class ChunkFactory {
   public:
-    static std::shared_ptr<Chunk> make(std::string id);
+    static std::unique_ptr<Chunk> make(std::string id);
   };
 }

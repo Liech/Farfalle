@@ -14,6 +14,7 @@
 #include "Voxel/CSG.h"
 #include "Voxel/LineTracer.h"
 
+
 VoxelAPI::VoxelAPI(apiDatabase& db) : database(db) {
 
 }
