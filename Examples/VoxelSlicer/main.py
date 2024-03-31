@@ -78,7 +78,7 @@ startZ = minPos[2] + padding - voxelLength[2];
 endZ   = maxPos[2] - padding + voxelLength[2];
 for windowPos in numpy.arange(startZ,endZ,LayerHeight):
   counter = counter + 1
-  print("Window Position: " + str(windowPos));
+  print("Progress: " + str(100*(windowPos-startZ)/(endZ-startZ)) + "%");
   windowMin = bounds["Min"]
   windowMax = bounds["Max"]
   windowMin[2] = windowPos - windowSize/2.0;
@@ -91,25 +91,30 @@ for windowPos in numpy.arange(startZ,endZ,LayerHeight):
     'Start'      : windowMin,
     'End'        : windowMax
   });
-  triangulateVolume({
-    'VoxelName': 'Main',
-    'ModelName': 'MainSave',
-    'Start' : windowMin,
-    'End'   : windowMax
-  });
-  saveModel({
-      'Name' : 'MainSave',
-      'Filename': "dbg/voxel" + str(counter) + ".stl"
-  });
-  
+  #triangulateVolume({
+  #  'VoxelName': 'Main',
+  #  'ModelName': 'MainSave',
+  #  'Start' : windowMin,
+  #  'End'   : windowMax
+  #});
+  #saveModel({
+  #    'Name' : 'MainSave',
+  #    'Filename': "dbg/voxel" + str(counter) + ".stl"
+  #});
+  #saveMagicaVox({
+  #    'VoxelField'     : 'Main',
+  #    'Filename'       : "dbg/voxel" + str(counter) + ".vox"
+  #});
+
   for x in range(resolution[0]):
     for y in range(resolution[1]):
         for z in range(ZResolution):
-                ZLayer[x,y,z] = windowPos + z * voxelLength[2];
+                ZLayer[x,y,z] = windowPos + z * voxelLength[2] - windowSize/2.0;
+                
   for x in range(resolution[0]):
     for y in range(resolution[1]):
         for z in range(ZResolution):
-                XLayer[x,y,z] = x * voxelLength[0];
+                XLayer[x,y,z] = windowMin[0] + x * voxelLength[0];
                 
   for XIso in numpy.arange(windowMin[0],windowMax[0],NozzleDiameter):
     ZIso = windowPos;
@@ -125,7 +130,7 @@ for windowPos in numpy.arange(startZ,endZ,LayerHeight):
     });
     traceVoxelLines({
         'Source' : 'Canvas',
-        'Target' : "LineCollection" + str(counter),
+        'Target' : "LineCollection",# + str(counter),
         'Min'    : bounds["Min"],
         'Max'    : bounds["Max"]
     });
@@ -141,21 +146,23 @@ for windowPos in numpy.arange(startZ,endZ,LayerHeight):
   });
   
   gcode += startup({});
-  #gcode += prime({});
+  gcode += prime({});
   gcode += "\n; ;;;;;;;;;;;;;;;;;;";
   gcode += "\n; Printing:  ";
   gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
   
-  gcode += linearPrint({
-    'Line': "LineCollection" + str(counter),
+  gcodeline = linearPrint({
+    'Line': "LineCollection",# + str(counter),
     'Feedrate': 0.028
   })
+  #print(gcodeline)
+  gcode += gcodeline;
   
   gcode += shutdown({});
   
   saveText({
       'Text' : gcode,
-      'Filename' : 'dbg/gcode_'+ str(windowPos) + '.gcode'
+      'Filename' : "dbg/voxel" + str(counter) + ".gcode"
   });
-  
-print("Finished");
+    
+  print("Finished");

@@ -501,24 +501,21 @@ nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
         auto* r  = resultField.first.get();
 
 #pragma omp parallel for
-  for (long long z = 0; z < resolution.z-1; z++) { //memory layout main direction
-    for (size_t y = 0; y < resolution.y-1; y++) {
-      for (size_t x = 0; x < resolution.x-1; x++) {
-        size_t address = z + y * resolution.z + x * resolution.z * resolution.y;
-        bool d1Value = d1[address] < isoValue1;
-        bool d2Value = d2[address] < isoValue2;
-        bool vValue  = v[address];
-
-        bool d1X = d1[address + resolution.z * resolution.y] < isoValue1; //d1[current + glm::ivec3(1,0,0)
-        bool d1Y = d1[address + resolution.z] < isoValue1;                //d1[current + glm::ivec3(0,1,0)
-        bool d1Z = d1[address + 1] < isoValue1;                           //d1[current + glm::ivec3(0,0,1)
-
-        bool d2X = d2[address + resolution.z * resolution.y] < isoValue2;
-        bool d2Y = d2[address + resolution.z] < isoValue2;
-        bool d2Z = d2[address + 1] < isoValue2;
-
-        bool d1Diff = d1Value != d1X || d1Value != d1Y || d1Value != d1Z;
-        bool d2Diff = d2Value != d2X || d2Value != d2Y || d2Value != d2Z;
+  for (long long x = 0; x < resolution.x-1; x++) {
+    for (long long y = 0; y < resolution.y-1; y++) {
+      for (long long z = 0; z < resolution.z-1; z++) { //memory layout main direction
+        const size_t address = z + y * resolution.z + x * resolution.z * resolution.y;
+        const bool d1Value = d1[address] < isoValue1;
+        const bool d2Value = d2[address] < isoValue2;
+        const bool vValue  = v[address];
+        const bool d1X = d1[address + resolution.z * resolution.y] < isoValue1; //d1[current + glm::ivec3(1,0,0)
+        const bool d1Y = d1[address + resolution.z] < isoValue1;                //d1[current + glm::ivec3(0,1,0)
+        const bool d1Z = d1[address + 1] < isoValue1;                           //d1[current + glm::ivec3(0,0,1)
+        const bool d2X = d2[address + resolution.z * resolution.y] < isoValue2;
+        const bool d2Y = d2[address + resolution.z] < isoValue2;
+        const bool d2Z = d2[address + 1] < isoValue2;
+        const bool d1Diff = d1Value != d1X || d1Value != d1Y || d1Value != d1Z;
+        const bool d2Diff = d2Value != d2X || d2Value != d2Y || d2Value != d2Z;
 
         r[address] = vValue && (d1Diff && d2Diff);
       }
