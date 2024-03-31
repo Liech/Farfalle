@@ -15,7 +15,7 @@ bounds = modelBoundary({
 
 Start    = bounds["Min"]
 End      = bounds["Max"];
-Start[2] = Start[2] + 8;
+Start[2] = Start[2] + 3;
 End[2]   = Start[2] + 1;
 
 print("Voxelize");
@@ -23,7 +23,7 @@ print("Voxelize");
 voxelizeModel({
     'ModelName'  : 'Benchy',
     'VoxelName'  : 'Benchy',
-    'Resolution' : [64,64,8], # divideable by 8
+    'Resolution' : [128,128,8], # divideable by 8
     'Start'      : Start,
     'End'        : End
 });

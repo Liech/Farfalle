@@ -4,7 +4,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 
-//http://research.michael-schwarz.com/publ/files/vox-siga10.pdf
+//http://research.michael-schwarz.com/publ/files/vox-siga10.pdf (4.1 Direct, triangle-parallel solid voxelization)
 
 //missing implementation for:
 //https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-rasterizer-stage-rules

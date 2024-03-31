@@ -63,9 +63,18 @@ void Voxelizer::applyTrianglesToVolume(bool* data, const std::vector<std::vector
     for (size_t y = 0; y < resolution.y; y++) {
       size_t stackAddress = x + resolution.x * y;
       size_t resultOffset = resolution.z * resolution.y * x + resolution.z * y;
-      glm::dvec3 rayStart = start + glm::dvec3(span.x * ((double)x / (double)resolution.x), span.y * ((double)y / (double)resolution.y), 0) - rayDirection;
+      auto& stack = triangleStack[stackAddress];
+
+      double zMin = std::numeric_limits<double>::max();
+      for (const auto& x : stack) {
+        zMin = std::min(zMin, vertecies[indices[x + 2]].z);
+      }
+      
+
+      glm::dvec3 rayStart = start + glm::dvec3(span.x * ((double)x / (double)resolution.x), span.y * ((double)y / (double)resolution.y), 0) - rayDirection * 10.0;
+      rayStart.z = zMin - rayDirection.z;
       std::vector<double> intersections;
-      for (auto& tri : triangleStack[stackAddress]) {
+      for (auto& tri : stack) {
         const glm::dvec3& a = vertecies[indices[tri]];
         const glm::dvec3& b = vertecies[indices[tri + 1]];
         const glm::dvec3& c = vertecies[indices[tri + 2]];
@@ -78,7 +87,9 @@ void Voxelizer::applyTrianglesToVolume(bool* data, const std::vector<std::vector
       intersections.erase(std::unique(intersections.begin(), intersections.end(), predicate), intersections.end());
 
       for (auto& zIntersection : intersections) {
-        size_t zPos = std::floor(((zIntersection - start.z) / span.z) * resolution.z);
+        long long zPos = std::floor(((zIntersection - start.z) / span.z) * (long long)resolution.z);
+        zPos = std::max((long long)0, zPos);
+        
         size_t memoryAddress = zPos + resultOffset;
         size_t max = resultOffset + resolution.z;
         for (size_t i = memoryAddress; i < max; i++)
