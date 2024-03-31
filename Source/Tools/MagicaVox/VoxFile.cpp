@@ -35,7 +35,7 @@ namespace MagicaVoxImporter {
       size_t dataSize = (size_t)size.sizeX * (size_t)size.sizeY * (size_t)size.sizeZ;
       content.resize(dataSize);
       for (int j = 0; j < xyzi.numVoxels; j++) {
-        size_t address = xyzi.content[j].X + xyzi.content[j].Y * size.sizeZ + xyzi.content[j].Z * size.sizeZ * size.sizeY;
+        size_t address = xyzi.content[j].Z + xyzi.content[j].Y * size.sizeZ + xyzi.content[j].X * size.sizeZ * size.sizeY;
         content[address] = xyzi.content[j].value;
       }
       std::array<size_t, 3> dimensions = { size.sizeX,size.sizeY,size.sizeZ };
@@ -95,9 +95,9 @@ namespace MagicaVoxImporter {
     contentChunk->content.resize(dataSize);
     for (size_t i = 0; i < dataSize; i++) {
       auto& vox = contentChunk->content[i];
-      vox.X = i % size[0];
-      vox.Y = (i / size[0]) % (size[1]);
-      vox.Z = i / (size[0] * size[1]);
+      vox.X = i / (size[1] * size[2]);
+      vox.Y = (i / size[2]) % size[1];
+      vox.Z = i % size[2];
       vox.value = data[i]?'U':0;
     }
 

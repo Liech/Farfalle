@@ -553,7 +553,7 @@ std::string VoxelAPI::loadMagicaVoxDescription() {
   return R"(
 Loads xraw as voxels. Can be exported with MagicaVox
 
-loadXRaw({
+loadMagicaVox({
     'VoxelField'     : 'BoolField',
     'Filename'       : 'Dataname.vox'
 });
@@ -570,7 +570,7 @@ std::string VoxelAPI::saveMagicaVoxDescription() {
   return R"(
 Saves Voxels as xraw. Can be imported with MagicaVox
 
-saveXRaw({
+saveMagicaVox({
     'VoxelField'     : 'BoolField',
     'Filename'       : 'Dataname.vox'
 });

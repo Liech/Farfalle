@@ -28,11 +28,11 @@ voxelizeModel({
     'End'        : End
 });
 
-print("Save XRAW");
+print("Save Vox");
 
-saveXRaw({
+saveMagicaVox({
     'VoxelField'     : 'Benchy',
-    'Filename'       : 'Benchy.xraw'
+    'Filename'       : 'Benchy.vox'
 });
 
 print("Triangulate")
