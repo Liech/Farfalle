@@ -495,16 +495,29 @@ nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
   assert(resolution == densityField2.second);
   assert(resolution == resultField.second);
 
+  glm::ivec3 start = glm::ivec3(0, 0, 0);
+  glm::ivec3 end   = resolution;
+
+  if (input.contains("StartVoxel"))
+    start = glm::ivec3(input["StartVoxel"][0], input["StartVoxel"][1], input["StartVoxel"][2]);
+  if (input.contains("EndVoxel"))
+    end = glm::ivec3(input["EndVoxel"][0], input["EndVoxel"][1], input["EndVoxel"][2]);
+
+  assert(end - start == resultField.second);
+
   const bool* v  = voxelField.first.get();
   const auto& d1 = *densityField1.first;
   const auto& d2 = *densityField2.first;
         auto* r  = resultField.first.get();
 
+
 #pragma omp parallel for
-  for (long long x = 0; x < resolution.x-1; x++) {
-    for (long long y = 0; y < resolution.y-1; y++) {
-      for (long long z = 0; z < resolution.z-1; z++) { //memory layout main direction
+  for (long long x = start[0]; x < end.x-1; x++) {
+    for (long long y = start[1]; y < end.y-1; y++) {
+      for (long long z = start[2]; z < end.z-1; z++) { //memory layout main direction
         const size_t address = z + y * resolution.z + x * resolution.z * resolution.y;
+        const size_t resultAddress = (z-start.z) + (y-start.y) * resultField.second.z + (x-start.x) * resultField.second.z * resultField.second.y;
+
         const bool d1Value = d1[address] < isoValue1;
         const bool d2Value = d2[address] < isoValue2;
         const bool vValue  = v[address];
@@ -517,7 +530,7 @@ nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
         const bool d1Diff = d1Value != d1X || d1Value != d1Y || d1Value != d1Z;
         const bool d2Diff = d2Value != d2X || d2Value != d2Y || d2Value != d2Z;
 
-        r[address] = vValue && (d1Diff && d2Diff);
+        r[resultAddress] = vValue && (d1Diff && d2Diff);
       }
     }
   }
@@ -536,6 +549,8 @@ dualIsoVoxel({
     'DensityField2'  : 'DoubleField2',
     'Isovalue1'      : 0.3,
     'Isovalue2'      : 0.3
+    'StartVoxel'     : [0,0,0], # optional
+    'EndVoxel'       : [20,20,20], # optional
 });
 )";
 }
