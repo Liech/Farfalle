@@ -101,16 +101,22 @@ void VoxelAPI::add(PolyglotAPI::API& api, PolyglotAPI::FunctionRelay& relay) {
   dualIsoVoxelAPI->setDescription(dualIsoVoxelDescription());
   api.addFunction(std::move(dualIsoVoxelAPI));
 
-  //loads xraw files
+  //loads .vox files
   std::unique_ptr<PolyglotAPI::APIFunction> loadMagicaVoxAPI = std::make_unique<PolyglotAPI::APIFunction>("loadMagicaVox", [this](const nlohmann::json& input) { return loadMagicaVox(input); });
   loadMagicaVoxAPI->setDescription(loadMagicaVoxDescription());
   api.addFunction(std::move(loadMagicaVoxAPI));
 
-  //saves as xraw file
+  //saves as .vox file
   std::unique_ptr<PolyglotAPI::APIFunction> saveMagicaVoxAPI = std::make_unique<PolyglotAPI::APIFunction>("saveMagicaVox", [this](const nlohmann::json& input) { return saveMagicaVox(input); });
   saveMagicaVoxAPI->setDescription(saveMagicaVoxDescription());
   api.addFunction(std::move(saveMagicaVoxAPI));
 
+  //copy int field to double field
+  std::unique_ptr<PolyglotAPI::APIFunction> int2doubleAPI = std::make_unique<PolyglotAPI::APIFunction>("int2double", [this](const nlohmann::json& input) { return int2double(input); });
+  int2doubleAPI->setDescription(int2doubleDescription());
+  api.addFunction(std::move(int2doubleAPI));
+
+  
   ////voxelization boundary
   //std::unique_ptr<PolyglotAPI::APIFunction> voxelizationBoundaryAPI = std::make_unique<PolyglotAPI::APIFunction>("voxelizationBoundary", [this](const nlohmann::json& input) { return voxelizationBoundary(input); });
   //voxelizationBoundaryAPI->setDescription(voxelizationBoundaryDescription());
@@ -253,7 +259,7 @@ nlohmann::json VoxelAPI::distanceMap(const nlohmann::json& input) {
   auto voxel = database.boolField[input["VoxelName"]].first.get();
   glm::ivec3 resolution = database.boolField[input["VoxelName"]].second;
   std::string mode = input["Mode"];
-  std::cout << "distanceMap::resolution: " << resolution[0] << " / " << resolution[1] << " / " << resolution[2] << std::endl;
+  //std::cout << "distanceMap::resolution: " << resolution[0] << " / " << resolution[1] << " / " << resolution[2] << std::endl;
 
   if (mode == "XYZ")
     database.intField[input["DistanceMapName"]] = std::make_pair(std::make_unique<std::vector<int>>(DistanceMap<int,bool*>().distanceMap(voxel, resolution)),resolution);
@@ -585,6 +591,33 @@ Saves Voxels as xraw. Can be imported with MagicaVox
 saveMagicaVox({
     'VoxelField'     : 'BoolField',
     'Filename'       : 'Dataname.vox'
+});
+)";
+}
+
+nlohmann::json VoxelAPI::int2double(const nlohmann::json& input) {
+  auto& intField = database.intField[input["IntField"]];
+  double scale = input["Scale"];
+
+  std::unique_ptr<std::vector<double>> field = std::make_unique<std::vector<double>>();
+  field->resize(intField.first->size());
+
+#pragma omp parallel for
+  for (long long i = 0; i < field->size(); i++)
+    field->at(i) = (double)intField.first->at(i) * scale;
+
+  database.doubleField[input["DoubleField"]] = std::make_pair(std::move(field), intField.second);
+  return "";
+}
+
+std::string VoxelAPI::int2doubleDescription() {
+  return R"(
+Copies the content of an int field to a double field. Scales with value
+
+int2double({
+    'IntField'     : 'IntField',
+    'DoubleField'  : 'DoubleField',
+    'Scale'      : 1
 });
 )";
 }

@@ -59,6 +59,33 @@ saveMagicaVox({
     'Filename'       : "dbg/Main.vox"
 });
 
+print("Distance Map");
+
+distanceMap({
+    'VoxelName'   : 'Main',
+    'DistanceMapName' : 'DistanceMap',
+    'Resolution' : resolution,
+    'Mode' : 'XY' # XY / XYZ
+});
+
+int2double({
+    'IntField'     : 'DistanceMap',
+    'DoubleField'  : 'DistanceMap',
+    'Scale'      : NozzleDiameter/voxelLength[0]
+});
+
+saveMagicaVox({
+    'VoxelField'     : 'Main',
+    'Filename'       : "dbg/Main_Shaved.vox"
+});
+
+# Shave of walls
+transformDistanceMap({
+  'DistanceMapName' : 'DistanceMap',
+  'VoxelName'   : 'Inner',
+  'Distance' : (0.5 + config["WallAmount"])*(NozzleDiameter/voxelLength[0])
+});
+
 print("Init Z Layer");
 createVolume({
     'Name': 'ZLayer',
@@ -130,13 +157,13 @@ for windowPos in numpy.arange(startZ,endZ,LayerHeight):
   windowMaxVox = [resolution[0],resolution[1],windowMinVox[2] + ZResolution];
   windowMinVox[2] = max(windowMinVox[2],0)
   windowMaxVox[2] = min(windowMaxVox[2],resolution[2]);
-
+  ZIso = windowPos;
+  
   for XIso in numpy.arange(bounds["Min"][0],bounds["Max"][0],NozzleDiameter):
-    ZIso = windowPos;
     #print(str(XIso) + " - "  + str(ZIso));
     
     inputDualIso = {
-        'VoxelField'     : 'Main',
+        'VoxelField'     : 'Inner',
         'ResultField'    : 'Canvas',
         'DensityField1'  : 'XLayer',
         'DensityField2'  : 'ZLayer',
@@ -157,6 +184,26 @@ for windowPos in numpy.arange(startZ,endZ,LayerHeight):
     #'VoxelField'     : 'Canvas',
     #'Filename'       : "dbg/" + str(counter) + "_" + str(XIso) + ".vox"
     #});
+
+  #for wall in range(0,config["WallAmount"]):
+  #  dualIsoVoxel({
+  #      'VoxelField'     : 'Main',
+  #      'ResultField'    : 'Canvas',
+  #      'DensityField1'  : 'DistanceMap',
+  #      'DensityField2'  : 'ZLayer',
+  #      'Isovalue1'      : (0.5 + wall),
+  #      'Isovalue2'      : ZIso,
+  #      'StartVoxel'     : windowMinVox, # optional
+  #      'EndVoxel'       : windowMaxVox, # optional
+  #  });
+  #  traceVoxelLines({
+  #      'Source' : 'Canvas',
+  #      'Target' : "LineCollection",# + str(counter),
+  #      'Min'    : windowMin,
+  #      'Max'    : windowMax
+  #  });  
+
+print("Progress: 100%                          ");
 
 print('Write GCode');
 ResultFilename = config['ResultFilename'];
@@ -185,8 +232,8 @@ gcode += shutdown({});
 
 saveText({
     'Text' : gcode,
-    'Filename' : "dbg/voxel" + str(counter) + ".gcode"
+    'Filename' : config['ResultFilename']
 });
   
-print("Progress: {:.2f}".format(100) + "%");
+print("Progress: 100%                                        ");
 print("Finished");

@@ -58,6 +58,8 @@ private:
   std::string loadMagicaVoxDescription();
   nlohmann::json saveMagicaVox(const nlohmann::json& input);
   std::string saveMagicaVoxDescription();
+  nlohmann::json int2double(const nlohmann::json& input);
+  std::string int2doubleDescription();
 
   //nlohmann::json voxelizationBoundary(const nlohmann::json& input);
   //std::string voxelizationBoundaryDescription();

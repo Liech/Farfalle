@@ -27,7 +27,13 @@ voxelizeModel({
     'Start'      : Start,
     'End'        : End
 });
-
+ 
+transformDistanceMap({
+  'DistanceMapName' : 'Main',
+  'VoxelName'   : 'Main',
+  'Distance' : 0.5*(NozzleDiameter/voxelSize)
+});
+  
 print("Save Vox");
 
 saveMagicaVox({
