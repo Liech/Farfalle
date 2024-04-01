@@ -1,4 +1,5 @@
 import numpy
+import time
 
 print("Prepare Config");
 config = {
@@ -43,22 +44,48 @@ print("Voxel Length: " + str(voxelLength));
 windowSize = config["WindowSize"]
 ZResolution = int(windowSize / LayerHeight);
 ZResolution = ZResolution + (8-ZResolution%8); # has to be %8==0
+print("Z Window Resolution: " + str(ZResolution));
+
+print("Voxelize");
+voxelizeModel({
+  'ModelName'  : 'Main',
+  'VoxelName'  : 'Main',
+  'Resolution' : [resolution[0],resolution[1],resolution[2]], # divideable by 8
+  'Start'      : bounds["Min"],
+  'End'        : bounds["Max"]
+});
+saveMagicaVox({
+    'VoxelField'     : 'Main',
+    'Filename'       : "dbg/Main.vox"
+});
 
 print("Init Z Layer");
 createVolume({
     'Name': 'ZLayer',
-    'Resolution': [resolution[0],resolution[1],ZResolution], #dividable by 8
+    'Resolution': [resolution[0],resolution[1],resolution[2]], #dividable by 8
     'Type' : 'Double' # 'Bool' / 'Double' / 'Int'
 });
 ZLayer = GetFarfalleDouble("ZLayer");
 
+print("Fill Z Layer");
+for x in range(resolution[0]):
+  for y in range(resolution[1]):
+      for z in range(resolution[0]):
+              ZLayer[x,y,z] = bounds["Min"][2] + z * voxelLength[2];
+                
 print("Init X Layer");
 createVolume({
     'Name': 'XLayer',
-    'Resolution': [resolution[0],resolution[1],ZResolution], #dividable by 8
+    'Resolution': [resolution[0],resolution[1],resolution[2]], #dividable by 8
     'Type' : 'Double' # 'Bool' / 'Double' / 'Int'
 });
 XLayer = GetFarfalleDouble("XLayer");
+
+print("Fill X Layer");
+for x in range(resolution[0]):
+  for y in range(resolution[1]):
+      for z in range(resolution[0]):
+              XLayer[x,y,z] = bounds["Min"][0] + x * voxelLength[0];
 
 print("Init Canvas");
 createVolume({
@@ -68,101 +95,98 @@ createVolume({
 });
 Canvas = GetFarfalleBool("Canvas");
 
-print("Create First Line");
-
-
-print("Z Resolution: " + str(ZResolution));
+print("Work");
 
 counter = 0;
 startZ = minPos[2] + padding - voxelLength[2];
 endZ   = maxPos[2] - padding + voxelLength[2];
+startTime = time.time()
+endTime   = time.time()
+
+maxCounter = int((endZ-startZ) / LayerHeight)
+
+###############
+# Execution
+###############
+
 for windowPos in numpy.arange(startZ,endZ,LayerHeight):
+  
+  completion = (windowPos-startZ)/(endZ-startZ);
+  endTime    = time.time()
+  etastr = "..."
+  if (counter > 5):
+    eta        = ((endTime-startTime) / counter) * (maxCounter-counter)
+    etastr = "{:d}m {:d}s      ".format(int(eta/60),int(eta%60));
+  
+  print("Progress: {:.2f}%".format(100*completion) + "  -  " + etastr, end="\r");
   counter = counter + 1
-  print("Progress: " + str(100*(windowPos-startZ)/(endZ-startZ)) + "%");
-  windowMin = bounds["Min"]
-  windowMax = bounds["Max"]
+
+  windowMin = bounds["Min"].copy() 
+  windowMax = bounds["Max"].copy() 
   windowMin[2] = windowPos - windowSize/2.0;
   windowMax[2] = windowPos + windowSize/2.0; 
-  
-  voxelizeModel({
-    'ModelName'  : 'Main',
-    'VoxelName'  : 'Main',
-    'Resolution' : [resolution[0],resolution[1],ZResolution], # divideable by 8
-    'Start'      : windowMin,
-    'End'        : windowMax
-  });
-  #triangulateVolume({
-  #  'VoxelName': 'Main',
-  #  'ModelName': 'MainSave',
-  #  'Start' : windowMin,
-  #  'End'   : windowMax
-  #});
-  #saveModel({
-  #    'Name' : 'MainSave',
-  #    'Filename': "dbg/voxel" + str(counter) + ".stl"
-  #});
-  #saveMagicaVox({
-  #    'VoxelField'     : 'Main',
-  #    'Filename'       : "dbg/voxel" + str(counter) + ".vox"
-  #});
+   
+  windowMinVox = [0,0,int((windowMin[2] - bounds["Min"][2]) / voxelLength[2])];
+  windowMaxVox = [resolution[0],resolution[1],windowMinVox[2] + ZResolution];
+  windowMinVox[2] = max(windowMinVox[2],0)
+  windowMaxVox[2] = min(windowMaxVox[2],resolution[2]);
 
-  for x in range(resolution[0]):
-    for y in range(resolution[1]):
-        for z in range(ZResolution):
-                ZLayer[x,y,z] = windowPos + z * voxelLength[2] - windowSize/2.0;
-                
-  for x in range(resolution[0]):
-    for y in range(resolution[1]):
-        for z in range(ZResolution):
-                XLayer[x,y,z] = windowMin[0] + x * voxelLength[0];
-                
-  for XIso in numpy.arange(windowMin[0],windowMax[0],NozzleDiameter):
+  for XIso in numpy.arange(bounds["Min"][0],bounds["Max"][0],NozzleDiameter):
     ZIso = windowPos;
     #print(str(XIso) + " - "  + str(ZIso));
     
-    dualIsoVoxel({
+    inputDualIso = {
         'VoxelField'     : 'Main',
         'ResultField'    : 'Canvas',
         'DensityField1'  : 'XLayer',
         'DensityField2'  : 'ZLayer',
         'Isovalue1'      : XIso,
-        'Isovalue2'      : ZIso
-    });
+        'Isovalue2'      : ZIso,
+        'StartVoxel'     : windowMinVox, # optional
+        'EndVoxel'       : windowMaxVox, # optional
+    }
+    #print(inputDualIso)
+    dualIsoVoxel(inputDualIso);
     traceVoxelLines({
         'Source' : 'Canvas',
         'Target' : "LineCollection",# + str(counter),
-        'Min'    : bounds["Min"],
-        'Max'    : bounds["Max"]
+        'Min'    : windowMin,
+        'Max'    : windowMax
     });
+    #saveMagicaVox({
+    #'VoxelField'     : 'Canvas',
+    #'Filename'       : "dbg/" + str(counter) + "_" + str(XIso) + ".vox"
+    #});
 
-  print('Write GCode');
-  ResultFilename = config['ResultFilename'];
+print('Write GCode');
+ResultFilename = config['ResultFilename'];
+
+gcode = ""
+gcode += setHeat({
+    'Mode' : 'Set',
+    'Nozzle' : 215,
+    'Bed': 60
+});
+
+gcode += startup({});
+gcode += prime({});
+gcode += "\n; ;;;;;;;;;;;;;;;;;;";
+gcode += "\n; Printing:  ";
+gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
+
+gcodeline = linearPrint({
+  'Line': "LineCollection",# + str(counter),
+  'Feedrate': 0.028
+})
+#print(gcodeline)
+gcode += gcodeline;
+
+gcode += shutdown({});
+
+saveText({
+    'Text' : gcode,
+    'Filename' : "dbg/voxel" + str(counter) + ".gcode"
+});
   
-  gcode = ""
-  gcode += setHeat({
-      'Mode' : 'Set',
-      'Nozzle' : 215,
-      'Bed': 60
-  });
-  
-  gcode += startup({});
-  gcode += prime({});
-  gcode += "\n; ;;;;;;;;;;;;;;;;;;";
-  gcode += "\n; Printing:  ";
-  gcode += "\n; ;;;;;;;;;;;;;;;;;;\n";
-  
-  gcodeline = linearPrint({
-    'Line': "LineCollection",# + str(counter),
-    'Feedrate': 0.028
-  })
-  #print(gcodeline)
-  gcode += gcodeline;
-  
-  gcode += shutdown({});
-  
-  saveText({
-      'Text' : gcode,
-      'Filename' : "dbg/voxel" + str(counter) + ".gcode"
-  });
-    
-  print("Finished");
+print("Progress: {:.2f}".format(100) + "%");
+print("Finished");

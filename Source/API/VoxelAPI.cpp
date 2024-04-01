@@ -548,7 +548,7 @@ dualIsoVoxel({
     'DensityField1'  : 'DoubleField',
     'DensityField2'  : 'DoubleField2',
     'Isovalue1'      : 0.3,
-    'Isovalue2'      : 0.3
+    'Isovalue2'      : 0.3,
     'StartVoxel'     : [0,0,0], # optional
     'EndVoxel'       : [20,20,20], # optional
 });
