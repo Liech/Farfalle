@@ -516,6 +516,9 @@ nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
   const auto& d2 = *densityField2.first;
         auto* r  = resultField.first.get();
 
+const size_t xOff = resolution.z * resolution.y;
+const size_t yOff = resolution.z;
+const size_t zOff = 1;
 
 #pragma omp parallel for
   for (long long x = start[0]; x < end.x-1; x++) {
@@ -524,17 +527,28 @@ nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
         const size_t address = z + y * resolution.z + x * resolution.z * resolution.y;
         const size_t resultAddress = (z-start.z) + (y-start.y) * resultField.second.z + (x-start.x) * resultField.second.z * resultField.second.y;
 
+        size_t xMinus = address - resolution.z * resolution.y;
+
         const bool d1Value = d1[address] < isoValue1;
         const bool d2Value = d2[address] < isoValue2;
         const bool vValue  = v[address];
-        const bool d1X = d1[address + resolution.z * resolution.y] < isoValue1; //d1[current + glm::ivec3(1,0,0)
-        const bool d1Y = d1[address + resolution.z] < isoValue1;                //d1[current + glm::ivec3(0,1,0)
-        const bool d1Z = d1[address + 1] < isoValue1;                           //d1[current + glm::ivec3(0,0,1)
-        const bool d2X = d2[address + resolution.z * resolution.y] < isoValue2;
-        const bool d2Y = d2[address + resolution.z] < isoValue2;
-        const bool d2Z = d2[address + 1] < isoValue2;
-        const bool d1Diff = d1Value != d1X || d1Value != d1Y || d1Value != d1Z;
-        const bool d2Diff = d2Value != d2X || d2Value != d2Y || d2Value != d2Z;
+
+        const bool d1X     = d1[address + xOff] < isoValue1;
+        const bool d1Y     = d1[address + yOff] < isoValue1; 
+        const bool d1Z     = d1[address + zOff] < isoValue1; 
+        const bool d1Xm    = (address > xOff) ? d1[address - xOff] < isoValue1 : d1Value;
+        const bool d1Ym    = (address > yOff) ? d1[address - yOff] < isoValue1 : d1Value;
+        const bool d1Zm    = (address > zOff) ? d1[address - zOff] < isoValue1 : d1Value;
+
+        const bool d2X     = d2[address + xOff] < isoValue2;
+        const bool d2Y     = d2[address + yOff] < isoValue2;
+        const bool d2Z     = d2[address + zOff] < isoValue2;
+        const bool d2Xm    = (address > xOff) ? d2[address - xOff] < isoValue2 : d2Value;
+        const bool d2Ym    = (address > yOff) ? d2[address - yOff] < isoValue2 : d2Value;
+        const bool d2Zm    = (address > zOff) ? d2[address - zOff] < isoValue2 : d2Value;
+
+        const bool d1Diff  = d1Value != d1X || d1Value != d1Y || d1Value != d1Z || d1Value != d1Xm || d1Value != d1Ym || d1Value != d1Zm;
+        const bool d2Diff  = d2Value != d2X || d2Value != d2Y || d2Value != d2Z || d2Value != d2Xm || d2Value != d2Ym || d2Value != d2Zm;
 
         r[resultAddress] = vValue && (d1Diff && d2Diff);
       }

@@ -67,6 +67,9 @@ distanceMap({
     'Resolution' : resolution,
     'Mode' : 'XY' # XY / XYZ
 });
+distanceMapValue = GetFarfalleInt("DistanceMap");
+
+
 
 int2double({
     'IntField'     : 'DistanceMap',
@@ -85,6 +88,22 @@ transformDistanceMap({
   'VoxelName'   : 'Inner',
   'Distance' : (0.5 + config["WallAmount"])*(NozzleDiameter/voxelLength[0])
 });
+
+#print("Debug Step");
+#createVolume({
+#    'Name': 'Debug',
+#    'Resolution': [resolution[0],resolution[1],resolution[2]], #dividable by 8
+#    'Type' : 'Bool' # 'Bool' / 'Double' / 'Int'
+#});
+#Debug = GetFarfalleBool("Debug");
+#for x in range(resolution[0]):
+#  for y in range(resolution[1]):
+#      for z in range(resolution[0]):
+#              Debug[x,y,z] = distanceMapValue[x,y,z] == 1;
+#saveMagicaVox({
+#    'VoxelField'     : 'Debug',
+#    'Filename'       : "dbg/Debug.vox"
+#});
 
 print("Init Z Layer");
 createVolume({
@@ -159,31 +178,31 @@ for windowPos in numpy.arange(startZ,endZ,LayerHeight):
   windowMaxVox[2] = min(windowMaxVox[2],resolution[2]);
   ZIso = windowPos;
   
-  for XIso in numpy.arange(bounds["Min"][0],bounds["Max"][0],NozzleDiameter):
-    #print(str(XIso) + " - "  + str(ZIso));
-    
-    inputDualIso = {
-        'VoxelField'     : 'Inner',
-        'ResultField'    : 'Canvas',
-        'DensityField1'  : 'XLayer',
-        'DensityField2'  : 'ZLayer',
-        'Isovalue1'      : XIso,
-        'Isovalue2'      : ZIso,
-        'StartVoxel'     : windowMinVox, # optional
-        'EndVoxel'       : windowMaxVox, # optional
-    }
-    #print(inputDualIso)
-    dualIsoVoxel(inputDualIso);
-    traceVoxelLines({
-        'Source' : 'Canvas',
-        'Target' : "LineCollection",# + str(counter),
-        'Min'    : windowMin,
-        'Max'    : windowMax
-    });
-    #saveMagicaVox({
-    #'VoxelField'     : 'Canvas',
-    #'Filename'       : "dbg/" + str(counter) + "_" + str(XIso) + ".vox"
-    #});
+  #for XIso in numpy.arange(bounds["Min"][0],bounds["Max"][0],NozzleDiameter):
+  #  #print(str(XIso) + " - "  + str(ZIso));
+  #  
+  #  inputDualIso = {
+  #      'VoxelField'     : 'Inner',
+  #      'ResultField'    : 'Canvas',
+  #      'DensityField1'  : 'XLayer',
+  #      'DensityField2'  : 'ZLayer',
+  #      'Isovalue1'      : XIso,
+  #      'Isovalue2'      : ZIso,
+  #      'StartVoxel'     : windowMinVox, # optional
+  #      'EndVoxel'       : windowMaxVox, # optional
+  #  }
+  #  #print(inputDualIso)
+  #  dualIsoVoxel(inputDualIso);
+  #  traceVoxelLines({
+  #      'Source' : 'Canvas',
+  #      'Target' : "LineCollection",# + str(counter),
+  #      'Min'    : windowMin,
+  #      'Max'    : windowMax
+  #  });
+  #  #saveMagicaVox({
+  #  #'VoxelField'     : 'Canvas',
+  #  #'Filename'       : "dbg/" + str(counter) + "_" + str(XIso) + ".vox"
+  #  #});
 
   for wall in range(0,config["WallAmount"]):
     dualIsoVoxel({
