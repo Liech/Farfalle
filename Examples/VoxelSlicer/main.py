@@ -185,23 +185,27 @@ for windowPos in numpy.arange(startZ,endZ,LayerHeight):
     #'Filename'       : "dbg/" + str(counter) + "_" + str(XIso) + ".vox"
     #});
 
-  #for wall in range(0,config["WallAmount"]):
-  #  dualIsoVoxel({
-  #      'VoxelField'     : 'Main',
-  #      'ResultField'    : 'Canvas',
-  #      'DensityField1'  : 'DistanceMap',
-  #      'DensityField2'  : 'ZLayer',
-  #      'Isovalue1'      : (0.5 + wall),
-  #      'Isovalue2'      : ZIso,
-  #      'StartVoxel'     : windowMinVox, # optional
-  #      'EndVoxel'       : windowMaxVox, # optional
-  #  });
-  #  traceVoxelLines({
-  #      'Source' : 'Canvas',
-  #      'Target' : "LineCollection",# + str(counter),
-  #      'Min'    : windowMin,
-  #      'Max'    : windowMax
-  #  });  
+  for wall in range(0,config["WallAmount"]):
+    dualIsoVoxel({
+        'VoxelField'     : 'Main',
+        'ResultField'    : 'Canvas',
+        'DensityField1'  : 'DistanceMap',
+        'DensityField2'  : 'ZLayer',
+        'Isovalue1'      : (0.5 + wall),
+        'Isovalue2'      : ZIso,
+        'StartVoxel'     : windowMinVox, # optional
+        'EndVoxel'       : windowMaxVox, # optional
+    });
+    traceVoxelLines({
+        'Source' : 'Canvas',
+        'Target' : "LineCollection",# + str(counter),
+        'Min'    : windowMin,
+        'Max'    : windowMax
+    });  
+    saveMagicaVox({
+    'VoxelField'     : 'Canvas',
+    'Filename'       : "dbg/wall" + str(counter) + "_" + str(wall) + ".vox"
+    });
 
 print("Progress: 100%                          ");
 
