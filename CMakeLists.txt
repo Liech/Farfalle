@@ -120,6 +120,8 @@ set(Voxel_Files
 	"Source/Voxel/CSG.h"
 	"Source/Voxel/LineTracer.cpp"
 	"Source/Voxel/LineTracer.h"
+	"Source/Voxel/DualIso.cpp"
+	"Source/Voxel/DualIso.h"
 )
 source_group("Source/Voxel" FILES ${Voxel_Files})
 

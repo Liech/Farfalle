@@ -13,6 +13,7 @@
 #include "Voxel/DistanceMap.h"
 #include "Voxel/CSG.h"
 #include "Voxel/LineTracer.h"
+#include "Voxel/DualIso.h"
 
 #include "Tools/MagicaVox/VoxFile.h"
 
@@ -492,13 +493,9 @@ traceVoxelLines({
 nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
   auto& voxelField = database.boolField[input["VoxelField"]];
   auto& resultField = database.boolField[input["ResultField"]];
-  auto& densityField1 = database.doubleField[input["DensityField1"]];
-  auto& densityField2 = database.doubleField[input["DensityField2"]];
   double isoValue1 = input["Isovalue1"];
   double isoValue2 = input["Isovalue2"];
   glm::ivec3 resolution = voxelField.second;
-  assert(resolution == densityField1.second);
-  assert(resolution == densityField2.second);
   assert(resolution == resultField.second);
 
   glm::ivec3 start = glm::ivec3(0, 0, 0);
@@ -512,48 +509,30 @@ nlohmann::json VoxelAPI::dualIsoVoxel(const nlohmann::json& input) {
   assert(end - start == resultField.second);
 
   const bool* v  = voxelField.first.get();
-  const auto& d1 = *densityField1.first;
-  const auto& d2 = *densityField2.first;
         auto* r  = resultField.first.get();
-
-const size_t xOff = resolution.z * resolution.y;
-const size_t yOff = resolution.z;
-const size_t zOff = 1;
-
-#pragma omp parallel for
-  for (long long x = start[0]; x < end.x-1; x++) {
-    for (long long y = start[1]; y < end.y-1; y++) {
-      for (long long z = start[2]; z < end.z-1; z++) { //memory layout main direction
-        const size_t address = z + y * resolution.z + x * resolution.z * resolution.y;
-        const size_t resultAddress = (z-start.z) + (y-start.y) * resultField.second.z + (x-start.x) * resultField.second.z * resultField.second.y;
-
-        size_t xMinus = address - resolution.z * resolution.y;
-
-        const bool d1Value = d1[address] < isoValue1;
-        const bool d2Value = d2[address] < isoValue2;
-        const bool vValue  = v[address];
-
-        const bool d1X     = d1[address + xOff] < isoValue1;
-        const bool d1Y     = d1[address + yOff] < isoValue1; 
-        const bool d1Z     = d1[address + zOff] < isoValue1; 
-        const bool d1Xm    = (address > xOff) ? d1[address - xOff] < isoValue1 : d1Value;
-        const bool d1Ym    = (address > yOff) ? d1[address - yOff] < isoValue1 : d1Value;
-        const bool d1Zm    = (address > zOff) ? d1[address - zOff] < isoValue1 : d1Value;
-
-        const bool d2X     = d2[address + xOff] < isoValue2;
-        const bool d2Y     = d2[address + yOff] < isoValue2;
-        const bool d2Z     = d2[address + zOff] < isoValue2;
-        const bool d2Xm    = (address > xOff) ? d2[address - xOff] < isoValue2 : d2Value;
-        const bool d2Ym    = (address > yOff) ? d2[address - yOff] < isoValue2 : d2Value;
-        const bool d2Zm    = (address > zOff) ? d2[address - zOff] < isoValue2 : d2Value;
-
-        const bool d1Diff  = d1Value != d1X || d1Value != d1Y || d1Value != d1Z || d1Value != d1Xm || d1Value != d1Ym || d1Value != d1Zm;
-        const bool d2Diff  = d2Value != d2X || d2Value != d2Y || d2Value != d2Z || d2Value != d2Xm || d2Value != d2Ym || d2Value != d2Zm;
-
-        r[resultAddress] = vValue && (d1Diff && d2Diff);
-      }
-    }
+  std::string mode = input["Mode"];
+  if (mode == "Double") {
+    auto& densityField1 = database.doubleField[input["DensityField1"]];
+    auto& densityField2 = database.doubleField[input["DensityField2"]];
+    assert(resolution == densityField1.second);
+    assert(resolution == densityField2.second);
+    const auto& d1 = *densityField1.first;
+    const auto& d2 = *densityField2.first;
+    DualIso::dualIso<double>(v, d1, d2, isoValue1, isoValue2, resolution, start, end, r, voxelField.second);
   }
+  else if (mode == "Int") {
+    auto& densityField1 = database.intField[input["DensityField1"]];
+    auto& densityField2 = database.intField[input["DensityField2"]];
+    assert(resolution == densityField1.second);
+    assert(resolution == densityField2.second);
+    const auto& d1 = *densityField1.first;
+    const auto& d2 = *densityField2.first;
+    DualIso::dualIso<int>(v, d1, d2, isoValue1, isoValue2, resolution, start, end, r, voxelField.second);
+  }
+  else throw std::runtime_error("UnkownMode");
+
+
+
   return "";
 }
 
@@ -565,8 +544,9 @@ Expects a voxel field to be true at that point as well.
 dualIsoVoxel({
     'VoxelField'     : 'BoolField',
     'ResultField'    : 'BoolField',
-    'DensityField1'  : 'DoubleField',
-    'DensityField2'  : 'DoubleField2',
+    'Mode'           : 'Double' # 'Double' / 'Int'
+    'DensityField1'  : 'DoubleField', # type dependend on Mode
+    'DensityField2'  : 'DoubleField2',# type dependend on Mode
     'Isovalue1'      : 0.3,
     'Isovalue2'      : 0.3,
     'StartVoxel'     : [0,0,0], # optional
